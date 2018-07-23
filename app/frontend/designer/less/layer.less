@@ -1,0 +1,101 @@
+.layer-name-prompt {
+  .modal-title{
+    font-weight:100;
+  }
+  .modal-footer{
+    border:0;
+  }
+  .modal-header{
+    border-bottom:3px solid @tintColor;
+  }
+
+  input{
+    outline:none !important;
+    -webkit-box-shadow: inset !important;
+    box-shadow: inset !important;
+    background-color: rgba(0,0,0,0.02) !important;
+    border-radius: 1px !important;
+    &:focus{
+      border:1px solid @tintColor;
+    }
+  }
+  .btn-primary{
+    background-color:@tintColor;
+    border:0;
+
+    &:hover{
+      background-color:darken(@tintColor,10%);
+    }
+  }
+}
+
+#layer{
+  padding:0px;
+  margin:0px;
+  border:0px;
+  position:absolute;
+  top:@toolbarHeight;
+  left:0px;
+  bottom:0px;
+  width:200px;
+  background-color: #282a30;
+  text-align: center;
+
+  .panetitle {
+    position: fixed;
+    height: @paneTitleHeight;
+    width: 200px;
+    top:@toolbarHeight;
+    border-bottom: 1px solid #222222;
+    border-top: 1px solid #111111;
+    font-weight: 500;
+    font-size: 12px;
+    padding-top: 5px;
+    letter-spacing: 5px;
+    text-align: center;
+    color:@tintColor;
+  }
+
+}
+
+#layer_elements{
+  padding:0px;
+  margin:0px;
+  border:0px;
+  position:fixed;
+  top:@toolbarHeight+@paneTitleHeight;
+  left:0px;
+  bottom:0px;
+  width:200px;
+  overflow:auto;
+}
+
+
+.layerElement{
+  color: #dddddd;
+  cursor: move;
+  font-weight: 200;
+  font-size:12px;
+  letter-spacing: 1px;
+  padding: 4px 4px 4px 20px;
+  text-align: left;
+  border-bottom:1px solid #222222;
+}
+
+.layerElement .icon{
+  cursor:pointer;
+  padding-top:4px;
+  padding-right:4px;
+  padding-left: 6px;
+  &:hover{
+    color:@tintColor;
+  }
+}
+
+
+.layerSelectedElement{
+  color:white;
+  padding:4px;
+  padding-left:20px;
+  background: rgba(255,255,255,0.1);
+}

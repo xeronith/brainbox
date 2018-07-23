@@ -1,0 +1,184 @@
+{
+  "draw2d": [
+    {
+      "type": "shape_designer.figure.PolyRect",
+      "id": "1b4a927c-e95d-5494-fd8c-cda80763c0f2",
+      "x": 7969.5,
+      "y": 7961.5,
+      "width": 61,
+      "height": 77,
+      "alpha": 1,
+      "angle": 0,
+      "userData": {
+        "baseClass": "draw2d.SetFigure",
+        "code": "/**\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custome code and event handler here.\n *\n *\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n         this._super(attr, setter, getter);\n\n        this.attr({resizeable:false});\n        this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());\n\n         // your dddspecial code here\n    },\n\n    /**\n     *  Called by the simulator for every calculation\n     *  loop\n     *  @required\n     **/\n    calculate:function()\n    {\n        // calc\n    },\n\n\n    /**\n     *  Called if the simulation mode is starting\n     *  @required\n     **/\n    onStart:function()\n    {\n    },\n\n    /**\n     *  Called if the simulation mode is stopping\n     *  @required\n     **/\n    onStop:function()\n    {\n    }\n});"
+      },
+      "cssClass": "shape_designer_figure_PolyRect",
+      "ports": [],
+      "bgColor": "#FFFFFF",
+      "color": "#303030",
+      "stroke": 1,
+      "radius": 0,
+      "dasharray": null,
+      "vertices": [
+        {
+          "x": 7969.5,
+          "y": 7961.5
+        },
+        {
+          "x": 8030.5,
+          "y": 7961.5
+        },
+        {
+          "x": 8030.5,
+          "y": 8038.5
+        },
+        {
+          "x": 7969.5,
+          "y": 8038.5
+        }
+      ],
+      "blur": 0,
+      "filters": [
+        {
+          "name": "shape_designer.filter.PositionFilter"
+        },
+        {
+          "name": "shape_designer.filter.SizeFilter"
+        },
+        {
+          "name": "shape_designer.filter.StrokeFilter"
+        },
+        {
+          "name": "shape_designer.filter.FillColorFilter"
+        }
+      ]
+    },
+    {
+      "type": "shape_designer.figure.ExtPort",
+      "id": "6643486c-3ff7-57ef-6627-c183389cc497",
+      "x": 8031.5,
+      "y": 7968.5,
+      "width": 10,
+      "height": 10,
+      "alpha": 1,
+      "angle": 0,
+      "userData": {
+        "name": "PortOut",
+        "type": "Output",
+        "direction": 1,
+        "fanout": 20
+      },
+      "cssClass": "shape_designer_figure_ExtPort",
+      "ports": [],
+      "bgColor": "#37B1DE",
+      "color": "#1B1B1B",
+      "stroke": 1,
+      "dasharray": null,
+      "filters": [
+        {
+          "name": "shape_designer.filter.PositionFilter"
+        },
+        {
+          "name": "shape_designer.filter.FanoutFilter"
+        },
+        {
+          "name": "shape_designer.filter.PortDirectionFilter"
+        },
+        {
+          "name": "shape_designer.filter.PortTypeFilter"
+        }
+      ]
+    },
+    {
+      "type": "shape_designer.figure.ExtPort",
+      "id": "2465fc3d-2db4-cacb-639c-af67902b4d64",
+      "x": 7958.5,
+      "y": 8031.5,
+      "width": 10,
+      "height": 10,
+      "alpha": 1,
+      "angle": 0,
+      "userData": {
+        "name": "PortIn",
+        "type": "Input",
+        "direction": 3,
+        "fanout": 20
+      },
+      "cssClass": "shape_designer_figure_ExtPort",
+      "ports": [],
+      "bgColor": "#37B1DE",
+      "color": "#1B1B1B",
+      "stroke": 1,
+      "dasharray": null,
+      "filters": [
+        {
+          "name": "shape_designer.filter.PositionFilter"
+        },
+        {
+          "name": "shape_designer.filter.FanoutFilter"
+        },
+        {
+          "name": "shape_designer.filter.PortDirectionFilter"
+        },
+        {
+          "name": "shape_designer.filter.PortTypeFilter"
+        }
+      ]
+    },
+    {
+      "type": "shape_designer.figure.PolyRect",
+      "id": "affa6a66-561f-cdb4-5ec1-81dca446ad0b",
+      "x": 7975.5,
+      "y": 7965.5,
+      "width": 49,
+      "height": 70,
+      "alpha": 1,
+      "angle": 0,
+      "userData": {
+        "name": "Rectangle"
+      },
+      "cssClass": "shape_designer_figure_PolyRect",
+      "ports": [],
+      "bgColor": "#FFFFFF",
+      "color": "#303030",
+      "stroke": 1,
+      "radius": 0,
+      "dasharray": null,
+      "vertices": [
+        {
+          "x": 8024.5,
+          "y": 8035.5
+        },
+        {
+          "x": 7975.5,
+          "y": 8035.5
+        },
+        {
+          "x": 7975.5,
+          "y": 7965.5
+        },
+        {
+          "x": 8024.5,
+          "y": 7965.5
+        }
+      ],
+      "blur": 0,
+      "filters": [
+        {
+          "name": "shape_designer.filter.PositionFilter"
+        },
+        {
+          "name": "shape_designer.filter.SizeFilter"
+        },
+        {
+          "name": "shape_designer.filter.StrokeFilter"
+        },
+        {
+          "name": "shape_designer.filter.FillColorFilter"
+        }
+      ]
+    }
+  ],
+  "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFEAAABhCAYAAACu9U2bAAAEi0lEQVR4Xu3dTUgUYRwG8JlZ13VXrezDvgs11w6Lbathn6ZFUIeCCLpYEHRwq0OHTkGRgdcOHawVL0V56BBUpyhME4Ok1USlEFkJI2NLK10dXfYrZvte3PcZ2Kn8ePY6D+/O/ub/zvvuLPxXlvhKWUBOeQQOIBHRgCIgIhENEDBgCFYiEQ0QMGAIViIRDRAwYAhdlVhZWVmiqmpFMBjMMuA9Z8UQFotl3GaztTQ3N3egE9aFWFZWds7lctUUFxfPG8Tu7u7xzs7Omvb29iuGIDqdzkvV1dU1brcbjTdnjns8Hqm+vr6mq6vrMvpQuiqRiGLGlBD7+vokr9crBQIBdLFm7PHs7GyptLRUKioq+uMc/1klNjY2Sh0dHZLdbp+xSOjEtELQEKuqqv4Pona1tNdsvlcm+wz/rBLnE+Jah6MgFpK3KmbTUq1woqHIsGyOPX/b2+tL6Z44XxBX5uXtyih0nUxfmbfdlLUwjhgOfPGH3vmeBfu7bxAxyS3px3T2j4w+sTq2XLQ5K/ak5ztMpgWL47ew6NhIZMrXE57qam0hogCxzuO5PbF8QySzZO8x6+bdJsVi/WPxiU6pkvqyJUhEAeLVOk9/rGSflLnzUKE5d820C33YPxghogjxev1nZdcRKbP8cI6SYZsWMTo1oe83lmTfWOb6wnKViGib/e24aJ/4azofLDTnruV0TkYqQqzzeG6pKzZEbK49x6zO3WmJUzo6OcGFBVWi9hTnw9hYk9VeeiFjU3lFRoEjTVm4xBTf4oz+3OI0c2EB+0TtUdiqdfk7LYXFJ8yr83ekZeUsj2+2xz/5Q+/ftAUHuNkW3hN/f54Y/9oXlsuUNNOyeCWGIx8Vs/R8sKdngJWooxLREkVEIqIawcf5KAwbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOGIYoamunncZ8bS6ku6csams3NDjQRkRxRcv5B44+ErW1m3zlrc1dvGDvdN2Nk00FPIlmTsKQ6ew4fy0samunvmi6lTk8YDnjdh9PbHtKxG/FILsaWmOitnaBtgf9yssm5exptz0RUWvMq3U3TuwMPHPqDJ+JIY15t9zpjYna2k08vfc52nZXOnuqOicRkS2iv1diKoj4Os/ehHar0r06uxqexkRt7QKt9/vMvS1q+batG/nfA9MXhew4XxcStbVTvY9vLhr1P043Sev5LxhJEAv2H30oams3+bqzdmjQ92z2Tsy/f+Yyams35CMgugzxhmuitnZoAB6X9DXmJRT42keg1AV09U9M/W3m9ghENOD6EpGIBggYMMRXd7IlqrwzJggAAAAASUVORK5CYII="
+}
