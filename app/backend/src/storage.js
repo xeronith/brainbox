@@ -3,7 +3,8 @@ const {lstatSync, readFileSync, existsSync, mkdirSync, createReadStream} = requi
 const glob = require("glob");
 const path = require('path');
 
-const brainDir = process.env.HOME + "/.brainbox/brain";
+const brainDirUserHOME = process.env.HOME + "/.brainbox/brain";
+const shapeDirUserHOME = process.env.HOME + "/.brainbox/shapes";
 const shapeDir = process.env.HOME + "/.brainbox/shapes";
 
 
@@ -18,8 +19,8 @@ try {
     }
   }
 
-  ensure(brainDir)
-  ensure(shapeDir)
+  ensure(brainDirUserHOME)
+  ensure(shapeDirUserHOME)
 }
 catch (e) {
   console.log(e)
@@ -27,8 +28,9 @@ catch (e) {
 
 
 module.exports = {
-  brainDir,
-  shapeDir,
+  brainDirUserHOME: brainDirUserHOME,
+  shapeDirUserHOME: shapeDirUserHOME,
+
   listFiles: function (baseDir, subDir, res) {
     glob(baseDir + "/" + subDir + "*", {}, function (er, files) {
       res.setHeader('Content-Type', 'application/json');

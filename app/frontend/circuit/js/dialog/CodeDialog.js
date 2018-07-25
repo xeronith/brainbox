@@ -1,3 +1,7 @@
+import "google-code-prettify/bin/prettify.min.css"
+
+import {prettyPrint} from "google-code-prettify/bin/prettify.min"
+
 export default class CodeDialog {
 
   constructor() {

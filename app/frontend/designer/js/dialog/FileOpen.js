@@ -27,6 +27,7 @@ export default class FileOpen {
 
   fetchPathContent(storage, newPath, view) {
     storage.getFiles(newPath).then((files) => {
+      files = files.filter( file => file.name.endsWith(conf.fileSuffix))
       let compiled = Hogan.compile(
         `
                {{^rootDir}}     

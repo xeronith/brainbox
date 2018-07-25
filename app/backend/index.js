@@ -14,7 +14,8 @@ const bodyParser = require('body-parser');
 // application specific configuration settings
 //
 const deviceRegistry = require("./src/device-registry.js");
-const {brainDir, shapeDir, listFiles, getJSONFile, renameFile, deleteFile, getBase64Image} = require("./src/storage.js");
+const storage= require("./src/storage.js");
+const shapeDirApp = __dirname + '/../shapes/'
 
 
 // Determine the IP:PORT to use for the http server
@@ -57,13 +58,13 @@ function runServer() {
   // Handle brain files
   //
   // =================================================================
-  app.get('/backend/brain/list',    (req, res) => listFiles(brainDir,      req.query.path,     res));
-  app.get('/backend/brain/get',     (req, res) => getJSONFile(brainDir,    req.query.filePath, res));
-  app.get('/backend/brain/image',   (req, res) => getBase64Image(brainDir, req.query.filePath, res));
-  app.post('/backend/brain/delete', (req, res) => deleteFile(brainDir,     req.query.filePath, res));
-  app.post('/backend/brain/rename', (req, res) => renameFile(brainDir,     req.body.from, req.body.to, res));
+  app.get('/backend/brain/list',    (req, res) => storage.listFiles(storage.brainDirUserHOME,      req.query.path,     res));
+  app.get('/backend/brain/get',     (req, res) => storage.getJSONFile(storage.brainDirUserHOME,    req.query.filePath, res));
+  app.get('/backend/brain/image',   (req, res) => storage.getBase64Image(storage.brainDirUserHOME, req.query.filePath, res));
+  app.post('/backend/brain/delete', (req, res) => storage.deleteFile(storage.brainDirUserHOME,     req.query.filePath, res));
+  app.post('/backend/brain/rename', (req, res) => storage.renameFile(storage.brainDirUserHOME,     req.body.from, req.body.to, res));
   app.post('/backend/brain/save',   (req, res) => {
-    fs.writeFile(brainDir + "/" + req.body.filePath, req.body.content,  (err) =>{
+    fs.writeFile(storage.brainDirUserHOME + "/" + req.body.filePath, req.body.content,  (err) =>{
       res.send('true');
     });
   });
@@ -73,37 +74,47 @@ function runServer() {
   // Handle shape files
   //
   // =================================================================
-  app.get('/backend/shape/list',    (req, res) => listFiles(shapeDir,      req.query.path,     res));
-  app.get('/backend/shape/get',     (req, res) => getJSONFile(shapeDir,    req.query.filePath, res)
+  app.get('/backend/shape/list',    (req, res) => storage.listFiles(shapeDirApp,      req.query.path,     res));
+  app.get('/backend/shape/get',     (req, res) => storage.getJSONFile(shapeDirApp,    req.query.filePath, res)
   // the shape isn't in the user store. copy them into the HOME directory and serve them again
     .catch(()=> {
       console.log("CATCH called")
-      fs.copyFile(__dirname + '/../shapes/' + req.query.filePath, shapeDir + "/" + req.query.filePath, (err) => {
-        getJSONFile(shapeDir, req.query.filePath, res)
+      fs.copyFile(__dirname + '/../shapes/' + req.query.filePath, storage.shapeDirUserHOME + "/" + req.query.filePath, (err) => {
+        storage.getJSONFile(storage.shapeDirUserHOME, req.query.filePath, res)
       })
     }))
-  app.get('/backend/shape/image',   (req, res) => getBase64Image(shapeDir, req.query.filePath, res));
-  app.post('/backend/shape/delete', (req, res) => deleteFile(shapeDir,     req.query.filePath, res));
-  app.post('/backend/shape/rename', (req, res) => renameFile(shapeDir,     req.body.from, req.body.to, res));
+  app.get('/backend/shape/image',   (req, res) => storage.getBase64Image(shapeDirApp, req.query.filePath, res));
+  app.post('/backend/shape/delete', (req, res) => storage.deleteFile(shapeDirApp,     req.query.filePath, res));
+  app.post('/backend/shape/rename', (req, res) => storage.renameFile(shapeDirApp,     req.body.from, req.body.to, res));
   app.post('/backend/shape/save',   (req, res) => {
-    fs.writeFile(shapeDir + "/" + req.body.filePath, req.body.content,  (err) =>{
+    fs.writeFile(shapeDirApp + "/" + req.body.filePath, req.body.content,  (err) =>{
+      // shape file is shape...fine
+      //
       res.send('true');
-      // create the js/png/md async
-      fs.copyFile(shapeDir + "/" + req.body.filePath,__dirname + '/../shapes/' + req.body.filePath, (err) => {
-        if (err) throw err;
-        let binPath = phantomjs.path
-        let childArgs = [
-          path.join(__dirname,'../shape2code/converter.js'),
-          path.normalize(__dirname + '/../shapes/' + req.body.filePath)
-        ]
-        childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
-          io.sockets.emit("shape:reload", {
-            filePath: req.body.filePath,
-            imagePath: req.body.filePath.replace(".shape",".png"),
-            jsPath: req.body.filePath.replace(".shape",".js")
-          });
+
+      // create the js/png/md async to avoid a blocked UI
+      //
+      let binPath = phantomjs.path
+      let childArgs = [
+        path.join(__dirname,'../shape2code/converter.js'),
+        path.normalize(shapeDirApp + req.body.filePath)
+      ]
+      childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
+        let pattern = path.join(shapeDirApp , req.body.filePath).replace(".shape",".*")
+        glob(pattern, options, function (er, files) {
+          files.forEach( file =>{
+            fs.copyFile(path.join(file ,path.join(file.replace(shapeDirApp, storage.shapeDirUserHOME)), (err) => {
+              if (err) throw err;
+            }))
+          })
         })
-      });
+
+        io.sockets.emit("shape:reload", {
+          filePath: req.body.filePath,
+          imagePath: req.body.filePath.replace(".shape",".png"),
+          jsPath: req.body.filePath.replace(".shape",".js")
+        });
+      })
     });
   });
 

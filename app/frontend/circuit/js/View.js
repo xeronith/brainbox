@@ -14,6 +14,7 @@ import conf from "./Configuration"
 import Connection from "./figures/Connection"
 import SimulationEditPolicy from "./SimulationEditPolicy"
 import MarkdownDialog from "./dialog/MarkdownDialog"
+import CodeDialog from "./dialog/CodeDialog"
 
 export default draw2d.Canvas.extend({
 
@@ -233,17 +234,16 @@ export default draw2d.Canvas.extend({
         let x = event.x
         let y = event.y
 
-        let pathToFile = "https://github.com/freegroup/draw2d_js.shapes/blob/master/" + eval(figure.NAME + ".github")
         let pathToMD = conf.shapes.url + figure.NAME + ".md"
         let pathToCustom = conf.shapes.url + figure.NAME + ".custom"
-        let pathToDesign = conf.designer.url + "?timestamp="+new Date().getTime()+"#file=" + figure.NAME + ".shape"
+        let pathToDesign = conf.designer.url + "?timestamp=" + new Date().getTime() + "#file=" + figure.NAME + ".shape"
         let items = {
-          "label": {name: "Add Label", icon: "x ion-ios-pricetag-outline"},
+          "label": {name: "Attach Label", icon: "x ion-ios-pricetag-outline"},
           "delete": {name: "Delete", icon: "x ion-ios-close-outline"},
-          "sep1":    "---------",
-          "design": {name: "Edit Shape", icon: "x ion-ios-compose-outline"},
-          "bug": {name: "Report Bug", icon: "x ion-social-github"},
-          "help": {name: "Shape Documentation", icon: "x ion-ios-information-outline"}
+          "sep1": "---------",
+          "design": {name: "Customize Shape", icon: "x ion-ios-compose-outline"},
+          "code": {name: "Show Custom Code", icon: "x ion-code"},
+          "help": {name: "About", icon: "x ion-ios-information-outline"}
         }
 
         $.contextMenu({
@@ -271,18 +271,14 @@ export default draw2d.Canvas.extend({
                 }
                 break
               case "design":
-                window.open(pathToDesign,"designer")
+                window.open(pathToDesign, "designer")
                 break
               case "help":
                 $.get(pathToMD, function (content) {
                   new MarkdownDialog().show(content)
                 })
                 break
-              case "bug":
-                let createUrl = conf.issues.url + "?title=Error in shape '" + figure.NAME + "'&body=" + encodeURIComponent("I found a bug in " + figure.NAME + ".\n\nError Description here...\n\n\nLinks to the code;\n[GitHub link](" + pathToFile + ")\n[Designer Link](" + pathToDesign + ")\n")
-                window.open(createUrl)
-                break
-              case "delete":
+               case "delete":
                 let cmd = new draw2d.command.CommandDelete(figure)
                 _this.getCommandStack().execute(cmd)
                 break
@@ -305,9 +301,9 @@ export default draw2d.Canvas.extend({
       $("#figureConfigDialog").hide()
     })
 
-    socket.on("shape:reload",  msg => {
-      $.getScript(conf.shapes.url+msg.jsPath+"?timestamp="+new Date().getTime(),
-          this.reloadFromCache.bind(this)
+    socket.on("shape:reload", msg => {
+      $.getScript(conf.shapes.url + msg.jsPath + "?timestamp=" + new Date().getTime(),
+        this.reloadFromCache.bind(this)
       )
     });
 
@@ -527,8 +523,8 @@ export default draw2d.Canvas.extend({
     return new draw2d.geo.Rectangle(minX, minY, width, height)
   },
 
-  reloadFromCache: function(){
-    new draw2d.io.json.Writer().marshal(this,  json => {
+  reloadFromCache: function () {
+    new draw2d.io.json.Writer().marshal(this, json => {
       //this.clear();
       draw2d.Canvas.prototype.clear.call(this)
 
