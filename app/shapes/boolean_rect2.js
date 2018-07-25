@@ -10,16 +10,16 @@ var boolean_rect2 = draw2d.SetFigure.extend({
 
    init:function(attr, setter, getter)
    {
-     this._super( $.extend({stroke:0, bgColor:null, width:61,height:77},attr), setter, getter);
+     this._super( $.extend({stroke:0, bgColor:null, width:61,height:91},attr), setter, getter);
      var port;
      // PortOut
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(109.8360655737705, 15.584415584415584));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(109.8360655737705, 28.571428571428573));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("PortOut");
      port.setMaxFanOut(20);
      // PortIn
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-9.836065573770492, 97.40259740259741));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-9.836065573770492, 97.80219780219781));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
      port.setName("PortIn");
@@ -31,7 +31,7 @@ var boolean_rect2 = draw2d.SetFigure.extend({
    {
       var shape = this._super();
       this.originalWidth = 61;
-      this.originalHeight= 77;
+      this.originalHeight= 91;
       return shape;
    },
 
@@ -40,17 +40,17 @@ var boolean_rect2 = draw2d.SetFigure.extend({
        this.canvas.paper.setStart();
        var shape = null;
        // BoundingBox
-       shape = this.canvas.paper.path("M0,0 L61,0 L61,77 L0,77");
+       shape = this.canvas.paper.path("M0,0 L61,0 L61,91 L0,91");
        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
        shape.data("name","BoundingBox");
        
        // 
-       shape = this.canvas.paper.path('M0 0L61 0L61 77L0 77Z');
+       shape = this.canvas.paper.path('M0 14L61 14L61 91L0 91Z');
        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
        shape.data("name","");
        
        // Rectangle
-       shape = this.canvas.paper.path('M55 74L6 74L6 4L55 4Z');
+       shape = this.canvas.paper.path('M55 70L6 70L6 0L55 0Z');
        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
        shape.data("name","Rectangle");
        

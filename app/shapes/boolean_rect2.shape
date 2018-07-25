@@ -11,7 +11,8 @@
       "angle": 0,
       "userData": {
         "baseClass": "draw2d.SetFigure",
-        "code": "/**\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custome code and event handler here.\n *\n *\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n         this._super(attr, setter, getter);\n\n        this.attr({resizeable:false});\n        this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());\n\n         // your dddspecial code here\n    },\n\n    /**\n     *  Called by the simulator for every calculation\n     *  loop\n     *  @required\n     **/\n    calculate:function()\n    {\n        // calc\n    },\n\n\n    /**\n     *  Called if the simulation mode is starting\n     *  @required\n     **/\n    onStart:function()\n    {\n    },\n\n    /**\n     *  Called if the simulation mode is stopping\n     *  @required\n     **/\n    onStop:function()\n    {\n    }\n});"
+        "code": "/**\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custome code and event handler here.\n *\n *\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n         this._super(attr, setter, getter);\n\n        this.attr({resizeable:false});\n        this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());\n\n         // your dddspecial code here\n    },\n\n    /**\n     *  Called by the simulator for every calculation\n     *  loop\n     *  @required\n     **/\n    calculate:function()\n    {\n        // calc\n    },\n\n\n    /**\n     *  Called if the simulation mode is starting\n     *  @required\n     **/\n    onStart:function()\n    {\n    },\n\n    /**\n     *  Called if the simulation mode is stopping\n     *  @required\n     **/\n    onStop:function()\n    {\n    }\n});",
+        "markdown": "# Header \n## Subheader \nbe nice and write a help file for your new \ncreated ***DigitalTrainingStudion*** shape. \n\n  - point 1\n  - point 2\n  - point 3\n  - "
       },
       "cssClass": "shape_designer_figure_PolyRect",
       "ports": [],
@@ -130,7 +131,7 @@
       "type": "shape_designer.figure.PolyRect",
       "id": "affa6a66-561f-cdb4-5ec1-81dca446ad0b",
       "x": 7975.5,
-      "y": 7965.5,
+      "y": 7947.5,
       "width": 49,
       "height": 70,
       "alpha": 1,
@@ -148,19 +149,19 @@
       "vertices": [
         {
           "x": 8024.5,
-          "y": 8035.5
+          "y": 8017.5
         },
         {
           "x": 7975.5,
-          "y": 8035.5
+          "y": 8017.5
         },
         {
           "x": 7975.5,
-          "y": 7965.5
+          "y": 7947.5
         },
         {
           "x": 8024.5,
-          "y": 7965.5
+          "y": 7947.5
         }
       ],
       "blur": 0,
@@ -180,5 +181,5 @@
       ]
     }
   ],
-  "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFEAAABhCAYAAACu9U2bAAAEi0lEQVR4Xu3dTUgUYRwG8JlZ13VXrezDvgs11w6Lbathn6ZFUIeCCLpYEHRwq0OHTkGRgdcOHawVL0V56BBUpyhME4Ok1USlEFkJI2NLK10dXfYrZvte3PcZ2Kn8ePY6D+/O/ub/zvvuLPxXlvhKWUBOeQQOIBHRgCIgIhENEDBgCFYiEQ0QMGAIViIRDRAwYAhdlVhZWVmiqmpFMBjMMuA9Z8UQFotl3GaztTQ3N3egE9aFWFZWds7lctUUFxfPG8Tu7u7xzs7Omvb29iuGIDqdzkvV1dU1brcbjTdnjns8Hqm+vr6mq6vrMvpQuiqRiGLGlBD7+vokr9crBQIBdLFm7PHs7GyptLRUKioq+uMc/1klNjY2Sh0dHZLdbp+xSOjEtELQEKuqqv4Pona1tNdsvlcm+wz/rBLnE+Jah6MgFpK3KmbTUq1woqHIsGyOPX/b2+tL6Z44XxBX5uXtyih0nUxfmbfdlLUwjhgOfPGH3vmeBfu7bxAxyS3px3T2j4w+sTq2XLQ5K/ak5ztMpgWL47ew6NhIZMrXE57qam0hogCxzuO5PbF8QySzZO8x6+bdJsVi/WPxiU6pkvqyJUhEAeLVOk9/rGSflLnzUKE5d820C33YPxghogjxev1nZdcRKbP8cI6SYZsWMTo1oe83lmTfWOb6wnKViGib/e24aJ/4azofLDTnruV0TkYqQqzzeG6pKzZEbK49x6zO3WmJUzo6OcGFBVWi9hTnw9hYk9VeeiFjU3lFRoEjTVm4xBTf4oz+3OI0c2EB+0TtUdiqdfk7LYXFJ8yr83ekZeUsj2+2xz/5Q+/ftAUHuNkW3hN/f54Y/9oXlsuUNNOyeCWGIx8Vs/R8sKdngJWooxLREkVEIqIawcf5KAwbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOEBEbwQQRIREOGIYoamunncZ8bS6ku6csams3NDjQRkRxRcv5B44+ErW1m3zlrc1dvGDvdN2Nk00FPIlmTsKQ6ew4fy0samunvmi6lTk8YDnjdh9PbHtKxG/FILsaWmOitnaBtgf9yssm5exptz0RUWvMq3U3TuwMPHPqDJ+JIY15t9zpjYna2k08vfc52nZXOnuqOicRkS2iv1diKoj4Os/ehHar0r06uxqexkRt7QKt9/vMvS1q+batG/nfA9MXhew4XxcStbVTvY9vLhr1P043Sev5LxhJEAv2H30oams3+bqzdmjQ92z2Tsy/f+Yyams35CMgugzxhmuitnZoAB6X9DXmJRT42keg1AV09U9M/W3m9ghENOD6EpGIBggYMMRXd7IlqrwzJggAAAAASUVORK5CYII="
+  "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFEAAABvCAYAAACU/yzrAAAE5UlEQVR4Xu3dT0wUVxwH8LezLMsuoGItFv8GEOlhg9sFA7WKi8akPWjSNPGCJk087NoePPRkopEmXnvwQLvESxvl4KFJ9WRqkJVgIukWCZA2hCwxNMWsfwsLA5v918wY/4ad32+YpzD43YTT77ePt5/9vXlvZidvHAIvywIOyy2gAQFECUUARCBKEJDQBCoRiBIEJDSBSgSiBAEJTViqxLa2tkZVVYOpVKpMQl+WpQm32z3r9Xqjvb29fy61A5YQm5ubvwsEAh0NDQ22RRweHp4dHBzsGBgY+GFZEP1+/7lQKNQRDoeX+v+X/X2RSER0dXV1DA0Nfb/UzliqRCA+YwciKnGpA/Dl+zCcrRsKIAJRgoCEJlCJQJQgIKEJVCIQJQhIaAKVaCdEg6s1wVAoFFwF585RIYT29+Jl5uoO67Sv0NWaWCwmmpqahN0Rn3+OVxHNXN1hIRa60KAdT7SX3REX+wxmjpVALFAIQDQx4RQaTUAEogkBCamoxHeIuNXnq82nHS2Ky7lB+7e5dPaRw5W/88/oaBwTC2Niqaqu3ldSFzhRXFW9x1m2VkfMJP9LpP+N306ND/8MRAIx8Xj6pse3+6zXHzxQXONzOtes1+s/N/M4uxAfySwM9UWBaIDYGYlcntu4I1vaePCY55P9TsXtee0AkltQhXo3mgKiAeKFzsh4vvGQKN17pM5VuWXRI3AmMZkFohHiT11PlX1fidLWLyuUEu+iiLmFOd5Ppu/rad8FIPLWP0brxJfD+XCdq3IrhnMhUiPEzkjkkvrRjqw3cOCYx7+/6M0hnZufw8SiwVJnLA9mZno8O5vOlOxqDZbU+oqUtR849SXO9IslTi8mFsZie9O2mr3uuoavXZtrPisqq9ioL7ZnnyTS9+/1pyaw2CYr8fndYvppX8bRrBQ5P9QrMZN9qLjEncmRkQlUIqMSqSkKiECkaoSOUxML5+ZPVCIqka40KgOVSAkx4kBkIFEpQKSEGHEgMpCoFCBSQow4EBlIVAoQKSFGHIgMJCoFiJQQIw5EBhKVAkRKiBEHIgOJSgEiJcSIA5GBRKUAkRJixIHIQKJSgEgJMeJAZCBRKUCkhBhxIDKQqBQgUkKMOBAZSFQKECkhRhyIDCQqBYiUECMORAYSlQJESogRByIDiUoBIiXEiAORgUSlAJESYsSByECiUpYdsbu7W2jbodTX11N9XbHxsbExfVua9vb21/qo4XL3mrV0u7HWAQ0xmUyuWCSqY+Xl5Trim4XwzhCpDto5DkQJ3x4QgShBQEITqEQgShCQ0AQqEYgSBCQ0gUoEogQBCU2gEoEoQUBCE6Yr0WhbO60/q+HhNWZdTSFS29pNTU70A9H4K3DUfHH0d6Nt7eb/ip2vXL/moN2fRfVWK9F3+seM0bZ26h89l0ofTbi/DYeP23kr6LeKGLjYlzfa1i7Zf21cudujnPomvBOIi38Vjt1XRvNG29rN3frtaa7/V3HqZKgCiEA0NaJNzc6Bi7fyRtvaJfuujrlGo2rrpy0f2/lJkaYEhRCmnj3gO92ZNtrWTo3d+GXddOJGsVNst/MzS80imnoKRu3nR68bbWs3//fg+anJ+G2znXif8h3UtnZTcQBSBaH/7my0rR3VAOIWn2UKwGcCrDsggEWcOwPIugAq0bohhrMEQyDKQPwfsG1suM5BRmYAAAAASUVORK5CYII="
 }

@@ -10,16 +10,16 @@ var boolean_rect2 = draw2d.SetFigure.extend({
 
    init:function(attr, setter, getter)
    {
-     this._super( $.extend({stroke:0, bgColor:null, width:61,height:77},attr), setter, getter);
+     this._super( $.extend({stroke:0, bgColor:null, width:61,height:91},attr), setter, getter);
      var port;
      // PortOut
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(109.8360655737705, 15.584415584415584));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(109.8360655737705, 28.571428571428573));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("PortOut");
      port.setMaxFanOut(20);
      // PortIn
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-9.836065573770492, 97.40259740259741));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-9.836065573770492, 97.80219780219781));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
      port.setName("PortIn");
@@ -31,7 +31,7 @@ var boolean_rect2 = draw2d.SetFigure.extend({
    {
       var shape = this._super();
       this.originalWidth = 61;
-      this.originalHeight= 77;
+      this.originalHeight= 91;
       return shape;
    },
 
@@ -40,17 +40,17 @@ var boolean_rect2 = draw2d.SetFigure.extend({
        this.canvas.paper.setStart();
        var shape = null;
        // BoundingBox
-       shape = this.canvas.paper.path("M0,0 L61,0 L61,77 L0,77");
+       shape = this.canvas.paper.path("M0,0 L61,0 L61,91 L0,91");
        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
        shape.data("name","BoundingBox");
        
        // 
-       shape = this.canvas.paper.path('M0 0L61 0L61 77L0 77Z');
+       shape = this.canvas.paper.path('M0 14L61 14L61 91L0 91Z');
        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
        shape.data("name","");
        
        // Rectangle
-       shape = this.canvas.paper.path('M55 74L6 74L6 4L55 4Z');
+       shape = this.canvas.paper.path('M55 70L6 70L6 0L55 0Z');
        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
        shape.data("name","Rectangle");
        
@@ -1598,14 +1598,13 @@ draw2d_circuit_counter_BCDCounter = draw2d_circuit_counter_BCDCounter.extend({
 draw2d_circuit_counter_BCDCounter.github="./shapes/org/draw2d/circuit/counter/BCDCounter.shape";
 
 
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_decoder_BCDto7Seg = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_decoder_BCDto7Seg = draw2d.SetFigure.extend({
 
    NAME: "draw2d_circuit_decoder_BCDto7Seg",
 
@@ -1693,89 +1692,89 @@ var draw2d_circuit_decoder_BCDto7Seg = draw2d.SetFigure.extend({
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L87,0 L87,185 L0,185");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M0,3Q0,0 3, 0L84,0Q87,0 87, 3L87,182Q87,185 84, 185L3,185Q0,185 0, 182L0,3');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'BCD');
+       shape.attr({"x":29.3359375,"y":13.453125,"text-anchor":"start","text":"BCD","font-family":"\"Arial\"","font-size":12,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'7-Seg');
+       shape.attr({"x":29.3359375,"y":43.953125,"text-anchor":"start","text":"7-Seg","font-family":"\"Arial\"","font-size":12,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'A');
+       shape.attr({"x":72,"y":15.5,"text-anchor":"start","text":"A","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'B');
+       shape.attr({"x":73,"y":40.5,"text-anchor":"start","text":"B","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'C');
+       shape.attr({"x":73,"y":66,"text-anchor":"start","text":"C","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'D');
+       shape.attr({"x":73,"y":90,"text-anchor":"start","text":"D","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'E');
+       shape.attr({"x":73,"y":115,"text-anchor":"start","text":"E","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'F');
+       shape.attr({"x":73,"y":140,"text-anchor":"start","text":"F","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'A');
+       shape.attr({"x":7.472000000001572,"y":14.5,"text-anchor":"start","text":"A","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'B');
+       shape.attr({"x":7.472000000001572,"y":39.5,"text-anchor":"start","text":"B","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'C');
+       shape.attr({"x":7,"y":65,"text-anchor":"start","text":"C","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'D');
+       shape.attr({"x":6.472000000001572,"y":90,"text-anchor":"start","text":"D","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'to');
+       shape.attr({"x":38.3359375,"y":28.5,"text-anchor":"start","text":"to","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'G');
+       shape.attr({"x":72,"y":165.0703999999996,"text-anchor":"start","text":"G","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L87,0 L87,185 L0,185");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M0,3Q0,0 3, 0L84,0Q87,0 87, 3L87,182Q87,185 84, 185L3,185Q0,185 0, 182L0,3');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'BCD');
-        shape.attr({"x":29.3359375,"y":13.75,"text-anchor":"start","text":"BCD","font-family":"\"Arial\"","font-size":12,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'7-Seg');
-        shape.attr({"x":29.3359375,"y":39.25,"text-anchor":"start","text":"7-Seg","font-family":"\"Arial\"","font-size":12,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'A');
-        shape.attr({"x":72,"y":16,"text-anchor":"start","text":"A","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'B');
-        shape.attr({"x":73,"y":41,"text-anchor":"start","text":"B","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'C');
-        shape.attr({"x":73,"y":66.5,"text-anchor":"start","text":"C","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'D');
-        shape.attr({"x":73,"y":90.5,"text-anchor":"start","text":"D","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'E');
-        shape.attr({"x":73,"y":115.5,"text-anchor":"start","text":"E","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'F');
-        shape.attr({"x":73,"y":140.5,"text-anchor":"start","text":"F","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'A');
-        shape.attr({"x":7.472000000001572,"y":15,"text-anchor":"start","text":"A","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'B');
-        shape.attr({"x":7.472000000001572,"y":40,"text-anchor":"start","text":"B","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'C');
-        shape.attr({"x":7,"y":65.5,"text-anchor":"start","text":"C","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'D');
-        shape.attr({"x":6.472000000001572,"y":90.5,"text-anchor":"start","text":"D","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'to');
-        shape.attr({"x":38.3359375,"y":26.9765625,"text-anchor":"start","text":"to","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'G');
-        shape.attr({"x":72,"y":165.5703999999996,"text-anchor":"start","text":"G","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-
-        return this.canvas.paper.setFinish();
+       return this.canvas.paper.setFinish();
    },
 
    applyAlpha: function()
@@ -1970,7 +1969,6 @@ draw2d_circuit_decoder_BCDto7Seg = draw2d_circuit_decoder_BCDto7Seg.extend({
     {
     }
 });
-draw2d_circuit_decoder_BCDto7Seg.github="./shapes/org/draw2d/circuit/decoder/BCDto7Seg.shape";
 
 
 // Generated Code for the Draw2D touch HTML5 lib
@@ -8597,14 +8595,13 @@ draw2d_circuit_switch_PushButton = draw2d_circuit_switch_PushButton.extend({
 draw2d_circuit_switch_PushButton.github="./shapes/org/draw2d/circuit/switch/PushButton.shape";
 
 
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_timer_Delay = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_timer_Delay = draw2d.SetFigure.extend({
 
    NAME: "draw2d_circuit_timer_Delay",
 
@@ -8613,13 +8610,13 @@ var draw2d_circuit_timer_Delay = draw2d.SetFigure.extend({
      this._super( $.extend({stroke:0, bgColor:null, width:84,height:69},attr), setter, getter);
      var port;
      // output_0
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(100.59523809523809, 52.11524637681143));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(100.59523809523809, 52.11524637681209));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#1C9BAB");
      port.setName("output_0");
      port.setMaxFanOut(20);
      // input_0
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-5.357142857142857, 52.11524637681143));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-5.357142857142857, 52.11524637681209));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
      port.setName("input_0");
@@ -8638,104 +8635,104 @@ var draw2d_circuit_timer_Delay = draw2d.SetFigure.extend({
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L84,0 L84,69 L0,69");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M84,67Q84,69 82, 69L2,69Q0,69 0, 67L0,2Q0,0 2, 0L82,0Q84,0 84, 2L84,67');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'Delay');
+       shape.attr({"x":39,"y":37.1796875,"text-anchor":"start","text":"Delay","font-family":"\"Arial\"","font-size":11,"stroke":"none","fill":"#D9D9D9","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M9.5 20.5L9.5,48.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M9.5 20.5L9.5,48.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#A8A8A8","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M35.5 57.5L35.5,27.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M35.5 57.5L35.5,27.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#C9C9C9","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
+       // pulseline_top_shadow
+       shape = this.canvas.paper.path('M4.5 19.5L9.5,19.5Q11.309437499999149,19.776879999997618 11.5, 17.5L11.5,8.5Q11.30943749999824,6.006239999996978 13.5, 6.5L39.5,6.5Q41.2756774999998,6.333919999997306 41.5, 8.5L41.5,16.5Q41.2756774999998,18.992499999997563 43.5, 19.5L75.5,19.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","pulseline_top_shadow");
+       
+       // pulseline_top
+       shape = this.canvas.paper.path('M4.5 19.5L9.5,19.5Q11.309437499999149,19.776879999997618 11.5, 17.5L11.5,8.5Q11.30943749999824,6.006239999996978 13.5, 6.5L39.5,6.5Q41.2756774999998,6.333919999997306 41.5, 8.5L41.5,16.5Q41.2756774999998,18.992499999997563 43.5, 19.5L75.5,19.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","pulseline_top");
+       
+       // pulseline_bottom_shadow
+       shape = this.canvas.paper.path('M3.5 59.5L33.5,59.5Q35.642557499997565,59.194799999995666 35.5, 57.5L35.5,48.5Q35.642557499997565,46.40719999999601 37.5, 46.5L63.5,46.5Q65.60879749999731,46.07951999999568 65.5, 48.5L65.5,56.5Q65.60879749999731,58.73809999999594 67.5, 58.5L78.5,58.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","pulseline_bottom_shadow");
+       
+       // pulseline_bottom
+       shape = this.canvas.paper.path('M3.5 59.5L33.5,59.5Q35.642557499997565,59.194799999995666 35.5, 57.5L35.5,48.5Q35.642557499997565,46.40719999999601 37.5, 46.5L63.5,46.5Q65.60879749999731,46.07951999999568 65.5, 48.5L65.5,56.5Q65.60879749999731,58.73809999999594 67.5, 58.5L78.5,58.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","pulseline_bottom");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M11.5 33.5L11.5,42.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M11.5 33.5L11.5,42.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#FF0569","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M33.5 38.5L30.5,42.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M33.5 38.5L30.5,42.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#FF0569","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M29.5 34.5L33.5,37.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M29.5 34.5L33.5,37.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#FF0569","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M11.5 38.5L33.5,38.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M11.5 38.5L33.5,38.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#FF0569","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L84,0 L84,69 L0,69");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M84,67Q84,69 82, 69L2,69Q0,69 0, 67L0,2Q0,0 2, 0L82,0Q84,0 84, 2L84,67');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'Delay');
-        shape.attr({"x":36,"y":37.5,"text-anchor":"start","text":"Delay","font-family":"\"Arial\"","font-size":11,"stroke":"none","fill":"#D9D9D9","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // pulseline_top_shadow
-        shape = this.canvas.paper.path('M4.5 19.5L9.5,19.5Q11.309437499999149,19.776879999997618 11.5, 17.5L11.5,8.5Q11.309437499998694,6.006239999997433 13.5, 6.5L39.5,6.5Q41.27567749999935,6.333919999997761 41.5, 8.5L41.5,16.5Q41.27567749999935,18.992499999997563 43.5, 19.5L75.5,19.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","pulseline_top_shadow");
-        
-        // pulseline_top
-        shape = this.canvas.paper.path('M4.5 19.5L9.5,19.5Q11.309437499999149,19.776879999997618 11.5, 17.5L11.5,8.5Q11.309437499998694,6.006239999997433 13.5, 6.5L39.5,6.5Q41.27567749999935,6.333919999997761 41.5, 8.5L41.5,16.5Q41.27567749999935,18.992499999997563 43.5, 19.5L75.5,19.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","pulseline_top");
-        
-        // pulseline_bottom_shadow
-        shape = this.canvas.paper.path('M3.5 59.5L33.5,59.5Q35.642557499997565,59.19479999999612 35.5, 57.5L35.5,48.5Q35.642557499997565,46.40719999999601 37.5, 46.5L63.5,46.5Q65.60879749999776,46.07951999999614 65.5, 48.5L65.5,56.5Q65.60879749999776,58.73809999999594 67.5, 58.5L78.5,58.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","pulseline_bottom_shadow");
-        
-        // pulseline_bottom
-        shape = this.canvas.paper.path('M3.5 59.5L33.5,59.5Q35.642557499997565,59.19479999999612 35.5, 57.5L35.5,48.5Q35.642557499997565,46.40719999999601 37.5, 46.5L63.5,46.5Q65.60879749999776,46.07951999999614 65.5, 48.5L65.5,56.5Q65.60879749999776,58.73809999999594 67.5, 58.5L78.5,58.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","pulseline_bottom");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M11.5 33.5L11.5,42.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M11.5 33.5L11.5,42.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#FF0569","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M33.5 38.5L30.5,42.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M33.5 38.5L30.5,42.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#FF0569","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M29.5 34.5L33.5,37.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M29.5 34.5L33.5,37.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#FF0569","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M11.5 38.5L33.5,38.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M11.5 38.5L33.5,38.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#FF0569","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M10.5 20.5L10.5,48.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M10.5 20.5L10.5,48.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#A8A8A8","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M34.5 57.5L34.5,27.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M34.5 57.5L34.5,27.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#C9C9C9","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-
-        return this.canvas.paper.setFinish();
+       return this.canvas.paper.setFinish();
    },
 
    applyAlpha: function()
@@ -8941,7 +8938,6 @@ draw2d_circuit_timer_Delay = draw2d_circuit_timer_Delay.extend({
     }
 
 });
-draw2d_circuit_timer_Delay.github="./shapes/org/draw2d/circuit/timer/Delay.shape";
 
 
 // Generated Code for the Draw2D touch HTML5 lib.
