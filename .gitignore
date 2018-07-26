@@ -1,4 +1,2 @@
 .idea
 node_modules
-app/frontend/designer/js/webpack
-app/frontend/circuit/js/webpack
