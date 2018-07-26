@@ -104,7 +104,7 @@ class BackendStorage extends EventEmitter{
           withCredentials: true
         },
         data: {
-          fileName: fileName
+          filePath: fileName
         }
       }
     )

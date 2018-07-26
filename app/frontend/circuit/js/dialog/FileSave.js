@@ -23,14 +23,14 @@ export default class FileSave {
   show(canvas) {
     $("#githubSaveFileDialog .githubFileName").val(storage.currentFile)
 
-    $('#githubSaveFileDialog').on('shown.bs.modal', (event) => {
+    $('#githubSaveFileDialog').off('shown.bs.modal').on('shown.bs.modal', (event) => {
       $(event.currentTarget).find('input:first').focus()
     })
     $("#githubSaveFileDialog").modal("show")
 
     // Button: Commit to GitHub
     //
-    $("#githubSaveFileDialog .okButton").on("click", () => {
+    $("#githubSaveFileDialog .okButton").off("click").on("click", () => {
       canvas.setCurrentSelection(null)
       new draw2d.io.png.Writer().marshal(canvas, imageDataUrl => {
         let writer = new draw2d.io.json.Writer()

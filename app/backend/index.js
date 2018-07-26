@@ -10,12 +10,14 @@ const path = require('path');
 const childProcess = require('child_process')
 const phantomjs = require('phantomjs')
 const bodyParser = require('body-parser');
+const glob = require("glob");
 
 // application specific configuration settings
 //
 const deviceRegistry = require("./src/device-registry.js");
 const storage= require("./src/storage.js");
-const shapeDirApp = __dirname + '/../shapes/'
+const shapeDirApp = path.normalize(__dirname + '/../shapes/')
+
 
 
 // Determine the IP:PORT to use for the http server
@@ -48,7 +50,7 @@ function runServer() {
   // provide the  WebApp with this very simple
   // HTTP server. Good enough for an private raspi access
   //
-  app.use('/assets/shapes', express.static(__dirname + '/../shapes'));
+  app.use('/assets/shapes', express.static(shapeDirApp));
   app.use(express.static(__dirname + '/../frontend'));
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));
@@ -61,11 +63,14 @@ function runServer() {
   app.get('/backend/brain/list',    (req, res) => storage.listFiles(storage.brainDirUserHOME,      req.query.path,     res));
   app.get('/backend/brain/get',     (req, res) => storage.getJSONFile(storage.brainDirUserHOME,    req.query.filePath, res));
   app.get('/backend/brain/image',   (req, res) => storage.getBase64Image(storage.brainDirUserHOME, req.query.filePath, res));
-  app.post('/backend/brain/delete', (req, res) => storage.deleteFile(storage.brainDirUserHOME,     req.query.filePath, res));
+  app.post('/backend/brain/delete', (req, res) => storage.deleteFile(storage.brainDirUserHOME,     req.body.filePath, res));
   app.post('/backend/brain/rename', (req, res) => storage.renameFile(storage.brainDirUserHOME,     req.body.from, req.body.to, res));
   app.post('/backend/brain/save',   (req, res) => {
-    fs.writeFile(storage.brainDirUserHOME + "/" + req.body.filePath, req.body.content,  (err) =>{
+    fs.writeFile(storage.brainDirUserHOME + req.body.filePath, req.body.content,  (err) =>{
       res.send('true');
+      io.sockets.emit("brain:generated", {
+        filePath: req.body.filePath
+      });
     });
   });
 
@@ -74,21 +79,16 @@ function runServer() {
   // Handle shape files
   //
   // =================================================================
-  app.get('/backend/shape/list',    (req, res) => storage.listFiles(shapeDirApp,      req.query.path,     res));
-  app.get('/backend/shape/get',     (req, res) => storage.getJSONFile(shapeDirApp,    req.query.filePath, res)
-  // the shape isn't in the user store. copy them into the HOME directory and serve them again
-    .catch(()=> {
-      console.log("CATCH called")
-      fs.copyFile(__dirname + '/../shapes/' + req.query.filePath, storage.shapeDirUserHOME + "/" + req.query.filePath, (err) => {
-        storage.getJSONFile(storage.shapeDirUserHOME, req.query.filePath, res)
-      })
-    }))
-  app.get('/backend/shape/image',   (req, res) => storage.getBase64Image(shapeDirApp, req.query.filePath, res));
-  app.post('/backend/shape/delete', (req, res) => storage.deleteFile(shapeDirApp,     req.query.filePath, res));
-  app.post('/backend/shape/rename', (req, res) => storage.renameFile(shapeDirApp,     req.body.from, req.body.to, res));
+  app.get('/backend/shape/list',    (req, res) => storage.listFiles(shapeDirApp,      req.query.path,     res))
+  app.get('/backend/shape/get',     (req, res) => storage.getJSONFile(shapeDirApp,    req.query.filePath, res))
+  app.get('/backend/shape/image',   (req, res) => storage.getBase64Image(shapeDirApp, req.query.filePath, res))
+  app.post('/backend/shape/delete', (req, res) => storage.deleteFile(shapeDirApp,     req.body.filePath, res))
+  app.post('/backend/shape/rename', (req, res) => storage.renameFile(shapeDirApp,     req.body.from, req.body.to, res))
   app.post('/backend/shape/save',   (req, res) => {
-    fs.writeFile(shapeDirApp + "/" + req.body.filePath, req.body.content,  (err) =>{
-      // shape file is shape...fine
+    fs.writeFile(shapeDirApp + req.body.filePath, req.body.content,  (err) =>{
+      if(err) throw err
+
+      // file is saved...fine
       //
       res.send('true');
 
@@ -99,17 +99,26 @@ function runServer() {
         path.join(__dirname,'../shape2code/converter.js'),
         path.normalize(shapeDirApp + req.body.filePath)
       ]
+
+      // inform the browser that the processing of the
+      // code generation is ongoing
+      //
+      io.sockets.emit("shape:generating", {
+        filePath: req.body.filePath
+      });
+
       childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
-        let pattern = path.join(shapeDirApp , req.body.filePath).replace(".shape",".*")
-        glob(pattern, options, function (er, files) {
+        if(err) throw err
+        let pattern = (shapeDirApp + req.body.filePath).replace(".shape",".*")
+        glob(pattern, {}, function (er, files) {
           files.forEach( file =>{
-            fs.copyFile(path.join(file ,path.join(file.replace(shapeDirApp, storage.shapeDirUserHOME)), (err) => {
+            fs.copyFile(file ,file.replace(shapeDirApp, storage.shapeDirUserHOME), (err) => {
               if (err) throw err;
-            }))
+            })
           })
         })
 
-        io.sockets.emit("shape:reload", {
+        io.sockets.emit("shape:generated", {
           filePath: req.body.filePath,
           imagePath: req.body.filePath.replace(".shape",".png"),
           jsPath: req.body.filePath.replace(".shape",".js")

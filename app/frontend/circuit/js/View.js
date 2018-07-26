@@ -301,7 +301,7 @@ export default draw2d.Canvas.extend({
       $("#figureConfigDialog").hide()
     })
 
-    socket.on("shape:reload", msg => {
+    socket.on("shape:generated", msg => {
       $.getScript(conf.shapes.url + msg.jsPath + "?timestamp=" + new Date().getTime(),
         this.reloadFromCache.bind(this)
       )

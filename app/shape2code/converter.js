@@ -9,6 +9,7 @@ var system = require('system');
 var page    = webPage.create();
 var file = system.args[1]
 
+
 function fileToPackage(file){
   return file.replace(fs.workingDirectory+"/app/shapes/","").replace(".shape","");
 }
@@ -69,6 +70,8 @@ page.viewportSize = { width: 900, height: 900 };
 
 page.open('http://localhost:7400/designer', function(status) {
 
+
+  console.log(status)
   if (status === "success") {
       console.log("Processing: "+file);
       var json = JSON.parse(fs.read(file));

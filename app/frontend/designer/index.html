@@ -10,6 +10,16 @@
 
 
 <script>
+
+  // required for phantomJS. Function is not defined is this env
+  // phantomJS is not optimal for some reason but didn'T have any solution right now
+  // to render the shape preview in the server side.
+  // In this case: DON'T remove it.
+  Math.log2 = Math.log2 || function(x) {
+    return Math.log(x) * Math.LOG2E;
+  };
+
+
   // global struct to serialize/deserialize JSON structs from/to draw2d shapes
   var shape_designer = {
     app: null,

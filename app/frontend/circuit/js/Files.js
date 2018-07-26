@@ -43,12 +43,12 @@ export default class Files {
         files: files
       })
 
-      $("#files .container > .row").append($(output))
+      $("#files .container > .row").html($(output))
 
       $("#files .container .deleteIcon").on("click", (event) => {
         let $el = $(event.currentTarget)
-        let name = $el.data("id")
-        app.fileDelete(name, () => {
+        let name = $el.data("name")
+        storage.deleteFile(name).then( () => {
           let parent = $el.parent()
           parent.hide('slow', () =>  parent.remove())
         })
@@ -122,6 +122,17 @@ export default class Files {
       $("#files .thumbAdd").on("click",  () =>{
         new FileNew().show()
       })
+
+      socket.on("brain:generated",  msg => {
+        let preview = $("a[data-name='"+msg.filePath+"'] img")
+        if(preview.length===0){
+          this.render()
+        }
+        else {
+          $("a[data-name='" + msg.filePath + "'] img").attr({src: conf.backend.file.image + "?filePath=" + msg.filePath + "&timestamp=" + new Date().getTime()})
+        }
+      });
+
     })
   }
 }

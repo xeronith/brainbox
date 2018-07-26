@@ -2,8 +2,8 @@ var json=[
   {
     "type": "shape_designer.figure.PolyRect",
     "id": "1b4a927c-e95d-5494-fd8c-cda80763c0f2",
-    "x": 7969.5,
-    "y": 7968.5,
+    "x": 7975,
+    "y": 7977,
     "width": 61,
     "height": 77,
     "alpha": 1,
@@ -22,20 +22,20 @@ var json=[
     "dasharray": null,
     "vertices": [
       {
-        "x": 7969.5,
-        "y": 7968.5
+        "x": 7975,
+        "y": 7977
       },
       {
-        "x": 8030.5,
-        "y": 7968.5
+        "x": 8036,
+        "y": 7977
       },
       {
-        "x": 8030.5,
-        "y": 8045.5
+        "x": 8036,
+        "y": 8054
       },
       {
-        "x": 7969.5,
-        "y": 8045.5
+        "x": 7975,
+        "y": 8054
       }
     ],
     "blur": 0,
@@ -57,8 +57,8 @@ var json=[
   {
     "type": "shape_designer.figure.ExtPort",
     "id": "6643486c-3ff7-57ef-6627-c183389cc497",
-    "x": 8031.5,
-    "y": 7975.5,
+    "x": 8037,
+    "y": 7984,
     "width": 10,
     "height": 10,
     "alpha": 1,
@@ -93,8 +93,8 @@ var json=[
   {
     "type": "shape_designer.figure.ExtPort",
     "id": "2465fc3d-2db4-cacb-639c-af67902b4d64",
-    "x": 7958.5,
-    "y": 8038.5,
+    "x": 7964,
+    "y": 8047,
     "width": 10,
     "height": 10,
     "alpha": 1,
@@ -129,8 +129,8 @@ var json=[
   {
     "type": "shape_designer.figure.PolyRect",
     "id": "affa6a66-561f-cdb4-5ec1-81dca446ad0b",
-    "x": 7975.5,
-    "y": 7972,
+    "x": 7981,
+    "y": 7980.5,
     "width": 49,
     "height": 70,
     "alpha": 1,
@@ -147,20 +147,20 @@ var json=[
     "dasharray": null,
     "vertices": [
       {
-        "x": 8024.5,
-        "y": 8042
+        "x": 8030,
+        "y": 8050.5
       },
       {
-        "x": 7975.5,
-        "y": 8042
+        "x": 7981,
+        "y": 8050.5
       },
       {
-        "x": 7975.5,
-        "y": 7972
+        "x": 7981,
+        "y": 7980.5
       },
       {
-        "x": 8024.5,
-        "y": 7972
+        "x": 8030,
+        "y": 7980.5
       }
     ],
     "blur": 0,

@@ -1,3 +1,4 @@
+
 import 'ionicons-npm/css/ionicons.min.css'
 import "../less/index.less"
 import "font-awesome/css/font-awesome.css"
@@ -9,6 +10,8 @@ import global from "./global"
 /*** Handle jQuery plugin naming conflict between jQuery UI and Bootstrap ***/
 $.widget.bridge('uibutton', $.ui.button)
 $.widget.bridge('uitooltip', $.ui.tooltip)
+
+
 
 
 import "./figure/index"
@@ -54,5 +57,6 @@ $(window).load(function () {
   //
   for(var k in global) window[k]=global[k];
 
+  console.log("window loaded. Init application")
   app = shape_designer.app = new Application()
 })

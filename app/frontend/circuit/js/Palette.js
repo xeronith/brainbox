@@ -92,7 +92,12 @@ export default class Palette
         //    $("#paletteElements").append("<div>++</div>");
         });
 
-      socket.on("shape:reload", function (msg) {
+      socket.on("shape:generating", function (msg) {
+        $("div[data-file='"+msg.filePath+"'] ").addClass("spinner")
+      });
+
+      socket.on("shape:generated", function (msg) {
+        $("div[data-file='"+msg.filePath+"'] ").removeClass("spinner")
         $("div[data-file='"+msg.filePath+"'] img").attr({src:conf.shapes.url+msg.imagePath+"?timestamp="+new Date().getTime()})
       });
     }

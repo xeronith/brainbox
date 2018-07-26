@@ -8,9 +8,9 @@
     "dev": "webpack --progress --colors --watch --env dev"
   },
   "bin": {
-    "brainbox": "./server/http/index.js"
+    "brainbox": "./app/backend/index.js"
   },
-  "repository": "git+https://github.com/freegroup/draw2d_js.app.brainbox.git",
+  "repository": "git+https://github.com/freegroup/brainbox.git",
   "keywords": [
     "diagramming",
     "canvas",
@@ -20,7 +20,7 @@
   "author": "Andreas Herz (FreeGroup)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/freegroup/draw2d_js.app.brainbox/issues"
+    "url": "https://github.com/freegroup/brainbox/issues"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -58,7 +58,7 @@
   },
   "dependencies": {
     "body-parser": "1.18.3",
-    "draw2d": "^1.0.4",
+    "draw2d": "^1.0.10",
     "express": "4.16.3",
     "glob": "7.0.3",
     "gpio": "0.2.7",
@@ -77,5 +77,5 @@
     "system": "2.0.1",
     "webpage": "0.3.0"
   },
-  "homepage": "https://github.com/freegroup/draw2d_js.app.brainbox#readme"
+  "homepage": "https://github.com/freegroup/brainbox#readme"
 }

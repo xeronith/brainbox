@@ -14,6 +14,7 @@ export default {
     file: {
       list: "/backend/brain/list",
       get: "/backend/brain/get",
+      del: "/backend/brain/delete",
       rename: "/backend/brain/rename",
       save: "/backend/brain/save",
       image:"/backend/brain/image"
