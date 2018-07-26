@@ -17,6 +17,7 @@ const glob = require("glob");
 const deviceRegistry = require("./src/device-registry.js");
 const storage= require("./src/storage.js");
 const shapeDirApp = path.normalize(__dirname + '/../shapes/')
+const shape2CodeDir = path.normalize(__dirname + '/../shape2code/')
 
 
 
@@ -97,7 +98,9 @@ function runServer() {
       let binPath = phantomjs.path
       let childArgs = [
         path.normalize(__dirname+'/../shape2code/converter.js'),
-        path.normalize(shapeDirApp + req.body.filePath)
+        path.normalize(shapeDirApp + req.body.filePath),
+        shape2CodeDir,
+        shapeDirApp
       ]
 
       // inform the browser that the processing of the
@@ -107,7 +110,7 @@ function runServer() {
         filePath: req.body.filePath
       });
 
-      console.log(binPath, childArgs[0], childArgs[1])
+      console.log(binPath, childArgs[0], childArgs[1],childArgs[2],childArgs[3])
       childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
         if(err) throw err
         let pattern = (shapeDirApp + req.body.filePath).replace(".shape",".*")

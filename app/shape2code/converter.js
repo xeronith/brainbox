@@ -8,14 +8,16 @@ var fs      = require('fs');
 var system = require('system');
 var page    = webPage.create();
 var file = system.args[1]
+var shape2CodeDir = system.args[2]
+var shapeDir = system.args[3]
 
 
 function fileToPackage(file){
-  return file.replace(fs.workingDirectory+"/app/shapes/","").replace(".shape","");
+  return file.replace(shapeDir,"").replace(".shape","");
 }
 
 function shape2CodePath(file){
-  return fs.workingDirectory+"/app/shape2code/"+file;
+  return shape2CodeDir+file;
 }
 
 
@@ -102,7 +104,6 @@ page.open('http://localhost:7400/designer', function(status) {
               var jsFilePath       = file.replace(".shape", ".js");
               var customFilePath   = file.replace(".shape", ".custom");
               var markdownFilePath = file.replace(".shape", ".md");
-              var shapeDir         = jsFilePath.split("/").slice(0,-1).join("/")+"/"
 
               // replace the generated "testShape" with the real figure name
               //
