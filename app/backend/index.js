@@ -96,7 +96,7 @@ function runServer() {
       //
       let binPath = phantomjs.path
       let childArgs = [
-        path.normalize(__dirname+'../shape2code/converter.js'),
+        path.normalize(__dirname+'/../shape2code/converter.js'),
         path.normalize(shapeDirApp + req.body.filePath)
       ]
 
