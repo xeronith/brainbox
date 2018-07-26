@@ -96,7 +96,7 @@ function runServer() {
       //
       let binPath = phantomjs.path
       let childArgs = [
-        path.join(__dirname,'../shape2code/converter.js'),
+        path.normalize(__dirname+'../shape2code/converter.js'),
         path.normalize(shapeDirApp + req.body.filePath)
       ]
 
@@ -107,6 +107,7 @@ function runServer() {
         filePath: req.body.filePath
       });
 
+      console.log(binPath, childArgs[0], childArgs[1])
       childProcess.execFile(binPath, childArgs, function(err, stdout, stderr) {
         if(err) throw err
         let pattern = (shapeDirApp + req.body.filePath).replace(".shape",".*")
