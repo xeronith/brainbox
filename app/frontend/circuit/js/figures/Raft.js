@@ -1,18 +1,4 @@
-/*jshint evil:true */
-
-
-/**
- * The markerFigure is the left hand side annotation for a DecoratedPort.
- *
- * It contains two children
- *
- * StateAFigure: if the mouse hover and the figure isn't permanent visible
- * StateBFigure: either the mouse is over or the user pressed the checkbox to stick the figure on the port
- *
- * This kind of decoration is usefull for defualt values on workflwos enginges or circuit diagrams
- *
- */
-var Raft = draw2d.shape.composite.Raft.extend({
+export default draw2d.shape.composite.Raft.extend({
 
     NAME : "Raft",
 
