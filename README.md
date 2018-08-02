@@ -11,19 +11,15 @@ classroom or at home and connect even your RaspberryPi to drive real physical de
 (*Extended Demo project for the [draw2d.js](http://www.draw2d.org) library which shows how to connect the browser with 
 a node.js server on raspberry Pi or just your local computer.*)
 
-![image](src/assets/images/animation.gif)
+![image](resources/animation.gif)
 
 
 
 # How to install and use it
 You have different options to use the brainbox.
 
-## Internet
-just go to [http://freegroup.github.io/draw2d_js.app.brainbox/](http://freegroup.github.io/draw2d_js.app.brainbox/) and 
-you can build your own digital circuits. You can save and load your created schemas if you login with your Google+ account.
 
-
-## Intranet
+## Desktop
 You can install the application even in your local intranet for training purpose. Just install and run the backend 
 server (to store and load the circuit files) on every computer which can run a simple node.js server. 
 
@@ -47,7 +43,7 @@ your RaspberryPi with the browser.
 See the running example on YouTube: [https://www.youtube.com/watch?v=fUkAIjTaNXI](https://www.youtube.com/watch?v=fUkAIjTaNXI)
 
 ###The simulation circuit
-![image](src/assets/images/readme_gpio_dts.png?raw=true)
+![image](assets/readme_gpio_dts.png?raw=true)
 
 ### connect a real LED to your GPIO pin 3
 You find a lot of documentation how to connect a simple LED to your raspi. A good source is always the web page of 
