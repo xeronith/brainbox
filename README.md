@@ -43,7 +43,7 @@ your RaspberryPi with the browser.
 See the running example on YouTube: [https://www.youtube.com/watch?v=fUkAIjTaNXI](https://www.youtube.com/watch?v=fUkAIjTaNXI)
 
 ###The simulation circuit
-![image](assets/readme_gpio_dts.png?raw=true)
+![image](resources/readme_gpio_dts.png?raw=true)
 
 ### connect a real LED to your GPIO pin 3
 You find a lot of documentation how to connect a simple LED to your raspi. A good source is always the web page of 
