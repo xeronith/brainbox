@@ -1,5 +1,5 @@
 site_name: Brainbox Getting Started Guide
-site_dir : ../../dist/assets/help/howto
+site_dir : ../../docs
 
 pages:
  - About : index.md
