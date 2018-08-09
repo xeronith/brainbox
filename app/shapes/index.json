@@ -1,13 +1,5 @@
 [
   {
-    "name": "boolean_rect2",
-    "tags": [
-      "boolean",
-      "rect2"
-    ],
-    "filePath": "boolean_rect2.shape"
-  },
-  {
     "name": "draw2d_circuit_alu_FullAdder",
     "tags": [
       "draw2d",

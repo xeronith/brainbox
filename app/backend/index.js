@@ -185,6 +185,7 @@ function runServer() {
 
 
   http.listen(port, function () {
+    console.log('using phantomJS for server side rendering of shape previews:', phantomjs.path)
     console.log('+------------------------------------------------------------+');
     console.log('| Welcome to brainbox - the begin of something awesome       |');
     console.log('|------------------------------------------------------------|');

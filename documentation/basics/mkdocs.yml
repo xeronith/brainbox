@@ -1,5 +1,5 @@
 site_name: Grundlagen der Digitaltechnik
-site_dir : ../../docs/book
+site_dir : ../../dist/book
 
 pages:
  - Grundlagen : index.md

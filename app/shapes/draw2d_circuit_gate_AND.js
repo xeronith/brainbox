@@ -1,11 +1,10 @@
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_gate_AND = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_gate_AND = draw2d.SetFigure.extend({
 
    NAME: "draw2d_circuit_gate_AND",
 
@@ -45,24 +44,24 @@ var draw2d_circuit_gate_AND = draw2d.SetFigure.extend({
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L30,0 L30,40 L0,40");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M0,3Q0,0 3, 0L27,0Q30,0 30, 3L30,37Q30,40 27, 40L3,40Q0,40 0, 37L0,3');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'&');
+       shape.attr({"x":9,"y":20.171875,"text-anchor":"start","text":"&","font-family":"\"Arial\"","font-size":20,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L30,0 L30,40 L0,40");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M0,3Q0,0 3, 0L27,0Q30,0 30, 3L30,37Q30,40 27, 40L3,40Q0,40 0, 37L0,3');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'&');
-        shape.attr({"x":9,"y":21,"text-anchor":"start","text":"&","font-family":"\"Arial\"","font-size":20,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-
-        return this.canvas.paper.setFinish();
+       return this.canvas.paper.setFinish();
    },
 
    applyAlpha: function()
@@ -229,4 +228,3 @@ draw2d_circuit_gate_AND = draw2d_circuit_gate_AND.extend({
         o1.setValue(i1.getValue() && i2.getValue());
     }
 });
-draw2d_circuit_gate_AND.github="./shapes/org/draw2d/circuit/gate/AND.shape";

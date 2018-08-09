@@ -4,251 +4,6 @@
 // created with http://www.draw2d.org
 //
 //
-var boolean_rect2 = draw2d.SetFigure.extend({
-
-   NAME: "boolean_rect2",
-
-   init:function(attr, setter, getter)
-   {
-     this._super( $.extend({stroke:0, bgColor:null, width:61,height:100},attr), setter, getter);
-     var port;
-     // PortOut
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(109.8360655737705, 35));
-     port.setConnectionDirection(1);
-     port.setBackgroundColor("#37B1DE");
-     port.setName("PortOut");
-     port.setMaxFanOut(20);
-     // PortIn
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-9.836065573770492, 98));
-     port.setConnectionDirection(3);
-     port.setBackgroundColor("#37B1DE");
-     port.setName("PortIn");
-     port.setMaxFanOut(20);
-     this.persistPorts=false;
-   },
-
-   createShapeElement : function()
-   {
-      var shape = this._super();
-      this.originalWidth = 61;
-      this.originalHeight= 100;
-      return shape;
-   },
-
-   createSet: function()
-   {
-       this.canvas.paper.setStart();
-       var shape = null;
-       // BoundingBox
-       shape = this.canvas.paper.path("M0,0 L61,0 L61,100 L0,100");
-       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-       shape.data("name","BoundingBox");
-       
-       // 
-       shape = this.canvas.paper.path('M0 23L61 23L61 100L0 100Z');
-       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-       shape.data("name","");
-       
-       // Rectangle
-       shape = this.canvas.paper.path('M55 70L6 70L6 0L55 0Z');
-       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-       shape.data("name","Rectangle");
-       
-
-       return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
-});
-
-/**
- * by 'Draw2D Shape Designer'
- *
- * Custom JS code to tweak the standard behaviour of the generated
- * shape. add your custome code and event handler here.
- *
- *
- */
-boolean_rect2 = boolean_rect2.extend({
-
-    init: function(attr, setter, getter){
-         this._super(attr, setter, getter);
-
-        this.attr({resizeable:false});
-        this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());
-
-         // your dddspecial code here
-    },
-
-    /**
-     *  Called by the simulator for every calculation
-     *  loop
-     *  @required
-     **/
-    calculate:function()
-    {
-        // calc
-    },
-
-
-    /**
-     *  Called if the simulation mode is starting
-     *  @required
-     **/
-    onStart:function()
-    {
-    },
-
-    /**
-     *  Called if the simulation mode is stopping
-     *  @required
-     **/
-    onStop:function()
-    {
-    }
-});
-
-
-// Generated Code for the Draw2D touch HTML5 lib.
-// File will be generated if you save the *.shape file.
-//
-// created with http://www.draw2d.org
-//
-//
 var draw2d_circuit_alu_FullAdder = draw2d.SetFigure.extend({
 
    NAME: "draw2d_circuit_alu_FullAdder",
@@ -4140,14 +3895,13 @@ draw2d_circuit_flipflop_ToggleFlipFlop = draw2d_circuit_flipflop_ToggleFlipFlop.
 draw2d_circuit_flipflop_ToggleFlipFlop.github="./shapes/org/draw2d/circuit/flipflop/ToggleFlipFlop.shape";
 
 
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_gate_AND = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_gate_AND = draw2d.SetFigure.extend({
 
    NAME: "draw2d_circuit_gate_AND",
 
@@ -4187,24 +3941,24 @@ var draw2d_circuit_gate_AND = draw2d.SetFigure.extend({
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L30,0 L30,40 L0,40");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M0,3Q0,0 3, 0L27,0Q30,0 30, 3L30,37Q30,40 27, 40L3,40Q0,40 0, 37L0,3');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'&');
+       shape.attr({"x":9,"y":20.171875,"text-anchor":"start","text":"&","font-family":"\"Arial\"","font-size":20,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L30,0 L30,40 L0,40");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M0,3Q0,0 3, 0L27,0Q30,0 30, 3L30,37Q30,40 27, 40L3,40Q0,40 0, 37L0,3');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'&');
-        shape.attr({"x":9,"y":21,"text-anchor":"start","text":"&","font-family":"\"Arial\"","font-size":20,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-
-        return this.canvas.paper.setFinish();
+       return this.canvas.paper.setFinish();
    },
 
    applyAlpha: function()
@@ -4371,7 +4125,6 @@ draw2d_circuit_gate_AND = draw2d_circuit_gate_AND.extend({
         o1.setValue(i1.getValue() && i2.getValue());
     }
 });
-draw2d_circuit_gate_AND.github="./shapes/org/draw2d/circuit/gate/AND.shape";
 
 
 // Generated Code for the Draw2D touch HTML5 lib

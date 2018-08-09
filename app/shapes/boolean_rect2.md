@@ -1,9 +1,0 @@
-# Header 
-## Subheader 
-be nice and write a help file for your new 
-created ***DigitalTrainingStudion*** shape. 
-
-  - point 1
-  - point 2
-  - point 3
-  - 
