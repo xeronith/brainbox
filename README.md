@@ -16,31 +16,28 @@ a node.js server on raspberry Pi or just your local computer.*)
 
 
 # How to install and use it
-You have different options to use the brainbox.
-
-
-## Desktop
-You can install the application even in your local intranet for training purpose. Just install and run the backend 
-server (to store and load the circuit files) on every computer which can run a simple node.js server. 
 
 ```
 npm install -g brainbox
 ```
-
-
-## Raspberry Pi
-You have **full access to the `GPIO`** pins on you RaspberryPi with the browser based digital circuit simulator. If 
-node.js already running on your raspi you need just to install the simulator 
-like on your desktop
-
-```
-npm install -g brainbox
-```
-
 and start the server with `brainbox`. The server reports the URL how to connect to 
 your RaspberryPi with the browser.
 
 See the running example on YouTube: [https://www.youtube.com/watch?v=fUkAIjTaNXI](https://www.youtube.com/watch?v=fUkAIjTaNXI)
+
+
+
+## On Desktop
+You can install the application even in your local intranet for training purpose. Just install and run the backend 
+server (to store and load the circuit files) on every computer which can run a simple node.js server. 
+
+
+## On a Raspberry Pi
+You have **full access to the `GPIO`** pins on you RaspberryPi with the browser based digital circuit simulator. If 
+node.js already running on your raspi you need just to install the simulator 
+like on your desktop
+
+
 
 ### The simulation circuit
 ![image](resources/readme_gpio_dts.png?raw=true)
@@ -55,7 +52,7 @@ if you press the button in your simulator.
 
 
 
-# Feel free to clone and and run it
+# Run from source code
 I develop the project with `yarn` to build my webpack. 
 YARN runs on Node.js, so if you don't have npm installed already, go ahead and install it.
 
