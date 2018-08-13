@@ -15,7 +15,19 @@ a node.js server on raspberry Pi or just your local computer.*)
 
 
 
-# How to install and use it
+# How to install it
+You can install `brainbox`on your desktop or your Raspberry Pi just by using npm as 
+package manager. But what is npm?
+
+NPM ist the package manager for NodeJS applications. 
+
+
+It's the world's largest software registry, with approximately 3 billion downloads per 
+week. Open-source developers from every continent use npm to share and borrow packages, 
+and many organizations use npm to manage private development as well.
+
+
+If you didn't have installed NodeJS and npm - [go ahead and install it](https://www.npmjs.com/get-npm)
 
 ```
 npm install -g brainbox
