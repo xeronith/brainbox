@@ -1,0 +1,494 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <title></title>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0"/>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+
+  <link rel="icon" type="./image/png"    href="./images/favicon_64x64.png" sizes="64x64">
+  <link rel="icon" type="./image/png"    href="./images/favicon_48x48.png" sizes="48x48">
+  <link rel="icon" type="./image/png"    href="./images/favicon_32x32.png" sizes="32x32">
+  <link rel="icon" type="./image/png"    href="./images/favicon_16x16.png" sizes="16x16">
+
+  <link href='//fonts.googleapis.com/css?family=Roboto:400,300,400italic,500,700,100,900' rel='stylesheet' type='text/css'>
+  <link href='./lib/bootstrap/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+  <link href='./lib/bootstrap-slider/slider.css' rel='stylesheet' type='text/css'>
+
+  <script src="./lib/jquery/jquery.js"></script>
+  <script src="./lib/jquery/jquery-ui.js"></script>
+
+  <script src="./lib/bootstrap/js/bootstrap.min.js"></script>
+  <script src="./lib/bootbox/bootbox.min.js"></script>
+  <script src="./lib/bootstrap-slider/bootstrap-slider.js"></script>
+  <script src="./lib/bootstrap-touchspin/jquery.bootstrap-touchspin.min.js"></script>
+  <script src="./lib/shufflejs/dist/jquery.shuffle.modernizr.min.js"></script>
+
+  <script src="./lib/draw2d.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <SCRIPT src="./js/webpack/bundle.js"></SCRIPT>
+
+  <style>
+    .x.axis line {
+      shape-rendering: auto;
+    }
+
+    .line {
+      fill: none;
+      stroke: #000;
+      stroke-width: 1px;
+    }
+
+  </style>
+  <script type="text/javascript">
+    var app = null
+    var socket = null
+  </script>
+
+</head>
+
+
+<body>
+<div id="layout">
+  <ul class="nav nav-tabs" id="leftTabStrip">
+
+
+    <li id="index_tab" class="active">
+      <a href="#home" class="leftTab home" data-toggle="tab">
+        <span class="ion-information"></span>
+      </a>
+    </li>
+
+    <li id="editor_tab">
+      <a href="#editor" class="leftTab editor" data-toggle="tab">
+        <span class="octicon octicon-circuit-board"></span>
+      </a>
+    </li>
+
+    <li id="files_tab" class="">
+      <a href="#files" class="leftTab files" data-toggle="tab">
+        <span class="ion-android-folder-open"></span>
+      </a>
+    </li>
+
+  </ul>
+
+
+
+  <div class="tab-content">
+
+    <div class="tab-pane active" id="home">
+      <div class="row hidden-xs teaser">
+        <div class="col-sm-8 col-md-8">
+          <div class="title"><img src="./images/favicon_64x64.svg"></img>BrainBox</div>
+          <div class="slogan">
+            Dive inside your device. Use a simple programming language to connect, control, and play
+            with all the sensors and tools.
+          </div>
+        </div>
+      </div>
+
+      <div class="row visible-xs teaser">
+        <div class="col-xs-12">
+          <div class="title">BrainBox</div>
+          <div class="slogan">
+            Dive inside your device. Use a simple programming language to connect, control, and play
+            with all the sensors and tools.
+          </div>
+        </div>
+      </div>
+
+      <div class="introText">
+        <div class="paragraph">
+          <h3>Building Hardware was always cool</h3>
+          Physical things are great. Hardware companies like Apple,
+          Arduino, etc are disrupting our lives in a big way. At <span class="branding">BrainBox</span> we love hardware
+          hackers
+          and are in absolute awe of their awesome design and applications they build.
+          <br>
+          Hobbyists can create some of these fun circuits and run them on an RaspberryPi or just
+          in your browser with our virtual instruments to test and measure appropriate signals.
+        </div>
+
+
+        <div class="paragraph">
+          <h3>Getting Started on Hackster.io</h3>
+          <div class="container">
+            <div class="row">
+              <div class="col-md-5">
+                <iframe frameborder='0' height='327.5' scrolling='no' src='https://www.hackster.io/draw2dtouch/getting-started-with-brainbox-and-raspberry-pi-5d56a1/embed' width='350'></iframe>
+              </div>
+              <div class="col-md-7">
+                One function that makes the Internet of Things the Internet of Things is remote control
+                of devices, being able to trigger action from a remote location.
+                With <span class="branding">BrainBox</span> you can edit and run your digital circuit simulation
+                designs online on RPi, PC, Mac, thin clients, tablets within your browser and trigger any
+                physical device.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="paragraph">
+          <h3>Open- minded</h3>
+          <div class="block">
+            At <span class="branding">BrainBox</span> – we have been listening to your feedback and we are working on
+            features such as
+          </div>
+
+          <ul>
+            <li>more supported Hardware</li>
+            <li>Making simulation faster</li>
+            <li>Introducing more components</li>
+            <li>Better wiring capabilities</li>
+            <li>Better messaging for debugging</li>
+            <li>Private Sharing of Circuits</li>
+          </ul>
+
+          <div class="block">
+            among other things. Please keep on giving us your valuable feedback and help us make <span class="branding">BrainBox</span>
+            the best Circuit Simulation and IoT tool for everyone.
+          </div>
+        </div>
+
+      </div>
+      <footer>Coded with ♥ and the powerful <a href="http://www.draw2d.org" target="_blank">Draw2D</a> library by
+        Andreas Herz
+      </footer>
+    </div>
+
+    <div class="tab-pane" id="files">
+      <div class="container">
+        <div class="row">
+        </div>
+      </div>
+    </div>
+
+
+    <div class="tab-pane" id="editor">
+      <div class="workspace">
+        <div class="palette ">
+          <div class="title"><img src="./images/favicon_64x64.svg"/>Brainbox</div>
+          <input type="text" id="filter" placeholder="Filter..." autofocus>
+          <div id="paletteElementsScroll">
+            <div id="paletteElements" class="row ">
+
+            </div>
+            <div id="paletteElementsOverlay"></div>
+          </div>
+        </div>
+        <div class="toolbar">
+                        <span class="group" id="editorgroup_fileoperations">
+                            <span id="editorFileOpen" class="ion-ios-download-outline icon" title="Open circuit"></span>
+                            <span id="editorFileSave" class="ion-ios-upload-outline icon" title="Save circuit"></span>
+                        </span>
+
+          <span class="group">
+                            <span id="editDelete" class="ion-ios-close-empty icon disabled"></span>
+                        </span>
+
+          <span class="group">
+                            <span id="editUndo" class="ion-ios-arrow-left icon disabled"></span>
+                            <span id="editRedo" class="ion-ios-arrow-right icon disabled"></span>
+                        </span>
+
+
+          <span class="group simulationBase" style="display: none;">
+                            <label>Simulation Speed</label>
+                            <input id="simulationBaseTimer"
+                                   type="text"
+                                   value="100"
+                                   data-slider-min="50"
+                                   data-slider-max="500"
+                                   data-slider-step="1"
+                                   data-slider-value="100"
+                                   data-slider-handle="round"
+                                   data-slider-tooltip="hide"
+                                   data-slider-id="simulationBaseTimerSlider"
+                                   data-slider-orientation="horizontal">
+                        </span>
+
+          <span class="group raspiConnection">
+                            Connection to RaspberryPi lost..
+                        </span>
+
+          <a href="#" class="morph_btn play" id="simulationStartStop">
+                                <span>
+                                  <span class="s1"></span>
+                                  <span class="s2"></span>
+                                  <span class="s3"></span>
+                                </span>
+          </a>
+
+        </div>
+        <div class="content" id="draw2dCanvasWrapper">
+          <div class="canvas" id="draw2dCanvas" oncontextmenu="return false;">
+          </div>
+          <div id="canvas_zoom" class="btn-group">
+            <button type="button" id="canvas_zoom_in" class="btn highlight">&#8210;</button>
+            <button type="button" id="canvas_zoom_normal" class="btn highlight">100%</button>
+            <button type="button" id="canvas_zoom_out" class="btn highlight">&#xFF0B</button>
+          </div>
+        </div>
+        <div id='probe_window'>
+          <div id="probe_window_stick" class="ion-ios-eye-outline" title="Stick Window"></div>
+          <div id="probe_hint"><span class="ion-ios-information-outline"></span>Right click on a connection to add a
+            probe signal to this logic analyzer window
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+  </div><!-- /tab-content -->
+
+</div><!-- /container -->
+
+<script id="shapeTemplate" type="text/x-jsrender">
+{{#shapes}}
+    <div  data-name='{{name}}'  data-file='{{filePath}}' class="mix col-md-6 pallette_item">
+      <div class="glow">
+          <img data-shape="{{name}}" class="draw2d_droppable" src="{{shapesUrl}}{{name}}.png"/>
+          <div>{{basename}}</div>
+       </div>
+    </div>
+{{/shapes}}
+
+</script>
+
+
+<!--
+  # Save Dialog
+  #
+  #
+-->
+<div id="githubSaveFileDialog" class="modal fade githubFileDialog" tabindex="-1">
+  <div class="modal-dialog ">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="media-heading">Save your circuit</h4>
+      </div>
+      <div class="modal-body">
+        <div class="media">
+          <div class="media-left media-middle">
+            <a href="#">
+              <div class="media-object githubFilePreview ion-ios-upload-outline"></div>
+            </a>
+          </div>
+          <div class="media-body">
+
+
+            <br>
+            <br>
+            <fieldset>
+              <div class="form-group">
+                <div class="col-lg-12">
+                  <input type="text"
+                         class="form-control floating-label githubFileName"
+                         value=""
+                  >
+                </div>
+              </div>
+            </fieldset>
+            <div class="row"></div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Abort</button>
+        <button class="btn btn-primary okButton"><span>Save</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--
+  # Save Dialog
+  #
+  #
+-->
+<div id="githubNewFileDialog" class="modal fade githubFileDialog" tabindex="-1">
+  <div class="modal-dialog ">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="media-heading">Enter File Name</h4>
+      </div>
+      <div class="modal-body">
+        <div class="media">
+          <div class="media-left media-middle">
+            <a href="#">
+              <div class="media-object githubFilePreview ion-ios-plus-outline"></div>
+            </a>
+          </div>
+          <div class="media-body">
+
+
+            <br>
+            <br>
+            <fieldset>
+              <div class="form-group">
+                <div class="col-lg-12">
+                  <input type="text"
+                         class="form-control floating-label githubFileName"
+                         value=""
+                  >
+                </div>
+              </div>
+            </fieldset>
+            <div class="row"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Abort</button>
+        <button class="btn btn-primary okButton"><span>Create</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--
+  # GitHub File select/open dialog
+  #
+  -->
+<div id="githubFileSelectDialog" class="modal fade githubFileDialog" tabindex="-1">
+  <div class="modal-dialog ">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="media-heading">File Open...</h4>
+      </div>
+      <div class="modal-body">
+
+
+        <div class="list-group githubNavigation">
+          <!-- FileList here -->
+        </div>
+
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Abort</button>
+        <button class="btn btn-primary okButton"><span>Open</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!--
+  # FileSaveAs Dialog
+  #
+  -->
+<div id="githubFileSaveAsDialog" class="modal fade githubFileDialog" tabindex="-1">
+  <div class="modal-dialog ">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="media-heading">Save file</h4>
+      </div>
+      <div class="modal-body">
+
+        <div class="list-group githubNavigation">
+          <!-- FileList here -->
+        </div>
+
+
+        <div class="media">
+          <div class="media-left media-middle">
+            <a href="#">
+              ddd
+            </a>
+          </div>
+          <div class="media-body">
+
+            <form class="form-horizontal">
+              <br>
+              <br>
+              <fieldset>
+                <div class="form-group">
+                  <div class="col-lg-12">
+                    <input type="text"
+                           class="form-control floating-label githubFileName"
+                           value=""
+                           placeholder="enter filename"
+                    >
+                  </div>
+                </div>
+                <div class="form-group">
+                  <div class="col-lg-12">
+                    <input type="text"
+                           class="form-control floating-label githubCommitMessage"
+                           value=""
+                           autofocus
+                           placeholder="commit message"
+                    >
+                  </div>
+                </div>
+              </fieldset>
+              <div class="row"></div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal">Abort</button>
+        <button class="btn btn-primary okButton"><span>Save</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!--
+  Dialog with behaviour code preview of the shapes
+ -->
+<div id="codePreviewDialog" class="modal fade" tabindex="-1">
+  <div class="modal-dialog ">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="media-heading">Shape Behaviour Code</h4>
+      </div>
+      <div class="modal-body">
+                <pre class="prettyprint">
+
+                </pre>
+      </div>
+      <div class="modal-footer">
+        <button class="btn  btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!--
+  Help file of a single shape element
+ -->
+<div id="markdownDialog" class="modal fade" tabindex="-1">
+  <div class="modal-dialog ">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="media-heading">Shape Documentation</h4>
+      </div>
+      <div class="modal-body">
+        <div class="html">
+
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn  btn-primary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div id="figureConfigDialog">
+  Please configure me
+</div>
+
+</body>
+</html>

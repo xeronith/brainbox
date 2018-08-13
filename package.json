@@ -32,6 +32,7 @@
     "babel-preset-env": "^1.6.1",
     "bootstrap-slider": "^10.0.2",
     "chai": "^4.1.2",
+    "copy-webpack-plugin": "^4.5.2",
     "css-loader": "^0.28.11",
     "d3": "^5.5.0",
     "eslint": "^4.13.1",
