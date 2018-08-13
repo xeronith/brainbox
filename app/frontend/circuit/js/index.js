@@ -47,16 +47,29 @@ if (!jQuery.browser) {
 
 
 import hardware from "./hardware"
+import conf from './Configuration'
 
 $(window).load(function () {
-  $.getScript("../assets/shapes/index.js",function(){
+  socket = io(
+  {
+    path: '/circuit/socket.io'
+  })
+  // remove the fileOpen/Save stuff if we run in a"serverless" mode. e.g. on gh-pages
+  // (fake event from the socket.io mock )
+  socket.on("serverless", () => {
+    $("#leftTabStrip .editor").click()
+    $("#fileOpen, #editorFileOpen").remove();
+    $("#fileSave, #editorFileSave").remove();
+    $("#files_tab").remove();
+  });
 
-    console.log("loaded")
+  // we must load the "shape/index.js" in the global scope.
+  $.getScript(conf.shapes.url+"index.js",function(){
+
     // export all required classes for deserialize JSON with "eval"
     // "eval" code didn't sees imported class or code
     //
     for(var k in global) window[k]=global[k];
-    socket = io()
     app = require("./Application")
     hardware.init(socket)
   });

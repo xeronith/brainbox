@@ -63,16 +63,19 @@ module.exports = {
       {
         context: projectDir+'/app/shapes/',
         from: '**/*',
-        to : projectDir+"/docs/assets/shapes"
-      }, {
+        to : projectDir+"/docs/circuit/shapes"
+      },
+      {
         context: projectDir+'/app/frontend/circuit/',
         from: 'images/**/*',
         to : projectDir+"/docs/circuit/"
-      }, {
+      },
+      {
         context: projectDir+'/app/frontend/circuit/',
         from: 'index.html',
         to : projectDir+"/docs/circuit/"
-      }, {
+      },
+      {
         context: projectDir+'/app/frontend/circuit',
         from: 'lib/**/*',
         to : projectDir+"/docs/circuit/"

@@ -37,6 +37,11 @@ class BackendStorage extends EventEmitter{
           path
         }
       }).then( (response)=>{
+        // happens in "serverless" mode on the gh-pages/docs installation
+        //
+        if(typeof response ==="string")
+          response =JSON.parse(response)
+
         let files = response.files
         // sort the result
         // Directories are always on top

@@ -12,18 +12,18 @@ export default {
   fileSuffix: ".brain",
   backend: {
     file: {
-      list: "/backend/brain/list",
-      get: "/backend/brain/get",
-      del: "/backend/brain/delete",
-      rename: "/backend/brain/rename",
-      save: "/backend/brain/save",
-      image:"/backend/brain/image"
+      list: "../backend/brain/list",
+      get: "../backend/brain/get",
+      del: "../backend/brain/delete",
+      rename: "../backend/brain/rename",
+      save: "../backend/brain/save",
+      image:"../backend/brain/image"
     },
     // registry of RF24 registered devices. Only available if we use
     // a node.js server and a connected RF24 receiver (e.g. Raspi or arduino with a RF24 receiver)
     //
     bloc: {
-      list: "/backend/bloc/list"
+      list: "../backend/bloc/list"
     }
   },
   issues: {
@@ -33,10 +33,10 @@ export default {
     url: "../designer/"
   },
   shapes: {
-    url: "../assets/shapes/"
+    url: "./shapes/"
   },
   color: {
     high: "#C21B7A",
-    low: "#0078F2"
+    low:  "#0078F2"
   }
 };

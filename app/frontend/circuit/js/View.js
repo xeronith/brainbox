@@ -82,7 +82,7 @@ export default draw2d.Canvas.extend({
     // nice grid decoration for the canvas paint area
     //
     this.grid = new draw2d.policy.canvas.ShowGridEditPolicy(20)
-  //  this.installEditPolicy(this.grid)
+    this.installEditPolicy(this.grid)
 
     // add some SnapTo policy for better shape/figure alignment
     //

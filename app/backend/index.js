@@ -4,7 +4,7 @@ const express = require('express');
 const fs = require('fs');
 const app = express();
 const http = require('http').Server(app);
-const io = require('socket.io')(http, { path: '/socket.io'});
+const io = require('socket.io')(http, { path: '/circuit/socket.io'});
 const gpio = require("./src/gpio");
 const path = require('path');
 const childProcess = require('child_process')
@@ -51,7 +51,7 @@ function runServer() {
   // provide the  WebApp with this very simple
   // HTTP server. Good enough for an private raspi access
   //
-  app.use('/assets/shapes', express.static(shapeDirApp));
+  app.use('/circuit/shapes', express.static(shapeDirApp));
   app.use(express.static(__dirname + '/../frontend'));
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded({ extended: true }));

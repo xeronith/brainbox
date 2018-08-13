@@ -149,6 +149,10 @@ var _FileSave = __webpack_require__(/*! ./dialog/FileSave */ "./app/frontend/cir
 
 var _FileSave2 = _interopRequireDefault(_FileSave);
 
+var _Configuration = __webpack_require__(/*! ./Configuration */ "./app/frontend/circuit/js/Configuration.js");
+
+var _Configuration2 = _interopRequireDefault(_Configuration);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -188,6 +192,7 @@ var Application = function () {
         _this.filePane.render();
       });
     });
+
     $("#appHelp").on("click", function () {
       $("#leftTabStrip .gitbook").click();
     });
@@ -293,18 +298,18 @@ exports.default = {
   fileSuffix: ".brain",
   backend: {
     file: {
-      list: "/backend/brain/list",
-      get: "/backend/brain/get",
-      del: "/backend/brain/delete",
-      rename: "/backend/brain/rename",
-      save: "/backend/brain/save",
-      image: "/backend/brain/image"
+      list: "../backend/brain/list",
+      get: "../backend/brain/get",
+      del: "../backend/brain/delete",
+      rename: "../backend/brain/rename",
+      save: "../backend/brain/save",
+      image: "../backend/brain/image"
     },
     // registry of RF24 registered devices. Only available if we use
     // a node.js server and a connected RF24 receiver (e.g. Raspi or arduino with a RF24 receiver)
     //
     bloc: {
-      list: "/backend/bloc/list"
+      list: "../backend/bloc/list"
     }
   },
   issues: {
@@ -314,7 +319,7 @@ exports.default = {
     url: "../designer/"
   },
   shapes: {
-    url: "../assets/shapes/"
+    url: "./shapes/"
   },
   color: {
     high: "#C21B7A",
@@ -1630,7 +1635,7 @@ exports.default = draw2d.Canvas.extend({
     // nice grid decoration for the canvas paint area
     //
     this.grid = new draw2d.policy.canvas.ShowGridEditPolicy(20);
-    //  this.installEditPolicy(this.grid)
+    this.installEditPolicy(this.grid);
 
     // add some SnapTo policy for better shape/figure alignment
     //
@@ -3823,6 +3828,10 @@ var _hardware = __webpack_require__(/*! ./hardware */ "./app/frontend/circuit/js
 
 var _hardware2 = _interopRequireDefault(_hardware);
 
+var _Configuration = __webpack_require__(/*! ./Configuration */ "./app/frontend/circuit/js/Configuration.js");
+
+var _Configuration2 = _interopRequireDefault(_Configuration);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 //require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
@@ -3859,16 +3868,27 @@ if (!jQuery.browser) {
 }
 
 $(window).load(function () {
-  $.getScript("../assets/shapes/index.js", function () {
+  socket = io({
+    path: '/circuit/socket.io'
+  });
+  // remove the fileOpen/Save stuff if we run in a"serverless" mode. e.g. on gh-pages
+  // (fake event from the socket.io mock )
+  socket.on("serverless", function () {
+    $("#leftTabStrip .editor").click();
+    $("#fileOpen, #editorFileOpen").remove();
+    $("#fileSave, #editorFileSave").remove();
+    $("#files_tab").remove();
+  });
 
-    console.log("loaded");
+  // we must load the "shape/index.js" in the global scope.
+  $.getScript(_Configuration2.default.shapes.url + "index.js", function () {
+
     // export all required classes for deserialize JSON with "eval"
     // "eval" code didn't sees imported class or code
     //
     for (var k in _global2.default) {
       window[k] = _global2.default[k];
-    }socket = io();
-    app = __webpack_require__(/*! ./Application */ "./app/frontend/circuit/js/Application.js");
+    }app = __webpack_require__(/*! ./Application */ "./app/frontend/circuit/js/Application.js");
     _hardware2.default.init(socket);
   });
 });
@@ -3936,6 +3956,10 @@ var BackendStorage = function (_EventEmitter) {
           path: path
         }
       }).then(function (response) {
+        // happens in "serverless" mode on the gh-pages/docs installation
+        //
+        if (typeof response === "string") response = JSON.parse(response);
+
         var files = response.files;
         // sort the result
         // Directories are always on top

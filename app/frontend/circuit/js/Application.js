@@ -9,6 +9,7 @@ import View from "./View"
 import Files from "./Files"
 import FileOpen from "./dialog/FileOpen"
 import FileSave from "./dialog/FileSave"
+import conf from './Configuration'
 
 class Application {
 
@@ -42,6 +43,7 @@ class Application {
         this.filePane.render()
       })
     })
+
     $("#appHelp").on("click", () => {
       $("#leftTabStrip .gitbook").click()
     })
