@@ -80,7 +80,7 @@
     <div class="tab-pane active" id="home">
       <div class="row hidden-xs teaser">
         <div class="col-sm-8 col-md-8">
-          <div class="title"><img src="./images/favicon_64x64.svg"></img>BrainBox</div>
+          <div class="title"><img src="./images/favicon_64x64.svg"/>BrainBox</div>
           <div class="slogan">
             Dive inside your device. Use a simple programming language to connect, control, and play
             with all the sensors and tools.
@@ -171,7 +171,7 @@
           <div class="title"><img src="./images/favicon_64x64.svg"/>Brainbox</div>
           <input type="text" id="filter" placeholder="Filter..." autofocus>
           <div id="paletteElementsScroll">
-            <div id="paletteElements" class="row ">
+            <div id="paletteElements" class="row" data-intro='Hello step one!'>
 
             </div>
             <div id="paletteElementsOverlay"></div>
@@ -183,15 +183,18 @@
                             <span id="editorFileSave" class="ion-ios-upload-outline icon" title="Save circuit"></span>
                         </span>
 
-          <span class="group">
+                         <span class="group">
                             <span id="editDelete" class="ion-ios-close-empty icon disabled"></span>
                         </span>
 
-          <span class="group">
+                        <span class="group">
                             <span id="editUndo" class="ion-ios-arrow-left icon disabled"></span>
                             <span id="editRedo" class="ion-ios-arrow-right icon disabled"></span>
                         </span>
 
+                        <span class="group">
+                            <span id="editHelp" class="ion-ios-help-outline icon"></span>
+                        </span>
 
           <span class="group simulationBase" style="display: none;">
                             <label>Simulation Speed</label>
