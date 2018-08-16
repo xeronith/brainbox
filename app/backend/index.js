@@ -4,13 +4,14 @@ const express = require('express');
 const fs = require('fs');
 const app = express();
 const http = require('http').Server(app);
-const io = require('socket.io')(http, { path: '/circuit/socket.io'});
+const io = require('./src/comm/websocket').connect(http, { path: '/circuit/socket.io'});
 const gpio = require("./src/comm/gpio");
 const path = require('path');
 const childProcess = require('child_process')
 const phantomjs = require('phantomjs')
 const bodyParser = require('body-parser');
 const glob = require("glob");
+const mqtt = require('./src/comm/hive-mqtt').connect("freegroup/brainbox");
 
 // application specific configuration settings
 //

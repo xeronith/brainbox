@@ -1,150 +1,50 @@
 var json=[
   {
-    "type": "shape_designer.figure.PolyRect",
-    "id": "c55dd135-15db-7c71-5efa-f6761c073e66",
-    "x": 7985,
-    "y": 7980,
-    "width": 30,
-    "height": 40,
+    "type": "shape_designer.figure.PolyCircle",
+    "id": "224a7916-067e-710f-bc40-d0ff40f3e7e4",
+    "x": 7960.620608,
+    "y": 7974,
+    "width": 53,
+    "height": 52,
     "alpha": 1,
     "angle": 0,
     "userData": {
       "baseClass": "draw2d.SetFigure",
-      "code": "/**\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custome code and event handler here.\n *\n *\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n        this._super(attr, setter, getter);\n\n        this.attr({resizeable:false});\n        this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());\n\n    },\n    \n    calculate:function()\n    {\n        var i1 = this.getInputPort(0);\n        var i2 = this.getInputPort(1);\n        var o1 = this.getOutputPort(0);\n        \n        o1.setValue(i1.getValue() && i2.getValue());\n    }\n});",
-      "name": "Rectangle",
-      "markdown": "# AND Gate\n\n## Description\nThe **AND** gate is a basic digital logic gate that implements logical conjunction - it behaves according to the truth table on the bottom.\n\nA HIGH output results only if both the inputs to the AND gate are HIGH. If neither or only one input to the AND gate is HIGH, a LOW output results. In another sense, the function of AND effectively finds the minimum between two binary digits, just as the OR function finds the maximum.\n\n\n**Therefore, the output is always 0 except when all the inputs are 1.**\n\n## Logic table\n\n| INPUT 1   | INPUT   |  OUTPUT    |\n|:---------:|:-------:|:----------:|\n| Low       | Low     |  Low       |\n| `High`    | Low     |  Low       |\n| Low       | `High`  |  Low       |\n| `High`    | `High`  |  `High`    |\n\n"
+      "code": "/**\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custome code and event handler here.\n *\n *\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n         this._super(attr, setter, getter);\n\n         this.attr({resizeable:false});\n         this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());\n         \n         this.value = 0;\n         var _this = this;\n         this.callback = function( msg){\n             _this.value = msg.value;\n             console.log(msg)\n         }\n    },\n    \n    calculate: function()\n    {\n        if(this.value === 0){\n            this.layerAttr(\"circle\",{fill:\"#C21B7A\"});\n        }\n        else{\n            this.layerAttr(\"circle\",{fill:\"#f0f0f0\"});\n        }\n    },\n    \n    onStart: function()\n    {\n        socket.on(\"mqtt:message\", this.callback);\n    },\n\n    onStop:function()\n    {\n        socket.off(\"mqtt:message\", this.callback);\n    },\n\n});",
+      "name": "circle",
+      "markdown": "# High / Low Signal display\n\nsimple `HIGH`/ `LOW` display.\n\n    HIGH -> red\n \n    LOW -> gray"
     },
-    "cssClass": "shape_designer_figure_PolyRect",
+    "cssClass": "shape_designer_figure_PolyCircle",
     "ports": [],
     "bgColor": "#FFFFFF",
-    "color": "#303030",
+    "color": "#1B1B1B",
     "stroke": 1,
-    "radius": 3,
+    "radius": 0,
     "dasharray": null,
-    "vertices": [
-      {
-        "x": 7985,
-        "y": 7980
-      },
-      {
-        "x": 8015,
-        "y": 7980
-      },
-      {
-        "x": 8015,
-        "y": 8020
-      },
-      {
-        "x": 7985,
-        "y": 8020
-      }
-    ],
     "blur": 0,
     "filters": [
       {
         "name": "shape_designer.filter.PositionFilter"
       },
       {
-        "name": "shape_designer.filter.SizeFilter"
+        "name": "shape_designer.filter.FillColorFilter"
       },
       {
         "name": "shape_designer.filter.StrokeFilter"
-      },
-      {
-        "name": "shape_designer.filter.FillColorFilter"
-      },
-      {
-        "name": "shape_designer.filter.RadiusFilter"
       }
     ]
   },
   {
     "type": "shape_designer.figure.ExtPort",
-    "id": "592a8604-e0a9-8913-445d-621078e5ae97",
-    "x": 7979.5,
-    "y": 7984,
-    "width": 10,
-    "height": 10,
-    "alpha": 1,
-    "angle": 0,
-    "userData": {
-      "name": "input01",
-      "type": "Input",
-      "direction": 3
-    },
-    "cssClass": "shape_designer_figure_ExtPort",
-    "ports": [],
-    "bgColor": "#1C9BAB",
-    "color": "#1B1B1B",
-    "stroke": 1,
-    "dasharray": null,
-    "filters": [
-      {
-        "name": "shape_designer.filter.PositionFilter"
-      },
-      {
-        "name": "shape_designer.filter.FanoutFilter"
-      },
-      {
-        "name": "shape_designer.filter.PortDirectionFilter"
-      },
-      {
-        "name": "shape_designer.filter.PortTypeFilter"
-      },
-      {
-        "name": "shape_designer.filter.FillColorFilter"
-      }
-    ]
-  },
-  {
-    "type": "shape_designer.figure.ExtPort",
-    "id": "5fc48f01-fecb-0d5f-ed4f-81a4bc26ae63",
-    "x": 7979.5,
-    "y": 8006,
-    "width": 10,
-    "height": 10,
-    "alpha": 1,
-    "angle": 0,
-    "userData": {
-      "name": "input02",
-      "type": "Input",
-      "direction": 3
-    },
-    "cssClass": "shape_designer_figure_ExtPort",
-    "ports": [],
-    "bgColor": "#1C9BAB",
-    "color": "#1B1B1B",
-    "stroke": 1,
-    "dasharray": null,
-    "filters": [
-      {
-        "name": "shape_designer.filter.PositionFilter"
-      },
-      {
-        "name": "shape_designer.filter.FanoutFilter"
-      },
-      {
-        "name": "shape_designer.filter.PortDirectionFilter"
-      },
-      {
-        "name": "shape_designer.filter.PortTypeFilter"
-      },
-      {
-        "name": "shape_designer.filter.FillColorFilter"
-      }
-    ]
-  },
-  {
-    "type": "shape_designer.figure.ExtPort",
-    "id": "7c8a6215-ce17-6a10-c85b-b97fd0de466c",
-    "x": 8011.328125,
+    "id": "f4d5683a-7c42-8771-5df4-e4e9da5b8b46",
+    "x": 8011.505856000001,
     "y": 7995,
     "width": 10,
     "height": 10,
     "alpha": 1,
     "angle": 0,
     "userData": {
-      "name": "out",
+      "name": "Port",
       "type": "Output",
       "direction": 1
     },
@@ -169,44 +69,6 @@ var json=[
       },
       {
         "name": "shape_designer.filter.FillColorFilter"
-      }
-    ]
-  },
-  {
-    "type": "shape_designer.figure.ExtLabel",
-    "id": "0a4705bb-c6fd-7a26-332f-6972e8683949",
-    "x": 7990,
-    "y": 7985,
-    "width": 30.350000381469727,
-    "height": 23,
-    "alpha": 1,
-    "angle": 0,
-    "userData": {
-      "name": "Label"
-    },
-    "cssClass": "shape_designer_figure_ExtLabel",
-    "ports": [],
-    "bgColor": "none",
-    "color": "#1B1B1B",
-    "stroke": 0,
-    "radius": 0,
-    "dasharray": null,
-    "text": "&",
-    "outlineStroke": 0,
-    "outlineColor": "none",
-    "fontSize": 20,
-    "fontColor": "#080808",
-    "fontFamily": null,
-    "editor": "draw2d.ui.LabelInplaceEditor",
-    "filters": [
-      {
-        "name": "shape_designer.filter.PositionFilter"
-      },
-      {
-        "name": "shape_designer.filter.FontSizeFilter"
-      },
-      {
-        "name": "shape_designer.filter.FontColorFilter"
       }
     ]
   }

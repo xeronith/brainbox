@@ -1,0 +1,45 @@
+/**
+ * by 'Draw2D Shape Designer'
+ *
+ * Custom JS code to tweak the standard behaviour of the generated
+ * shape. add your custome code and event handler here.
+ *
+ *
+ */
+HiveMQ = HiveMQ.extend({
+
+    init: function(attr, setter, getter){
+         this._super(attr, setter, getter);
+
+         this.attr({resizeable:false});
+         this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());
+         
+         this.value = 0;
+         var _this = this;
+         this.callback = function( msg){
+             _this.value = msg.value;
+             console.log(msg)
+         }
+    },
+    
+    calculate: function()
+    {
+        if(this.value === 0){
+            this.layerAttr("circle",{fill:"#C21B7A"});
+        }
+        else{
+            this.layerAttr("circle",{fill:"#f0f0f0"});
+        }
+    },
+    
+    onStart: function()
+    {
+        socket.on("mqtt:message", this.callback);
+    },
+
+    onStop:function()
+    {
+        socket.off("mqtt:message", this.callback);
+    },
+
+});

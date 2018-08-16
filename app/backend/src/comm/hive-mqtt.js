@@ -1,21 +1,20 @@
 const mqtt = require('mqtt');
 
 module.exports = {
-  connect: function( topic){
+
+  connect: function(topic){
     // to be changed to own local server/service
     const client = mqtt.connect('http://broker.hivemq.com');
 
     client.on('connect', () => {
-      console.log("connected")
+      client.subscribe(topic);
     });
 
     client.on('message', (topic, message) => {
-      console.log('MSG: %s: %s', topic, message);
+      require("./websocket").io.sockets.emit("mqtt:message", JSON.parse(message.toString()) );
     });
-  },
 
-
-  subscribe: function(topic){
-    client.subscribe(topic);
+    return client;
   }
+
 }
