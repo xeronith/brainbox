@@ -36,8 +36,6 @@ export default draw2d.policy.canvas.BoundingboxSelectionPolicy.extend({
     onInstall:function(canvas)
     {
         this._super(canvas);
-        var _this = this;
-
         // provide configuration menu if the mouse is close to a shape
         //
         canvas.on("mousemove", this.mouseMoveProxy);

@@ -16,6 +16,8 @@ import SimulationEditPolicy from "./SimulationEditPolicy"
 import MarkdownDialog from "./dialog/MarkdownDialog"
 import CodeDialog from "./dialog/CodeDialog"
 
+import "./util/mousetrap-global"
+
 import introJs from "intro.js"
 import "intro.js/introjs.css"
 
@@ -95,9 +97,9 @@ export default draw2d.Canvas.extend({
 
     this.installEditPolicy(new EditEditPolicy())
 
-    // Enable Copy&Past for figures
+    // Enable Copy&Paste for figures
     //
-    Mousetrap.bind(['ctrl+c', 'command+c'], () => {
+    Mousetrap.bindGlobal(['ctrl+c', 'command+c'], () => {
       let primarySelection = this.getSelection().getPrimary()
       if (primarySelection !== null) {
         this.clippboardFigure = primarySelection.clone({excludePorts: true})
@@ -105,7 +107,7 @@ export default draw2d.Canvas.extend({
       }
       return false
     })
-    Mousetrap.bind(['ctrl+v', 'command+v'], () => {
+    Mousetrap.bindGlobal(['ctrl+v', 'command+v'], () => {
       if (this.clippboardFigure !== null) {
         let cloneToAdd = this.clippboardFigure.clone({excludePorts: true})
         let command = new draw2d.command.CommandAdd(this, cloneToAdd, cloneToAdd.getPosition())
@@ -116,28 +118,28 @@ export default draw2d.Canvas.extend({
     })
 
 
-    Mousetrap.bind(['left'], function (event) {
+    Mousetrap.bindGlobal(['left'], function (event) {
       let diff = _this.getZoom() < 0.5 ? 0.5 : 1
       _this.getSelection().each(function (i, f) {
         f.translate(-diff, 0)
       })
       return false
     })
-    Mousetrap.bind(['up'], function (event) {
+    Mousetrap.bindGlobal(['up'], function (event) {
       let diff = _this.getZoom() < 0.5 ? 0.5 : 1
       _this.getSelection().each(function (i, f) {
         f.translate(0, -diff)
       })
       return false
     })
-    Mousetrap.bind(['right'], function (event) {
+    Mousetrap.bindGlobal(['right'], function (event) {
       let diff = _this.getZoom() < 0.5 ? 0.5 : 1
       _this.getSelection().each(function (i, f) {
         f.translate(diff, 0)
       })
       return false
     })
-    Mousetrap.bind(['down'], function (event) {
+    Mousetrap.bindGlobal(['down'], function (event) {
       let diff = _this.getZoom() < 0.5 ? 0.5 : 1
       _this.getSelection().each(function (i, f) {
         f.translate(0, diff)
@@ -175,9 +177,8 @@ export default draw2d.Canvas.extend({
       introJs().start()
     })
 
-
-
-    $(".toolbar").delegate("#editDelete:not(.disabled)", "click", function () {
+    this.deleteSelectionCallback = function () {
+      console.log("called---")
       let selection = _this.getSelection()
       _this.getCommandStack().startTransaction(draw2d.Configuration.i18n.command.deleteShape)
       selection.each(function (index, figure) {
@@ -198,7 +199,10 @@ export default draw2d.Canvas.extend({
       })
       // execute all single commands at once.
       _this.getCommandStack().commitTransaction()
-    })
+    }
+
+    $(".toolbar").delegate("#editDelete:not(.disabled)", "click", this.deleteSelectionCallback)
+    Mousetrap.bindGlobal(['del', 'backspace'], this.deleteSelectionCallback);
 
 
     $(".toolbar").delegate("#editUndo:not(.disabled)", "click", function () {
@@ -336,27 +340,6 @@ export default draw2d.Canvas.extend({
           _this.timerBase = parseInt(11 - ((event.value - 100) * (10 - 2) / (500 - 100) + 2))
         }
       })
-
-    // force focus for the searchbox in the object palette
-    //
-    /*
-    setInterval(function(){
-        // force only the focus if the editor tab pane is visible
-        if(!$("#editor").hasClass("active")){
-            return;
-        }
-
-        // fore only the focus if the "filter" input element the one and only visible
-        // input field
-        //
-        if($("input:visible").length>1){
-            return;
-        }
-
-        document.getElementById("filter").focus();
-    },10);
-    */
-
 
     socket.on('disconnect', function () {
       $(".raspiConnection").fadeIn()

@@ -63,7 +63,6 @@ export default class Application {
     if (file) {
       this.storage.loadFile(file)
         .then((content) => {
-          console.log("ddddddd");
           this.view.clear()
           let reader = new draw2d.io.json.Reader()
           reader.unmarshal(this.view, content)

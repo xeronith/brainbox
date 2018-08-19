@@ -291,6 +291,13 @@
     "filePath": "draw2d_circuit_timer_Delay.shape"
   },
   {
+    "name": "HiveMQ",
+    "tags": [
+      "HiveMQ"
+    ],
+    "filePath": "HiveMQ.shape"
+  },
+  {
     "name": "rect2",
     "tags": [
       "rect2"

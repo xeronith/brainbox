@@ -743,8 +743,6 @@ exports.default = draw2d.policy.canvas.BoundingboxSelectionPolicy.extend({
 
     onInstall: function onInstall(canvas) {
         this._super(canvas);
-        var _this = this;
-
         // provide configuration menu if the mouse is close to a shape
         //
         canvas.on("mousemove", this.mouseMoveProxy);
@@ -1563,6 +1561,8 @@ var _CodeDialog = __webpack_require__(/*! ./dialog/CodeDialog */ "./app/frontend
 
 var _CodeDialog2 = _interopRequireDefault(_CodeDialog);
 
+__webpack_require__(/*! ./util/mousetrap-global */ "./app/frontend/circuit/js/util/mousetrap-global.js");
+
 var _intro = __webpack_require__(/*! intro.js */ "./node_modules/intro.js/intro.js");
 
 var _intro2 = _interopRequireDefault(_intro);
@@ -1571,6 +1571,12 @@ __webpack_require__(/*! intro.js/introjs.css */ "./node_modules/intro.js/introjs
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+/**
+ *
+ * The **GraphicalEditor** is responsible for layout and dialog handling.
+ *
+ * @author Andreas Herz
+ */
 exports.default = draw2d.Canvas.extend({
 
   init: function init(id) {
@@ -1647,9 +1653,9 @@ exports.default = draw2d.Canvas.extend({
 
     this.installEditPolicy(new _EditEditPolicy2.default());
 
-    // Enable Copy&Past for figures
+    // Enable Copy&Paste for figures
     //
-    _mousetrap2.default.bind(['ctrl+c', 'command+c'], function () {
+    _mousetrap2.default.bindGlobal(['ctrl+c', 'command+c'], function () {
       var primarySelection = _this2.getSelection().getPrimary();
       if (primarySelection !== null) {
         _this2.clippboardFigure = primarySelection.clone({ excludePorts: true });
@@ -1657,7 +1663,7 @@ exports.default = draw2d.Canvas.extend({
       }
       return false;
     });
-    _mousetrap2.default.bind(['ctrl+v', 'command+v'], function () {
+    _mousetrap2.default.bindGlobal(['ctrl+v', 'command+v'], function () {
       if (_this2.clippboardFigure !== null) {
         var cloneToAdd = _this2.clippboardFigure.clone({ excludePorts: true });
         var command = new draw2d.command.CommandAdd(_this2, cloneToAdd, cloneToAdd.getPosition());
@@ -1667,28 +1673,28 @@ exports.default = draw2d.Canvas.extend({
       return false;
     });
 
-    _mousetrap2.default.bind(['left'], function (event) {
+    _mousetrap2.default.bindGlobal(['left'], function (event) {
       var diff = _this.getZoom() < 0.5 ? 0.5 : 1;
       _this.getSelection().each(function (i, f) {
         f.translate(-diff, 0);
       });
       return false;
     });
-    _mousetrap2.default.bind(['up'], function (event) {
+    _mousetrap2.default.bindGlobal(['up'], function (event) {
       var diff = _this.getZoom() < 0.5 ? 0.5 : 1;
       _this.getSelection().each(function (i, f) {
         f.translate(0, -diff);
       });
       return false;
     });
-    _mousetrap2.default.bind(['right'], function (event) {
+    _mousetrap2.default.bindGlobal(['right'], function (event) {
       var diff = _this.getZoom() < 0.5 ? 0.5 : 1;
       _this.getSelection().each(function (i, f) {
         f.translate(diff, 0);
       });
       return false;
     });
-    _mousetrap2.default.bind(['down'], function (event) {
+    _mousetrap2.default.bindGlobal(['down'], function (event) {
       var diff = _this.getZoom() < 0.5 ? 0.5 : 1;
       _this.getSelection().each(function (i, f) {
         f.translate(0, diff);
@@ -1725,7 +1731,8 @@ exports.default = draw2d.Canvas.extend({
       (0, _intro2.default)().start();
     });
 
-    $(".toolbar").delegate("#editDelete:not(.disabled)", "click", function () {
+    this.deleteSelectionCallback = function () {
+      console.log("called---");
       var selection = _this.getSelection();
       _this.getCommandStack().startTransaction(draw2d.Configuration.i18n.command.deleteShape);
       selection.each(function (index, figure) {
@@ -1746,7 +1753,10 @@ exports.default = draw2d.Canvas.extend({
       });
       // execute all single commands at once.
       _this.getCommandStack().commitTransaction();
-    });
+    };
+
+    $(".toolbar").delegate("#editDelete:not(.disabled)", "click", this.deleteSelectionCallback);
+    _mousetrap2.default.bindGlobal(['del', 'backspace'], this.deleteSelectionCallback);
 
     $(".toolbar").delegate("#editUndo:not(.disabled)", "click", function () {
       _this.getCommandStack().undo();
@@ -1874,24 +1884,6 @@ exports.default = draw2d.Canvas.extend({
         _this.timerBase = parseInt(11 - ((event.value - 100) * (10 - 2) / (500 - 100) + 2));
       }
     });
-
-    // force focus for the searchbox in the object palette
-    //
-    /*
-    setInterval(function(){
-        // force only the focus if the editor tab pane is visible
-        if(!$("#editor").hasClass("active")){
-            return;
-        }
-         // fore only the focus if the "filter" input element the one and only visible
-        // input field
-        //
-        if($("input:visible").length>1){
-            return;
-        }
-         document.getElementById("filter").focus();
-    },10);
-    */
 
     socket.on('disconnect', function () {
       $(".raspiConnection").fadeIn();
@@ -2118,13 +2110,7 @@ exports.default = draw2d.Canvas.extend({
   fromCanvasToDocumentCoordinate: function fromCanvasToDocumentCoordinate(x, y) {
     return new draw2d.geo.Point(x * (1 / this.zoomFactor) + this.getAbsoluteX(), y * (1 / this.zoomFactor) + this.getAbsoluteY());
   }
-}); /**
-     *
-     * The **GraphicalEditor** is responsible for layout and dialog handling.
-     *
-     * @author Andreas Herz
-     */
-
+});
 module.exports = exports["default"];
 
 /***/ }),
@@ -4162,6 +4148,62 @@ var EventEmitter = function () {
 
 exports.default = EventEmitter;
 module.exports = exports['default'];
+
+/***/ }),
+
+/***/ "./app/frontend/circuit/js/util/mousetrap-global.js":
+/*!**********************************************************!*\
+  !*** ./app/frontend/circuit/js/util/mousetrap-global.js ***!
+  \**********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * adds a bindGlobal method to Mousetrap that allows you to
+ * bind specific keyboard shortcuts that will still work
+ * inside a text input field
+ *
+ * usage:
+ * Mousetrap.bindGlobal('ctrl+s', _saveChanges);
+ */
+/* global Mousetrap:true */
+(function (Mousetrap) {
+  var _globalCallbacks = {};
+  var _originalStopCallback = Mousetrap.prototype.stopCallback;
+
+  Mousetrap.prototype.stopCallback = function (e, element, combo, sequence) {
+    var self = this;
+
+    if (self.paused) {
+      return true;
+    }
+
+    if (_globalCallbacks[combo] || _globalCallbacks[sequence]) {
+      return false;
+    }
+
+    return _originalStopCallback.call(self, e, element, combo);
+  };
+
+  Mousetrap.prototype.bindGlobal = function (keys, callback, action) {
+    var self = this;
+    self.bind(keys, callback, action);
+
+    if (keys instanceof Array) {
+      for (var i = 0; i < keys.length; i++) {
+        _globalCallbacks[keys[i]] = true;
+      }
+      return;
+    }
+
+    _globalCallbacks[keys] = true;
+  };
+
+  Mousetrap.init();
+})(Mousetrap);
 
 /***/ }),
 

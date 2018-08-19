@@ -4,14 +4,17 @@ const express = require('express');
 const fs = require('fs');
 const app = express();
 const http = require('http').Server(app);
-const io = require('./src/comm/websocket').connect(http, { path: '/circuit/socket.io'});
-const gpio = require("./src/comm/gpio");
 const path = require('path');
 const childProcess = require('child_process')
 const phantomjs = require('phantomjs')
 const bodyParser = require('body-parser');
 const glob = require("glob");
-const mqtt = require('./src/comm/hive-mqtt').connect("freegroup/brainbox");
+
+
+const io = require('./src/comm/websocket').connect(http, { path: '/circuit/socket.io'});
+const mqtt = require('./src/comm/hive-mqtt').connect(io, "freegroup/brainbox");
+const gpio = require("./src/comm/gpio").connect(io);
+
 
 // application specific configuration settings
 //
@@ -19,7 +22,6 @@ const deviceRegistry = require("./src/device-registry.js");
 const storage= require("./src/storage.js");
 const shapeDirApp = path.normalize(__dirname + '/../shapes/')
 const shape2CodeDir = path.normalize(__dirname + '/../shape2code/')
-
 
 
 // Determine the IP:PORT to use for the http server
@@ -38,7 +40,6 @@ deviceRegistry.init(runServer);
 deviceRegistry.on("register",    event => io.sockets.emit("bloc:register", event));
 deviceRegistry.on("unregister",  event => io.sockets.emit("bloc:unregister", event));
 deviceRegistry.on("value",       event => io.sockets.emit("bloc:value", event));
-
 
 
 // =======================================================================
@@ -141,49 +142,6 @@ function runServer() {
     res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify(deviceRegistry.getAll(), undefined, 2));
   });
-
-  // =================================================================
-
-  let pins = {
-    gpi_1:  gpio.export(1,  {direction: "out"}),
-    gpi_2:  gpio.export(2,  {direction: "out"}),
-    gpi_3:  gpio.export(3,  {direction: "out"}),
-    gpi_4:  gpio.export(4,  {direction: "out"}),
-    gpi_5:  gpio.export(5,  {direction: "out"}),
-    gpi_6:  gpio.export(6,  {direction: "out"}),
-    gpi_7:  gpio.export(7,  {direction: "out"}),
-    gpi_8:  gpio.export(8,  {direction: "out"}),
-
-    gpo_9:  gpio.export(9,  {direction: "in"}),
-    gpo_10: gpio.export(10, {direction: "in"}),
-    gpo_11: gpio.export(11, {direction: "in"}),
-    gpo_12: gpio.export(12, {direction: "in"}),
-    gpo_13: gpio.export(13, {direction: "in"}),
-    gpo_14: gpio.export(14, {direction: "in"}),
-    gpo_15: gpio.export(15, {direction: "in"}),
-    gpo_16: gpio.export(16, {direction: "in"})
-  };
-
-  // Browser => GPIO output pin
-  //
-  io.on('connection', socket => {
-    socket.on('gpi:set',  msg => {
-      let pin = pins[msg.pin];
-      pin.set(1 - msg.value);
-    });
-  });
-
-  // GPIO input pin => Browser
-  //
-  pins.gpo_9.on("change",  val => io.sockets.emit("gpo:change", {pin: "gpo_9",  value: val}));
-  pins.gpo_10.on("change", val => io.sockets.emit("gpo:change", {pin: "gpo_10", value: val}));
-  pins.gpo_11.on("change", val => io.sockets.emit("gpo:change", {pin: "gpo_11", value: val}));
-  pins.gpo_12.on("change", val => io.sockets.emit("gpo:change", {pin: "gpo_12", value: val}));
-  pins.gpo_13.on("change", val => io.sockets.emit("gpo:change", {pin: "gpo_13", value: val}));
-  pins.gpo_14.on("change", val => io.sockets.emit("gpo:change", {pin: "gpo_14", value: val}));
-  pins.gpo_15.on("change", val => io.sockets.emit("gpo:change", {pin: "gpo_15", value: val}));
-  pins.gpo_16.on("change", val => io.sockets.emit("gpo:change", {pin: "gpo_16", value: val}));
-
 
   http.listen(port, function () {
     console.log('using phantomJS for server side rendering of shape previews:', phantomjs.path)

@@ -8703,10 +8703,10 @@ var HiveMQ = draw2d.SetFigure.extend({
 
    init:function(attr, setter, getter)
    {
-     this._super( $.extend({stroke:0, bgColor:null, width:53,height:52},attr), setter, getter);
+     this._super( $.extend({stroke:0, bgColor:null, width:97,height:37},attr), setter, getter);
      var port;
      // Port
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(105.44386415094435, 50));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(97.81984329896957, 51.35135135135135));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#1C9BAB");
      port.setName("Port");
@@ -8717,8 +8717,8 @@ var HiveMQ = draw2d.SetFigure.extend({
    createShapeElement : function()
    {
       var shape = this._super();
-      this.originalWidth = 53;
-      this.originalHeight= 52;
+      this.originalWidth = 97;
+      this.originalHeight= 37;
       return shape;
    },
 
@@ -8727,14 +8727,19 @@ var HiveMQ = draw2d.SetFigure.extend({
        this.canvas.paper.setStart();
        var shape = null;
        // BoundingBox
-       shape = this.canvas.paper.path("M0,0 L53,0 L53,52 L0,52");
+       shape = this.canvas.paper.path("M0,0 L97,0 L97,37 L0,37");
        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
        shape.data("name","BoundingBox");
        
        // circle
-       shape = this.canvas.paper.ellipse();
-       shape.attr({"rx":26.5,"ry":26,"cx":26.5,"cy":26,"stroke":"#1B1B1B","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape = this.canvas.paper.path('M97,32Q97,37 92, 37L5,37Q0,37 0, 32L0,5Q0,0 5, 0L92,0Q97,0 97, 5L97,32');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#919191","dasharray":null,"opacity":1});
        shape.data("name","circle");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'HiveMQ');
+       shape.attr({"x":18.609375,"y":17.4375,"text-anchor":"start","text":"HiveMQ","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#FFF824","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
        
 
        return this.canvas.paper.setFinish();
@@ -8897,23 +8902,24 @@ HiveMQ = HiveMQ.extend({
          var _this = this;
          this.callback = function( msg){
              _this.value = msg.value;
-             console.log(msg)
+             _this.getOutputPort(0).setValue(_this.value);
+            if(_this.value === 1){
+                _this.layerAttr("circle",{fill:"#C21B7A"});
+            }
+            else{
+                _this.layerAttr("circle",{fill:"#f0f0f0"});
+            }
          }
     },
     
     calculate: function()
     {
-        if(this.value === 0){
-            this.layerAttr("circle",{fill:"#C21B7A"});
-        }
-        else{
-            this.layerAttr("circle",{fill:"#f0f0f0"});
-        }
     },
     
     onStart: function()
     {
         socket.on("mqtt:message", this.callback);
+        this.callback({value:this.value})
     },
 
     onStop:function()

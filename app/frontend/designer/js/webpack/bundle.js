@@ -398,7 +398,6 @@ var Application = function () {
     var file = this.getParam("file");
     if (file) {
       this.storage.loadFile(file).then(function (content) {
-        console.log("ddddddd");
         _this.view.clear();
         var reader = new draw2d.io.json.Reader();
         reader.unmarshal(_this.view, content);
@@ -849,10 +848,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _mousetrap = __webpack_require__(/*! mousetrap */ "./node_modules/mousetrap/mousetrap.js");
-
-var _mousetrap2 = _interopRequireDefault(_mousetrap);
-
 var _RectangleToolPolicy = __webpack_require__(/*! ./policy/RectangleToolPolicy */ "./app/frontend/designer/js/policy/RectangleToolPolicy.js");
 
 var _RectangleToolPolicy2 = _interopRequireDefault(_RectangleToolPolicy);
@@ -947,7 +942,7 @@ var Toolbar = function () {
       _this.view.getCommandStack().undo();
     }).prop("disabled", true);
 
-    _mousetrap2.default.bind("ctrl+z", function () {
+    Mousetrap.bindGlobal("ctrl+z", function () {
       _this.undoButton.click();
       return false;
     });
@@ -959,7 +954,7 @@ var Toolbar = function () {
     this.redoButton.on("click", function () {
       _this.view.getCommandStack().redo();
     }).prop("disabled", true);
-    _mousetrap2.default.bind("ctrl+y", function () {
+    Mousetrap.bindGlobal("ctrl+y", function () {
       _this.redoButton.click();
       return false;
     });
@@ -982,7 +977,7 @@ var Toolbar = function () {
       // execute all single commands at once.
       view.getCommandStack().commitTransaction();
     }).prop("disabled", true);
-    _mousetrap2.default.bind(["del"], function () {
+    Mousetrap.bindGlobal(["del", "backspace"], function () {
       _this.deleteButton.click();
       return false;
     });
@@ -992,7 +987,7 @@ var Toolbar = function () {
     this.selectButton.on("click", function () {
       _this.view.installEditPolicy(new _SelectionToolPolicy2.default());
     });
-    _mousetrap2.default.bind("space", function () {
+    Mousetrap.bindGlobal("space", function () {
       _this.selectButton.click();
       return false;
     });
@@ -1027,24 +1022,24 @@ var Toolbar = function () {
       _this.view.installEditPolicy(new _PortToolPolicy2.default());
     });
 
-    _mousetrap2.default.bind(["R", "r"], function () {
-      $('*[data-policy="RectangleToolPolicy"]').click();
+    Mousetrap.bindGlobal(["R", "r"], function () {
+      $('.policyRectangleToolPolicy1').click();
       return false;
     });
-    _mousetrap2.default.bind(["C", "c"], function () {
-      $('*[data-policy="CircleToolPolicy"]').click();
+    Mousetrap.bindGlobal(["C", "c"], function () {
+      $('.policyCircleToolPolicy').click();
       return false;
     });
-    _mousetrap2.default.bind(["T", "t"], function () {
-      $('*[data-policy="TextToolPolicy"]').click();
+    Mousetrap.bindGlobal(["T", "t"], function () {
+      $('.policyTextToolPolicy').click();
       return false;
     });
-    _mousetrap2.default.bind(["P", "p"], function () {
-      $('*[data-policy="PortToolPolicy"]').click();
+    Mousetrap.bindGlobal(["P", "p"], function () {
+      $('.policyPortToolPolicy').click();
       return false;
     });
-    _mousetrap2.default.bind(["L", "l"], function () {
-      $('*[data-policy="LineToolPolicy"]').click();
+    Mousetrap.bindGlobal(["L", "l"], function () {
+      $('.policyLineToolPolicy').click();
       return false;
     });
 
@@ -1056,7 +1051,7 @@ var Toolbar = function () {
       _this.view.installEditPolicy(policy);
       policy.execute(_this.view, selection);
     });
-    _mousetrap2.default.bind(["U", "u"], function () {
+    Mousetrap.bindGlobal(["U", "u"], function () {
       _this.unionButton.click();
       return false;
     });
@@ -1066,7 +1061,7 @@ var Toolbar = function () {
     this.differenceButton.on("click", function () {
       _this.view.installEditPolicy(new _GeoDifferenceToolPolicy2.default());
     });
-    _mousetrap2.default.bind(["D", "d"], function () {
+    Mousetrap.bindGlobal(["D", "d"], function () {
       _this.differenceButton.click();
       return false;
     });
@@ -1076,7 +1071,7 @@ var Toolbar = function () {
     this.intersectionButton.on("click", function () {
       _this.view.installEditPolicy(new _GeoIntersectionToolPolicy2.default());
     });
-    _mousetrap2.default.bind(["I", "i"], function () {
+    Mousetrap.bindGlobal(["I", "i"], function () {
       _this.intersectionButton.click();
       return false;
     });
@@ -1090,7 +1085,7 @@ var Toolbar = function () {
       _this.openButton.tooltip("hide");
       app.fileOpen();
     });
-    _mousetrap2.default.bind("ctrl+o", function () {
+    Mousetrap.bindGlobal("ctrl+o", function () {
       _this.openButton.click();
       return false;
     });
@@ -1101,7 +1096,7 @@ var Toolbar = function () {
       _this.saveButton.tooltip("hide");
       app.fileSave();
     });
-    _mousetrap2.default.bind("ctrl+s", function (event) {
+    Mousetrap.bindGlobal("ctrl+s", function (event) {
       _this.saveButton.click();
       return false;
     });
@@ -1111,7 +1106,7 @@ var Toolbar = function () {
     this.newButton.on("click", function () {
       app.fileNew();
     });
-    _mousetrap2.default.bind("ctrl+n", function () {
+    Mousetrap.bindGlobal("ctrl+n", function () {
       _this.undoButton.click();
       return false;
     });
@@ -1216,13 +1211,6 @@ module.exports = exports["default"];
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _mousetrap = __webpack_require__(/*! mousetrap */ "./node_modules/mousetrap/mousetrap.js");
-
-var _mousetrap2 = _interopRequireDefault(_mousetrap);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 exports.default = draw2d.Canvas.extend({
 
   init: function init(app, id) {
@@ -1241,28 +1229,28 @@ exports.default = draw2d.Canvas.extend({
     this.installEditPolicy(new draw2d.policy.canvas.SnapToCenterEditPolicy());
     this.installEditPolicy(new draw2d.policy.canvas.SnapToInBetweenEditPolicy());
 
-    _mousetrap2.default.bind(['left'], function () {
+    Mousetrap.bindGlobal(['left'], function () {
       var diff = _this.getZoom() < 0.5 ? 0.5 : 1;
       _this.getSelection().each(function (i, f) {
         f.translate(-diff, 0);
       });
       return false;
     });
-    _mousetrap2.default.bind(['up'], function () {
+    Mousetrap.bindGlobal(['up'], function () {
       var diff = _this.getZoom() < 0.5 ? 0.5 : 1;
       _this.getSelection().each(function (i, f) {
         f.translate(0, -diff);
       });
       return false;
     });
-    _mousetrap2.default.bind(['right'], function () {
+    Mousetrap.bindGlobal(['right'], function () {
       var diff = _this.getZoom() < 0.5 ? 0.5 : 1;
       _this.getSelection().each(function (i, f) {
         f.translate(diff, 0);
       });
       return false;
     });
-    _mousetrap2.default.bind(['down'], function () {
+    Mousetrap.bindGlobal(['down'], function () {
       var diff = _this.getZoom() < 0.5 ? 0.5 : 1;
       _this.getSelection().each(function (i, f) {
         f.translate(0, diff);
@@ -1270,7 +1258,7 @@ exports.default = draw2d.Canvas.extend({
       return false;
     });
 
-    _mousetrap2.default.bind(['ctrl+c', 'command+c'], function () {
+    Mousetrap.bindGlobal(['ctrl+c', 'command+c'], function () {
       var primarySelection = _this.getSelection().getPrimary();
       if (primarySelection !== null) {
         _this.clippboardFigure = primarySelection.clone();
@@ -1279,7 +1267,7 @@ exports.default = draw2d.Canvas.extend({
       return false;
     });
 
-    _mousetrap2.default.bind(['ctrl+v', 'command+v'], function () {
+    Mousetrap.bindGlobal(['ctrl+v', 'command+v'], function () {
       if (_this.clippboardFigure !== null) {
         var cloneToAdd = _this.clippboardFigure.clone();
         var command = new draw2d.command.CommandAdd(_this, cloneToAdd, cloneToAdd.getPosition());
@@ -1464,7 +1452,7 @@ exports.default = draw2d.Canvas.extend({
   }
 
 });
-module.exports = exports["default"];
+module.exports = exports['default'];
 
 /***/ }),
 
@@ -5359,10 +5347,17 @@ var _DecoratedInputPort = __webpack_require__(/*! ./figure/DecoratedInputPort */
 
 var _DecoratedInputPort2 = _interopRequireDefault(_DecoratedInputPort);
 
+var _mousetrap = __webpack_require__(/*! mousetrap */ "./node_modules/mousetrap/mousetrap.js");
+
+var _mousetrap2 = _interopRequireDefault(_mousetrap);
+
+__webpack_require__(/*! ./util/mousetrap-global */ "./app/frontend/designer/js/util/mousetrap-global.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
-  DecoratedInputPort: _DecoratedInputPort2.default
+  DecoratedInputPort: _DecoratedInputPort2.default,
+  Mousetrap: _mousetrap2.default
 };
 module.exports = exports["default"];
 
@@ -6947,6 +6942,62 @@ var EventEmitter = function () {
 
 exports.default = EventEmitter;
 module.exports = exports['default'];
+
+/***/ }),
+
+/***/ "./app/frontend/designer/js/util/mousetrap-global.js":
+/*!***********************************************************!*\
+  !*** ./app/frontend/designer/js/util/mousetrap-global.js ***!
+  \***********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * adds a bindGlobal method to Mousetrap that allows you to
+ * bind specific keyboard shortcuts that will still work
+ * inside a text input field
+ *
+ * usage:
+ * Mousetrap.bindGlobal('ctrl+s', _saveChanges);
+ */
+/* global Mousetrap:true */
+(function (Mousetrap) {
+  var _globalCallbacks = {};
+  var _originalStopCallback = Mousetrap.prototype.stopCallback;
+
+  Mousetrap.prototype.stopCallback = function (e, element, combo, sequence) {
+    var self = this;
+
+    if (self.paused) {
+      return true;
+    }
+
+    if (_globalCallbacks[combo] || _globalCallbacks[sequence]) {
+      return false;
+    }
+
+    return _originalStopCallback.call(self, e, element, combo);
+  };
+
+  Mousetrap.prototype.bindGlobal = function (keys, callback, action) {
+    var self = this;
+    self.bind(keys, callback, action);
+
+    if (keys instanceof Array) {
+      for (var i = 0; i < keys.length; i++) {
+        _globalCallbacks[keys[i]] = true;
+      }
+      return;
+    }
+
+    _globalCallbacks[keys] = true;
+  };
+
+  Mousetrap.init();
+})(Mousetrap);
 
 /***/ }),
 

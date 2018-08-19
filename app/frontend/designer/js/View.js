@@ -1,5 +1,3 @@
-import Mousetrap from "mousetrap"
-
 
 export default draw2d.Canvas.extend({
 
@@ -17,28 +15,28 @@ export default draw2d.Canvas.extend({
     this.installEditPolicy(new draw2d.policy.canvas.SnapToCenterEditPolicy())
     this.installEditPolicy(new draw2d.policy.canvas.SnapToInBetweenEditPolicy())
 
-    Mousetrap.bind(['left'], () => {
+    Mousetrap.bindGlobal(['left'], () => {
       let diff = this.getZoom() < 0.5 ? 0.5 : 1
       this.getSelection().each((i, f) => {
         f.translate(-diff, 0)
       })
       return false
     })
-    Mousetrap.bind(['up'], () => {
+    Mousetrap.bindGlobal(['up'], () => {
       let diff = this.getZoom() < 0.5 ? 0.5 : 1
       this.getSelection().each((i, f) => {
         f.translate(0, -diff)
       })
       return false
     })
-    Mousetrap.bind(['right'], () => {
+    Mousetrap.bindGlobal(['right'], () => {
       let diff = this.getZoom() < 0.5 ? 0.5 : 1
       this.getSelection().each((i, f) => {
         f.translate(diff, 0)
       })
       return false
     })
-    Mousetrap.bind(['down'], () => {
+    Mousetrap.bindGlobal(['down'], () => {
       let diff = this.getZoom() < 0.5 ? 0.5 : 1
       this.getSelection().each((i, f) => {
         f.translate(0, diff)
@@ -46,7 +44,7 @@ export default draw2d.Canvas.extend({
       return false
     })
 
-    Mousetrap.bind(['ctrl+c', 'command+c'], () => {
+    Mousetrap.bindGlobal(['ctrl+c', 'command+c'], () => {
       let primarySelection = this.getSelection().getPrimary()
       if (primarySelection !== null) {
         this.clippboardFigure = primarySelection.clone()
@@ -55,7 +53,7 @@ export default draw2d.Canvas.extend({
       return false
     })
 
-    Mousetrap.bind(['ctrl+v', 'command+v'], () => {
+    Mousetrap.bindGlobal(['ctrl+v', 'command+v'], () => {
       if (this.clippboardFigure !== null) {
         let cloneToAdd = this.clippboardFigure.clone()
         let command = new draw2d.command.CommandAdd(this, cloneToAdd, cloneToAdd.getPosition())

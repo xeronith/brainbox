@@ -1,4 +1,3 @@
-import Mousetrap from "mousetrap"
 import RectangleToolPolicy from "./policy/RectangleToolPolicy"
 import CircleToolPolicy from "./policy/CircleToolPolicy"
 import LineToolPolicy from "./policy/LineToolPolicy"
@@ -61,7 +60,7 @@ export default class Toolbar {
       this.view.getCommandStack().undo()
     }).prop("disabled", true)
 
-    Mousetrap.bind("ctrl+z", () => {
+    Mousetrap.bindGlobal("ctrl+z", () => {
       this.undoButton.click()
       return false
     })
@@ -74,7 +73,7 @@ export default class Toolbar {
     this.redoButton.on("click", () => {
       this.view.getCommandStack().redo()
     }).prop("disabled", true)
-    Mousetrap.bind("ctrl+y", () => {
+    Mousetrap.bindGlobal("ctrl+y", () => {
       this.redoButton.click()
       return false
     })
@@ -99,7 +98,7 @@ export default class Toolbar {
       // execute all single commands at once.
       view.getCommandStack().commitTransaction()
     }).prop("disabled", true)
-    Mousetrap.bind(["del"], () => {
+    Mousetrap.bindGlobal(["del", "backspace"], () => {
       this.deleteButton.click()
       return false
     })
@@ -110,7 +109,7 @@ export default class Toolbar {
     this.selectButton.on("click", () => {
       this.view.installEditPolicy(new SelectionToolPolicy())
     })
-    Mousetrap.bind("space", () => {
+    Mousetrap.bindGlobal("space", () => {
       this.selectButton.click()
       return false
     })
@@ -160,24 +159,24 @@ export default class Toolbar {
       this.view.installEditPolicy(new PortToolPolicy())
     })
 
-    Mousetrap.bind(["R", "r"], () => {
-      $('*[data-policy="RectangleToolPolicy"]').click()
+    Mousetrap.bindGlobal(["R", "r"], () => {
+      $('.policyRectangleToolPolicy1').click()
       return false
     })
-    Mousetrap.bind(["C", "c"], () => {
-      $('*[data-policy="CircleToolPolicy"]').click()
+    Mousetrap.bindGlobal(["C", "c"], () => {
+      $('.policyCircleToolPolicy').click()
       return false
     })
-    Mousetrap.bind(["T", "t"], () => {
-      $('*[data-policy="TextToolPolicy"]').click()
+    Mousetrap.bindGlobal(["T", "t"], () => {
+      $('.policyTextToolPolicy').click()
       return false
     })
-    Mousetrap.bind(["P", "p"], () => {
-      $('*[data-policy="PortToolPolicy"]').click()
+    Mousetrap.bindGlobal(["P", "p"], () => {
+      $('.policyPortToolPolicy').click()
       return false
     })
-    Mousetrap.bind(["L", "l"], () => {
-      $('*[data-policy="LineToolPolicy"]').click()
+    Mousetrap.bindGlobal(["L", "l"], () => {
+      $('.policyLineToolPolicy').click()
       return false
     })
 
@@ -189,7 +188,7 @@ export default class Toolbar {
       this.view.installEditPolicy(policy)
       policy.execute(this.view, selection)
     })
-    Mousetrap.bind(["U", "u"], () => {
+    Mousetrap.bindGlobal(["U", "u"], () => {
       this.unionButton.click()
       return false
     })
@@ -199,7 +198,7 @@ export default class Toolbar {
     this.differenceButton.on("click", () => {
       this.view.installEditPolicy(new GeoDifferenceToolPolicy())
     })
-    Mousetrap.bind(["D", "d"], () => {
+    Mousetrap.bindGlobal(["D", "d"], () => {
       this.differenceButton.click()
       return false
     })
@@ -209,7 +208,7 @@ export default class Toolbar {
     this.intersectionButton.on("click", () => {
       this.view.installEditPolicy(new GeoIntersectionToolPolicy())
     })
-    Mousetrap.bind(["I", "i"], () => {
+    Mousetrap.bindGlobal(["I", "i"], () => {
       this.intersectionButton.click()
       return false
     })
@@ -225,7 +224,7 @@ export default class Toolbar {
       this.openButton.tooltip("hide")
       app.fileOpen()
     })
-    Mousetrap.bind("ctrl+o", () => {
+    Mousetrap.bindGlobal("ctrl+o", () => {
       this.openButton.click()
       return false
     })
@@ -236,7 +235,7 @@ export default class Toolbar {
       this.saveButton.tooltip("hide")
       app.fileSave()
     })
-    Mousetrap.bind("ctrl+s", (event) => {
+    Mousetrap.bindGlobal("ctrl+s", (event) => {
       this.saveButton.click()
       return false
     })
@@ -246,7 +245,7 @@ export default class Toolbar {
     this.newButton.on("click", () => {
       app.fileNew()
     })
-    Mousetrap.bind("ctrl+n", () => {
+    Mousetrap.bindGlobal("ctrl+n", () => {
       this.undoButton.click()
       return false
     })

@@ -1,43 +1,67 @@
 var json=[
   {
-    "type": "shape_designer.figure.PolyCircle",
-    "id": "224a7916-067e-710f-bc40-d0ff40f3e7e4",
-    "x": 7960.620608,
-    "y": 7974,
-    "width": 53,
-    "height": 52,
+    "type": "shape_designer.figure.PolyRect",
+    "id": "d937ec12-7bfe-0617-565c-447e72f00431",
+    "x": 7934.5,
+    "y": 7981,
+    "width": 97,
+    "height": 37,
     "alpha": 1,
     "angle": 0,
     "userData": {
       "baseClass": "draw2d.SetFigure",
-      "code": "/**\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custome code and event handler here.\n *\n *\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n         this._super(attr, setter, getter);\n\n         this.attr({resizeable:false});\n         this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());\n         \n         this.value = 0;\n         var _this = this;\n         this.callback = function( msg){\n             _this.value = msg.value;\n             console.log(msg)\n         }\n    },\n    \n    calculate: function()\n    {\n        if(this.value === 0){\n            this.layerAttr(\"circle\",{fill:\"#C21B7A\"});\n        }\n        else{\n            this.layerAttr(\"circle\",{fill:\"#f0f0f0\"});\n        }\n    },\n    \n    onStart: function()\n    {\n        socket.on(\"mqtt:message\", this.callback);\n    },\n\n    onStop:function()\n    {\n        socket.off(\"mqtt:message\", this.callback);\n    },\n\n});",
+      "code": "/**\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custome code and event handler here.\n *\n *\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n         this._super(attr, setter, getter);\n\n         this.attr({resizeable:false});\n         this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());\n         \n         this.value = 0;\n         var _this = this;\n         this.callback = function( msg){\n             _this.value = msg.value;\n             _this.getOutputPort(0).setValue(_this.value);\n            if(_this.value === 1){\n                _this.layerAttr(\"circle\",{fill:\"#C21B7A\"});\n            }\n            else{\n                _this.layerAttr(\"circle\",{fill:\"#f0f0f0\"});\n            }\n         }\n    },\n    \n    calculate: function()\n    {\n    },\n    \n    onStart: function()\n    {\n        socket.on(\"mqtt:message\", this.callback);\n        this.callback({value:this.value})\n    },\n\n    onStop:function()\n    {\n        socket.off(\"mqtt:message\", this.callback);\n    },\n\n});",
       "name": "circle",
       "markdown": "# High / Low Signal display\n\nsimple `HIGH`/ `LOW` display.\n\n    HIGH -> red\n \n    LOW -> gray"
     },
-    "cssClass": "shape_designer_figure_PolyCircle",
+    "cssClass": "shape_designer_figure_PolyRect",
     "ports": [],
-    "bgColor": "#FFFFFF",
-    "color": "#1B1B1B",
+    "bgColor": "#919191",
+    "color": "#303030",
     "stroke": 1,
-    "radius": 0,
+    "radius": 5,
     "dasharray": null,
+    "vertices": [
+      {
+        "x": 8031.5,
+        "y": 8018
+      },
+      {
+        "x": 7934.5,
+        "y": 8018
+      },
+      {
+        "x": 7934.5,
+        "y": 7981
+      },
+      {
+        "x": 8031.5,
+        "y": 7981
+      }
+    ],
     "blur": 0,
     "filters": [
       {
         "name": "shape_designer.filter.PositionFilter"
       },
       {
-        "name": "shape_designer.filter.FillColorFilter"
+        "name": "shape_designer.filter.SizeFilter"
       },
       {
         "name": "shape_designer.filter.StrokeFilter"
+      },
+      {
+        "name": "shape_designer.filter.FillColorFilter"
+      },
+      {
+        "name": "shape_designer.filter.RadiusFilter"
       }
     ]
   },
   {
     "type": "shape_designer.figure.ExtPort",
     "id": "f4d5683a-7c42-8771-5df4-e4e9da5b8b46",
-    "x": 8011.505856000001,
+    "x": 8024.3852480000005,
     "y": 7995,
     "width": 10,
     "height": 10,
@@ -69,6 +93,44 @@ var json=[
       },
       {
         "name": "shape_designer.filter.FillColorFilter"
+      }
+    ]
+  },
+  {
+    "type": "shape_designer.figure.ExtLabel",
+    "id": "dda95266-c917-46e8-cc39-f538d0d43f73",
+    "x": 7949.109375,
+    "y": 7985.5,
+    "width": 28.328125,
+    "height": 21,
+    "alpha": 1,
+    "angle": 0,
+    "userData": {
+      "name": "Label"
+    },
+    "cssClass": "shape_designer_figure_ExtLabel",
+    "ports": [],
+    "bgColor": "none",
+    "color": "#1B1B1B",
+    "stroke": 0,
+    "radius": 0,
+    "dasharray": null,
+    "text": "HiveMQ",
+    "outlineStroke": 0,
+    "outlineColor": "none",
+    "fontSize": 16,
+    "fontColor": "#FFF824",
+    "fontFamily": null,
+    "editor": "draw2d.ui.LabelInplaceEditor",
+    "filters": [
+      {
+        "name": "shape_designer.filter.PositionFilter"
+      },
+      {
+        "name": "shape_designer.filter.FontSizeFilter"
+      },
+      {
+        "name": "shape_designer.filter.FontColorFilter"
       }
     ]
   }
