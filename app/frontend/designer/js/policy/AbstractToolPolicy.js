@@ -21,6 +21,9 @@ export default draw2d.policy.canvas.SelectionPolicy.extend({
       $("#currentTool_message").html(message)
       $('#currentTool_message').fadeIn(200)
     })
+  },
+
+  executed: function(){
   }
 })
 

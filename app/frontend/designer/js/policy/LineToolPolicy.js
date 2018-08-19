@@ -31,7 +31,7 @@ export default AbstractToolPolicy.extend({
       }
       else {
         // stay in the canvas and finalize the stroke if a doubleClick
-        var last = this.lineFigure.vertices.last()
+        let last = this.lineFigure.vertices.last()
         this.onDoubleClick(this.lineFigure, last.x, last.y, false, false)
       }
     }
@@ -94,14 +94,15 @@ export default AbstractToolPolicy.extend({
     // the vertices are recreated in the "calculatePath" mnethod of the polygon and
     // the reference is in this case invalid...design flaw!
     //
-    var last = this.lineFigure.vertices.last()
-    var beforeLast = this.lineFigure.vertices.get(this.lineFigure.vertices.getSize() - 2)
+    let last = this.lineFigure.vertices.last()
+    let beforeLast = this.lineFigure.vertices.get(this.lineFigure.vertices.getSize() - 2)
     while (last.equals(beforeLast)) {
       this.lineFigure.removeVertexAt(this.lineFigure.vertices.getSize() - 2)
       beforeLast = this.lineFigure.vertices.get(this.lineFigure.vertices.getSize() - 2)
     }
 
     this.lineFigure = null
+    this.executed()
   },
 
 
@@ -122,7 +123,7 @@ export default AbstractToolPolicy.extend({
       this.lineFigure = new shape_designer.figure.ExtLine()
       this.lineFigure.setStartPoint(x, y)
       this.lineFigure.setEndPoint(x, y)
-      var command = new draw2d.command.CommandAdd(this.canvas, this.lineFigure, x, y)
+      let command = new draw2d.command.CommandAdd(this.canvas, this.lineFigure, x, y)
       this.canvas.getCommandStack().execute(command)
       this.canvas.setCurrentSelection(this.lineFigure)
     }

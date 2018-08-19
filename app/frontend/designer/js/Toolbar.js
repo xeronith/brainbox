@@ -129,34 +129,36 @@ export default class Toolbar {
       '</label>'
     )
     buttonGroup.append(this.shapeButton)
-    $(".tool_shape_entry").on("click", (event) => {
-      var $target = $(event.currentTarget)
-      $("#tool_shape_image").attr("src", $target.find("img").attr("src"))
-      $("#tool_shape_button").data("policy", $target.data("policy"))
-      $("#tool_shape_image").click()
-
-      $("#tool_shape_image")
-        .attr('data-original-title', $target.data("original-title"))
-        .tooltip('fixTitle')
-    })
 
     $(".policyRectangleToolPolicy1").on("click", () => {
-      this.view.installEditPolicy(new RectangleToolPolicy())
+      let p =new RectangleToolPolicy()
+      p.executed=()=>{ this.selectButton.click()}
+      this.view.installEditPolicy(p)
     })
     $(".policyRectangleToolPolicy2").on("click", () => {
-      this.view.installEditPolicy(new RectangleToolPolicy())
+      let p =new RectangleToolPolicy()
+      p.executed=()=>{ this.selectButton.click()}
+      this.view.installEditPolicy(p)
     })
     $(".policyCircleToolPolicy").on("click", () => {
-      this.view.installEditPolicy(new CircleToolPolicy())
+      let p =new CircleToolPolicy()
+      p.executed=()=>{ this.selectButton.click()}
+      this.view.installEditPolicy(p)
     })
     $(".policyLineToolPolicy").on("click", () => {
-      this.view.installEditPolicy(new LineToolPolicy())
+      let p =new LineToolPolicy()
+      p.executed=()=>{ this.selectButton.click()}
+      this.view.installEditPolicy(p)
     })
     $(".policyTextToolPolicy").on("click", () => {
-      this.view.installEditPolicy(new TextToolPolicy())
+      let p =new TextToolPolicy()
+      p.executed=()=>{ this.selectButton.click()}
+      this.view.installEditPolicy(p)
     })
     $(".policyPortToolPolicy").on("click", () => {
-      this.view.installEditPolicy(new PortToolPolicy())
+      let p =new PortToolPolicy()
+      p.executed=()=>{ this.selectButton.click()}
+      this.view.installEditPolicy(p)
     })
 
     Mousetrap.bindGlobal(["R", "r"], () => {
@@ -184,9 +186,10 @@ export default class Toolbar {
     buttonGroup.append(this.unionButton)
     this.unionButton.on("click", () => {
       let selection = this.view.getSelection().getAll()
-      let policy = new GeoUnionToolPolicy()
-      this.view.installEditPolicy(policy)
-      policy.execute(this.view, selection)
+      let p = new GeoUnionToolPolicy()
+      p.executed=()=>{ this.selectButton.click()}
+      this.view.installEditPolicy(p)
+      p.execute(this.view, selection)
     })
     Mousetrap.bindGlobal(["U", "u"], () => {
       this.unionButton.click()

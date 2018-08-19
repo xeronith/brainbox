@@ -94,6 +94,8 @@ export default AbstractToolPolicy.extend({
       setTimeout($.proxy(function () {
         this.newFigure.onDoubleClick()
       }, this), 100)
+
+      this.executed()
     }
     else {
       this.topLeft = null

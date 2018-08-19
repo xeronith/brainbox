@@ -118,6 +118,8 @@ export default AbstractToolPolicy.extend({
       this.boundingBoxFigure1 = null
       this.boundingBoxFigure2.setCanvas(null)
       this.boundingBoxFigure2 = null
+
+      this.executed()
     }
   }
 })

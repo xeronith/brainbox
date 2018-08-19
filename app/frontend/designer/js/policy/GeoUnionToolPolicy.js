@@ -49,7 +49,6 @@ export default AbstractGeoToolPolicy.extend({
       }
     }
   }
-
 })
 
 

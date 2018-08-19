@@ -54,8 +54,8 @@ export default AbstractToolPolicy.extend({
   onMouseMove: function (canvas, x, y) {
 
     if (this.boundingBoxFigure1 !== null) {
-      var dx = this.topLeftPoint.x - x
-      var dy = this.topLeftPoint.y - y
+      let dx = this.topLeftPoint.x - x
+      let dy = this.topLeftPoint.y - y
       this.boundingBoxFigure1.setDimension(Math.abs(dx), Math.abs(dy))
       this.boundingBoxFigure1.setPosition(x + Math.min(0, dx), y + Math.min(0, dy))
       this.boundingBoxFigure2.setDimension(Math.abs(dx), Math.abs(dy))
@@ -105,9 +105,9 @@ export default AbstractToolPolicy.extend({
       this.boundingBoxFigure2.setBackgroundColor(null)
     }
     else {
-      var bottomRight = new draw2d.geo.Point(x, y)
-      var rect = new PolyRect(this.topLeftPoint, bottomRight)
-      var command = new draw2d.command.CommandAdd(canvas, rect, rect.getX(), rect.getY())
+      let bottomRight = new draw2d.geo.Point(x, y)
+      let rect = new PolyRect(this.topLeftPoint, bottomRight)
+      let command = new draw2d.command.CommandAdd(canvas, rect, rect.getX(), rect.getY())
       canvas.getCommandStack().execute(command)
       canvas.setCurrentSelection(rect)
       this.topLeftPoint = null
@@ -117,6 +117,8 @@ export default AbstractToolPolicy.extend({
       this.boundingBoxFigure1 = null
       this.boundingBoxFigure2.setCanvas(null)
       this.boundingBoxFigure2 = null
+
+      this.executed()
     }
   }
 })

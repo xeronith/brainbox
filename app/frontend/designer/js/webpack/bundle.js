@@ -994,32 +994,48 @@ var Toolbar = function () {
 
     this.shapeButton = $('<label id="tool_shape" class="dropdown btn btn-sm btn-primary">' + '    <input id="tool_shape_button"  class="btn-default btn"  type="radio">' + '    <img   id="tool_shape_image" class="policyRectangleToolPolicy1"  data-toggle="tooltip" title="Rectangle <span class=\'highlight\'> [ R ]</span>"  src="./images/tools/POLYGON_DIAGONALS_032.png">' + '    <span data-toggle="dropdown" role="button" href="#" id="tool_shape_caret"><span class="caret">&nbsp;</span></span>' + '    <ul class="dropdown-menu" role="menu" >' + '       <li class="tool_shape_entry policyRectangleToolPolicy2" data-toggle="tooltip" title="Rectangle <span class=\'highlight\'> [ R ]</span>"><a href="#"><img  src="./images/tools/POLYGON_DIAGONALS_032.png">Rectangle</a></li>' + '       <li class="tool_shape_entry policyCircleToolPolicy"    data-toggle="tooltip" title="Circle <span class=\'highlight\'> [ C ]</span>">   <a href="#"><img  src="./images/tools/CIRCLE_1_032.png">Circle</a></li>' + '       <li class="tool_shape_entry policyLineToolPolicy"      data-toggle="tooltip" title="Line <span class=\'highlight\'> [ L ]</span>">     <a href="#"><img  src="./images/tools/LINE_032.png">Line</a></li>' + '       <li class="tool_shape_entry policyTextToolPolicy"      data-toggle="tooltip" title="Text <span class=\'highlight\'> [ T ]</span>">     <a href="#"><img  src="./images/tools/TEXT_032.png">Text</a></li>' + '       <li class="tool_shape_entry policyPortToolPolicy"      data-toggle="tooltip" title="Port <span class=\'highlight\'> [ P ]</span>">     <a href="#"><img  src="./images/tools/PORT_032.png">Port</a></li>' + '    </ul>' + '</label>');
     buttonGroup.append(this.shapeButton);
-    $(".tool_shape_entry").on("click", function (event) {
-      var $target = $(event.currentTarget);
-      $("#tool_shape_image").attr("src", $target.find("img").attr("src"));
-      $("#tool_shape_button").data("policy", $target.data("policy"));
-      $("#tool_shape_image").click();
-
-      $("#tool_shape_image").attr('data-original-title', $target.data("original-title")).tooltip('fixTitle');
-    });
 
     $(".policyRectangleToolPolicy1").on("click", function () {
-      _this.view.installEditPolicy(new _RectangleToolPolicy2.default());
+      var p = new _RectangleToolPolicy2.default();
+      p.executed = function () {
+        _this.selectButton.click();
+      };
+      _this.view.installEditPolicy(p);
     });
     $(".policyRectangleToolPolicy2").on("click", function () {
-      _this.view.installEditPolicy(new _RectangleToolPolicy2.default());
+      var p = new _RectangleToolPolicy2.default();
+      p.executed = function () {
+        _this.selectButton.click();
+      };
+      _this.view.installEditPolicy(p);
     });
     $(".policyCircleToolPolicy").on("click", function () {
-      _this.view.installEditPolicy(new _CircleToolPolicy2.default());
+      var p = new _CircleToolPolicy2.default();
+      p.executed = function () {
+        _this.selectButton.click();
+      };
+      _this.view.installEditPolicy(p);
     });
     $(".policyLineToolPolicy").on("click", function () {
-      _this.view.installEditPolicy(new _LineToolPolicy2.default());
+      var p = new _LineToolPolicy2.default();
+      p.executed = function () {
+        _this.selectButton.click();
+      };
+      _this.view.installEditPolicy(p);
     });
     $(".policyTextToolPolicy").on("click", function () {
-      _this.view.installEditPolicy(new _TextToolPolicy2.default());
+      var p = new _TextToolPolicy2.default();
+      p.executed = function () {
+        _this.selectButton.click();
+      };
+      _this.view.installEditPolicy(p);
     });
     $(".policyPortToolPolicy").on("click", function () {
-      _this.view.installEditPolicy(new _PortToolPolicy2.default());
+      var p = new _PortToolPolicy2.default();
+      p.executed = function () {
+        _this.selectButton.click();
+      };
+      _this.view.installEditPolicy(p);
     });
 
     Mousetrap.bindGlobal(["R", "r"], function () {
@@ -1047,9 +1063,12 @@ var Toolbar = function () {
     buttonGroup.append(this.unionButton);
     this.unionButton.on("click", function () {
       var selection = _this.view.getSelection().getAll();
-      var policy = new _GeoUnionToolPolicy2.default();
-      _this.view.installEditPolicy(policy);
-      policy.execute(_this.view, selection);
+      var p = new _GeoUnionToolPolicy2.default();
+      p.executed = function () {
+        _this.selectButton.click();
+      };
+      _this.view.installEditPolicy(p);
+      p.execute(_this.view, selection);
     });
     Mousetrap.bindGlobal(["U", "u"], function () {
       _this.unionButton.click();
@@ -5849,6 +5868,7 @@ exports.default = _AbstractToolPolicy2.default.extend({
       cmd.add(command);
     }, this));
     canvas.getCommandStack().execute(cmd);
+    this.executed();
   },
 
   getGeometry: function getGeometry(figure) {
@@ -5900,7 +5920,9 @@ exports.default = draw2d.policy.canvas.SelectionPolicy.extend({
       $("#currentTool_message").html(message);
       $('#currentTool_message').fadeIn(200);
     });
-  }
+  },
+
+  executed: function executed() {}
 });
 module.exports = exports["default"];
 
@@ -6042,6 +6064,8 @@ exports.default = _AbstractToolPolicy2.default.extend({
       this.boundingBoxFigure1 = null;
       this.boundingBoxFigure2.setCanvas(null);
       this.boundingBoxFigure2 = null;
+
+      this.executed();
     }
   }
 });
@@ -6264,7 +6288,6 @@ exports.default = _AbstractGeoToolPolicy2.default.extend({
       }
     }
   }
-
 });
 module.exports = exports["default"];
 
@@ -6390,6 +6413,7 @@ exports.default = _AbstractToolPolicy2.default.extend({
     }
 
     this.lineFigure = null;
+    this.executed();
   },
 
   /**
@@ -6500,6 +6524,7 @@ exports.default = _SelectionToolPolicy2.default.extend({
       var command = new draw2d.command.CommandAdd(canvas, new shape_designer.figure.ExtPort(), x, y);
       canvas.getCommandStack().execute(command);
       canvas.setCurrentSelection(command.figure);
+      this.executed();
     } else {
       this._super(canvas, x, y);
     }
@@ -6649,6 +6674,8 @@ exports.default = _AbstractToolPolicy2.default.extend({
       this.boundingBoxFigure1 = null;
       this.boundingBoxFigure2.setCanvas(null);
       this.boundingBoxFigure2 = null;
+
+      this.executed();
     }
   }
 });
@@ -6856,6 +6883,8 @@ exports.default = _AbstractToolPolicy2.default.extend({
       setTimeout($.proxy(function () {
         this.newFigure.onDoubleClick();
       }, this), 100);
+
+      this.executed();
     } else {
       this.topLeft = null;
     }

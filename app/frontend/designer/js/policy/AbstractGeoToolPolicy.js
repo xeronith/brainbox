@@ -76,7 +76,7 @@ export default AbstractToolPolicy.extend({
       cmd.add(command)
     }, this))
     canvas.getCommandStack().execute(cmd)
-
+    this.executed()
   },
 
   getGeometry: function (figure) {

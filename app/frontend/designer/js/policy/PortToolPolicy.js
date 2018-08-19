@@ -35,7 +35,7 @@ export default SelectionToolPolicy.extend({
   },
 
   onMouseDown: function (canvas, x, y, shiftKey, ctrlKey) {
-    var figure = canvas.getBestFigure(x, y)
+    let figure = canvas.getBestFigure(x, y)
 
     if (figure === null || figure instanceof shape_designer.figure.ExtPort) {
       this._super(canvas, x, y, shiftKey, ctrlKey)
@@ -53,9 +53,10 @@ export default SelectionToolPolicy.extend({
   onMouseUp: function (canvas, x, y) {
 
     if (this.mouseDownElement === null || !(this.mouseDownElement instanceof shape_designer.figure.ExtPort)) {
-      var command = new draw2d.command.CommandAdd(canvas, new shape_designer.figure.ExtPort(), x, y)
+      let command = new draw2d.command.CommandAdd(canvas, new shape_designer.figure.ExtPort(), x, y)
       canvas.getCommandStack().execute(command)
       canvas.setCurrentSelection(command.figure)
+      this.executed()
     }
     else {
       this._super(canvas, x, y)
