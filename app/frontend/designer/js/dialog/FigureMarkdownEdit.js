@@ -21,6 +21,7 @@ export default class FigureMarkdownEdit {
   /**
    */
   show() {
+    Mousetrap.pause()
     var _this = this
     this.mdHtml = new Remarkable('full', this.defaults)
 
@@ -46,6 +47,7 @@ export default class FigureMarkdownEdit {
     $("body").append(splash)
 
     var removeDialog = function () {
+      Mousetrap.unpause()
       shape_designer.app.setConfiguration({markdown: _this.editor.getValue()})
       splash.removeClass("open")
       setTimeout(function () {

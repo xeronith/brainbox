@@ -202,12 +202,18 @@ HiveMQ = HiveMQ.extend({
     init: function(attr, setter, getter){
          this._super(attr, setter, getter);
 
-         this.attr({resizeable:false});
+        this.attr({
+            resizeable:false,
+            "userData.elementId":this.id
+        });
          this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());
          
          this.value = 0;
          var _this = this;
          this.callback = function( msg){
+             if(msg.elementId !== _this.attr("userData.elementId")){
+                return;
+             }
              _this.value = msg.value;
              _this.getOutputPort(0).setValue(_this.value);
             if(_this.value === 1){
@@ -234,4 +240,17 @@ HiveMQ = HiveMQ.extend({
         socket.off("mqtt:message", this.callback);
     },
 
+    getParameterSettings: function()
+    {
+        return [
+        {
+            name:"elementId",
+            label:"Element Id",
+            property:{
+                type: "string"
+        }
+        
+        }];
+    }
+    
 });

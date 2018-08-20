@@ -2,7 +2,7 @@ const gpio = require('./gpio-lib');
 
 module.exports = {
 
-  connect: function(io ){
+  connect: function(socketio){
     // =================================================================
 
     let pins = {
@@ -27,7 +27,7 @@ module.exports = {
 
     // Browser => GPIO output pin
     //
-    io.on('connection', socket => {
+    socketio.on('connection', socket => {
       socket.on('gpi:set',  msg => {
         let pin = pins[msg.pin];
         pin.set(1 - msg.value);
@@ -36,14 +36,14 @@ module.exports = {
 
     // GPIO input pin => Browser
     //
-    pins.gpo_9.on("change",  val => io.sockets.emit("gpo:change", {pin: "gpo_9",  value: val}));
-    pins.gpo_10.on("change", val => io.sockets.emit("gpo:change", {pin: "gpo_10", value: val}));
-    pins.gpo_11.on("change", val => io.sockets.emit("gpo:change", {pin: "gpo_11", value: val}));
-    pins.gpo_12.on("change", val => io.sockets.emit("gpo:change", {pin: "gpo_12", value: val}));
-    pins.gpo_13.on("change", val => io.sockets.emit("gpo:change", {pin: "gpo_13", value: val}));
-    pins.gpo_14.on("change", val => io.sockets.emit("gpo:change", {pin: "gpo_14", value: val}));
-    pins.gpo_15.on("change", val => io.sockets.emit("gpo:change", {pin: "gpo_15", value: val}));
-    pins.gpo_16.on("change", val => io.sockets.emit("gpo:change", {pin: "gpo_16", value: val}));
+    pins.gpo_9.on("change",  val => socketio.sockets.emit("gpo:change", {pin: "gpo_9",  value: val}));
+    pins.gpo_10.on("change", val => socketio.sockets.emit("gpo:change", {pin: "gpo_10", value: val}));
+    pins.gpo_11.on("change", val => socketio.sockets.emit("gpo:change", {pin: "gpo_11", value: val}));
+    pins.gpo_12.on("change", val => socketio.sockets.emit("gpo:change", {pin: "gpo_12", value: val}));
+    pins.gpo_13.on("change", val => socketio.sockets.emit("gpo:change", {pin: "gpo_13", value: val}));
+    pins.gpo_14.on("change", val => socketio.sockets.emit("gpo:change", {pin: "gpo_14", value: val}));
+    pins.gpo_15.on("change", val => socketio.sockets.emit("gpo:change", {pin: "gpo_15", value: val}));
+    pins.gpo_16.on("change", val => socketio.sockets.emit("gpo:change", {pin: "gpo_16", value: val}));
 
     return this;
   }

@@ -3,8 +3,9 @@ export default class FigureCodeEdit {
   }
 
   show() {
-    var code = shape_designer.app.getConfiguration("code")
-    var splash = $(
+    Mousetrap.pause()
+    let code = shape_designer.app.getConfiguration("code")
+    let splash = $(
       '<pre id="code_overlay">' +
       code +
       '</pre>' +
@@ -15,10 +16,10 @@ export default class FigureCodeEdit {
     $("body").append(splash)
     splash.fadeIn()
 
-    var before = function (obj, method, wrapper) {
-      var orig = obj[method]
+    let before = function (obj, method, wrapper) {
+      let orig = obj[method]
       obj[method] = function () {
-        var args = Array.prototype.slice.call(arguments)
+        let args = Array.prototype.slice.call(arguments)
         return wrapper.call(this, function () {
           return orig.apply(obj, args)
         }, args)
@@ -27,22 +28,22 @@ export default class FigureCodeEdit {
       return obj[method]
     }
 
-    var intersects = function (range) {
+    let intersects = function (range) {
       return editor.getSelectionRange().intersects(range)
     }
 
-    var preventReadonly = function (next, args) {
+    let preventReadonly = function (next, args) {
       if (intersects(range)) return
       next()
     }
 
-    var lines = code.split("\n")
-    var last = lines.length - 1
-    var first = lines.findIndex(function (element, index, array) {
+    let lines = code.split("\n")
+    let last = lines.length - 1
+    let first = lines.findIndex(function (element, index, array) {
       return element.startsWith("testShape")
     })
 
-    var editor = ace.edit("code_overlay"),
+    let editor = ace.edit("code_overlay"),
       session = editor.getSession(),
       Range = ace.require("ace/range").Range,
       range = new Range(0, 0, first, lines[first].length),
@@ -77,15 +78,16 @@ export default class FigureCodeEdit {
     range2.end.$insertRight = true
 
     $("#code_close").on("click", function () {
-      var code = editor.getValue()
+      let code = editor.getValue()
       shape_designer.app.setConfiguration({code: code})
+      Mousetrap.unpause()
       splash.fadeOut(function () {
         splash.remove()
       })
     })
 
     $("#test_run").on("click", function () {
-      var code = editor.getValue()
+      let code = editor.getValue()
       shape_designer.app.setConfiguration({code: code})
       new shape_designer.dialog.FigureTest().show()
     })

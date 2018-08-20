@@ -1501,6 +1501,7 @@ var FigureCodeEdit = function () {
   _createClass(FigureCodeEdit, [{
     key: 'show',
     value: function show() {
+      Mousetrap.pause();
       var code = shape_designer.app.getConfiguration("code");
       var splash = $('<pre id="code_overlay">' + code + '</pre>' + '<div title="Run"   id="test_run"  ><i class="icon ion-android-arrow-dropright-circle"></i></div>' + '<div title="Close" id="code_close"><i class="icon ion-ios-close-outline"></i></div>');
       splash.hide();
@@ -1571,6 +1572,7 @@ var FigureCodeEdit = function () {
       $("#code_close").on("click", function () {
         var code = editor.getValue();
         shape_designer.app.setConfiguration({ code: code });
+        Mousetrap.unpause();
         splash.fadeOut(function () {
           splash.remove();
         });
@@ -1740,6 +1742,7 @@ var FigureMarkdownEdit = function () {
   _createClass(FigureMarkdownEdit, [{
     key: 'show',
     value: function show() {
+      Mousetrap.pause();
       var _this = this;
       this.mdHtml = new _remarkable2.default('full', this.defaults);
 
@@ -1753,6 +1756,7 @@ var FigureMarkdownEdit = function () {
       $("body").append(splash);
 
       var removeDialog = function removeDialog() {
+        Mousetrap.unpause();
         shape_designer.app.setConfiguration({ markdown: _this.editor.getValue() });
         splash.removeClass("open");
         setTimeout(function () {
@@ -5372,6 +5376,8 @@ var _mousetrap2 = _interopRequireDefault(_mousetrap);
 
 __webpack_require__(/*! ./util/mousetrap-global */ "./app/frontend/designer/js/util/mousetrap-global.js");
 
+__webpack_require__(/*! ./util/mousetrap-pause */ "./app/frontend/designer/js/util/mousetrap-pause.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
@@ -7023,6 +7029,50 @@ module.exports = exports['default'];
     }
 
     _globalCallbacks[keys] = true;
+  };
+
+  Mousetrap.init();
+})(Mousetrap);
+
+/***/ }),
+
+/***/ "./app/frontend/designer/js/util/mousetrap-pause.js":
+/*!**********************************************************!*\
+  !*** ./app/frontend/designer/js/util/mousetrap-pause.js ***!
+  \**********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * adds a pause and unpause method to Mousetrap
+ * this allows you to enable or disable keyboard shortcuts
+ * without having to reset Mousetrap and rebind everything
+ */
+/* global Mousetrap:true */
+(function (Mousetrap) {
+  var _originalStopCallback = Mousetrap.prototype.stopCallback;
+
+  Mousetrap.prototype.stopCallback = function (e, element, combo) {
+    var self = this;
+
+    if (self.paused) {
+      return true;
+    }
+
+    return _originalStopCallback.call(self, e, element, combo);
+  };
+
+  Mousetrap.prototype.pause = function () {
+    var self = this;
+    self.paused = true;
+  };
+
+  Mousetrap.prototype.unpause = function () {
+    var self = this;
+    self.paused = false;
   };
 
   Mousetrap.init();
