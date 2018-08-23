@@ -1,62 +1,61 @@
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_hardware_RaspiOUTPUT = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_hardware_RaspiOUTPUT = draw2d.SetFigure.extend({
 
    NAME: "draw2d_circuit_hardware_RaspiOUTPUT",
 
    init:function(attr, setter, getter)
    {
-     this._super( $.extend({stroke:0, bgColor:null, width:106.61262500000112,height:259.50000000000045},attr), setter, getter);
+     this._super( $.extend({stroke:0, bgColor:null, width:106.61262500000157,height:259.5},attr), setter, getter);
      var port;
      // gpi_1
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(15.249587226836221, 28.968047990643996));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(15.249587226836155, 28.968047990644045));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
      port.setName("gpi_1");
      port.setMaxFanOut(1);
      // gpi_2
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(15.249587226836221, 38.7283236994219));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(15.249587226836155, 38.72832369942196));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
      port.setName("gpi_2");
      port.setMaxFanOut(1);
      // gpi_3
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(15.249587226836221, 47.892263969171545));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(15.249587226836155, 47.89226396917145));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
      port.setName("gpi_3");
      port.setMaxFanOut(1);
      // gpi_4
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(15.249587226836221, 57.12954720616573));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(15.249587226836155, 57.12954720616548));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
      port.setName("gpi_4");
      port.setMaxFanOut(1);
      // gpi_5
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(15.249587226836221, 65.92480732177262));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(15.249587226836155, 65.92480732177273));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
      port.setName("gpi_5");
      port.setMaxFanOut(1);
      // gpi_6
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(15.249587226836221, 75.1445086705201));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(15.249587226836155, 75.14450867052024));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
      port.setName("gpi_6");
      port.setMaxFanOut(1);
      // gpi_7
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(15.249587226836221, 84.93550096339092));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(15.249587226836155, 84.93550096339108));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
      port.setName("gpi_7");
      port.setMaxFanOut(1);
      // gpi_8
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(15.249587226836221, 93.83133911367989));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(15.249587226836155, 93.83133911367987));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#37B1DE");
      port.setName("gpi_8");
@@ -67,162 +66,162 @@ var draw2d_circuit_hardware_RaspiOUTPUT = draw2d.SetFigure.extend({
    createShapeElement : function()
    {
       var shape = this._super();
-      this.originalWidth = 106.61262500000112;
-      this.originalHeight= 259.50000000000045;
+      this.originalWidth = 106.61262500000157;
+      this.originalHeight= 259.5;
       return shape;
    },
 
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L106.61262500000157,0 L106.61262500000157,259.5 L0,259.5");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M106.60618588992817,47.99999999907308Q106.60612499999843,46 106.60612499999843, 44L106.60612499999843,2Q106.60612499999843,0 104.60612499999843, 0L3.6061249999984284,0Q1.6061249999984284,0 1.6061249999984284, 2L1.6061249999984284,44Q1.6061249999984284,46 3.6061249999984284, 46L14.34612499999912,46Q16.34612499999912,46 16.34612499999912, 48L16.34612499999912,257.5Q16.34612499999912,259.5 18.34612499999912, 259.5L104.61262500000157,259.5Q106.61262500000157,259.5 106.61256411007183, 257.5000000009269L106.60618588992817,47.99999999907308');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'Output GPIO');
+       shape.attr({"x":4,"y":21.92449999999917,"text-anchor":"start","text":"Output GPIO","font-family":"\"Arial\"","font-size":17,"stroke":"none","fill":"#BD2466","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'1');
+       shape.attr({"x":25.25798524419497,"y":75.6095845357213,"text-anchor":"start","text":"1","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'2');
+       shape.attr({"x":27.25798524419497,"y":100.9375,"text-anchor":"start","text":"2","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'3');
+       shape.attr({"x":27.25798524419497,"y":124.7963749999999,"text-anchor":"start","text":"3","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'4');
+       shape.attr({"x":27.25798524419497,"y":147.7963749999999,"text-anchor":"start","text":"4","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'5');
+       shape.attr({"x":27.25798524419497,"y":171.1707749999996,"text-anchor":"start","text":"5","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'6');
+       shape.attr({"x":27.25798524419497,"y":196.93887499999983,"text-anchor":"start","text":"6","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'7');
+       shape.attr({"x":27.25798524419497,"y":221.9375,"text-anchor":"start","text":"7","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'8');
+       shape.attr({"x":27.25798524419497,"y":243.49124999999913,"text-anchor":"start","text":"8","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Circle
+       shape = this.canvas.paper.ellipse();
+       shape.attr({"rx":15.5,"ry":16.5,"cx":69.08258524419489,"cy":72.39887499999895,"stroke":"none","stroke-width":0,"fill":"#000000","dasharray":null,"opacity":1});
+       shape.data("name","Circle");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M74.66660524419603 63.10502500000075L63.525485244195806 63.10502500000075L63.525485244195806 53.274625000000015L74.66660524419603 53.274625000000015Z');
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"#000000","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M61.83734010743956,86.68742174721956Q61.3536865523547,84.3212085643172 65.01346100532373, 83.53730360715826L65.01346100532373,83.53730360715826Q68.67323545829277,82.75339864999933 71.90351318166131, 83.42978257348068L71.90351318166131,83.42978257348068Q75.13379090502985,84.10616649696203 75.32963807461238, 86.57990071354197L75.32963807461238,86.57990071354197Q75.5254852441949,89.05363493012192 71.81073687939488, 90.32220267578214L71.81073687939488,90.32220267578214Q68.09598851459486,91.59077042144236 65.20849108855964, 90.32220267578214L65.20849108855964,90.32220267578214Q62.320993662524415,89.05363493012192 61.83734010743956, 86.68742174721956L61.83734010743956,86.68742174721956');
+       shape.attr({"stroke":"#000000","stroke-width":1,"fill":"#B3003B","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M86.3667101890358,55.684774099766635Q84.64625958284705,59.295874999999796 80.64798934134767, 59.17825240038364L76.59667989113707,59.05906947361764Q72.59840964963769,58.941446874001485 72.35215719243095, 54.949034103843616L72.30185043740241,54.133426684208615Q72.05559798019567,50.141013914050745 74.47178476809268, 48.0772128335384L74.47178476809268,48.0772128335384Q76.88797155598968,46.01341175302605 79.84102925588604, 45.426005680511935L79.84102925588604,45.426005680511935Q82.7940869557824,44.83859960799782 86.76311827786319, 45.3353796039132L87.07330073811684,45.374203293834874Q91.04233206019762,45.87098328975026 89.32188145400887, 49.48208418998342L86.3667101890358,55.684774099766635');
+       shape.attr({"stroke":"#000000","stroke-width":2,"fill":"#6B8E23","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Circle
+       shape = this.canvas.paper.ellipse();
+       shape.attr({"rx":5.5,"ry":5.5,"cx":69.0254852441958,"cy":78.10027499999978,"stroke":"#000000","stroke-width":1,"fill":"#B3003B","dasharray":null,"opacity":1});
+       shape.data("name","Circle");
+       
+       // Circle
+       shape = this.canvas.paper.ellipse();
+       shape.attr({"rx":4,"ry":4.5,"cx":73.94498524419578,"cy":68.82042499999989,"stroke":"none","stroke-width":0,"fill":"#B3003B","dasharray":null,"opacity":1});
+       shape.data("name","Circle");
+       
+       // Circle
+       shape = this.canvas.paper.ellipse();
+       shape.attr({"rx":4,"ry":4.5,"cx":65.44498524419578,"cy":68.32042499999989,"stroke":"none","stroke-width":0,"fill":"#B3003B","dasharray":null,"opacity":1});
+       shape.data("name","Circle");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M71.7530936625244,52.09992905405352Q70.1280936625244,55.84992905405397 66.1280936625235, 57.572902027026885L66.1280936625235,57.572902027026885Q62.12809366252259,59.295874999999796 59.78434366252395, 58.383712837837265L59.78434366252395,58.383712837837265Q57.440593662525316,57.471550675674735 55.84684366252486, 55.54587499999889L55.84684366252486,55.54587499999889Q54.25309366252441,53.62019932432304 52.81559366252441, 49.87019932432304L52.81559366252441,49.87019932432304Q51.37809366252441,46.12019932432304 57.25309366252441, 45.20803716216142L57.25309366252441,45.20803716216142Q63.12809366252441,44.295874999999796 68.2530936625244, 46.32290202702643L68.2530936625244,46.32290202702643Q73.3780936625244,48.349929054053064 71.7530936625244, 52.09992905405352L71.7530936625244,52.09992905405352');
+       shape.attr({"stroke":"#000000","stroke-width":2,"fill":"#6B8E23","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M53.94135162060866,77.00072237161612Q54.50460957869291,72.60027499999978 58.65398688256391, 74.61934036716548L58.65398688256391,74.61934036716548Q62.80336418643492,76.63840573433117 63.09072892447966, 80.51343261639249L63.09072892447966,80.51343261639249Q63.37809366252441,84.38845949845381 60.62425377443924, 84.9943672492268L60.62425377443924,84.9943672492268Q57.87041388635407,85.60027499999978 55.62425377443924, 83.50072237161612L55.62425377443924,83.50072237161612Q53.37809366252441,81.40116974323246 53.94135162060866, 77.00072237161612L53.94135162060866,77.00072237161612');
+       shape.attr({"stroke":"#000000","stroke-width":1,"fill":"#B3003B","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M75.82212619620213,79.51260111401734Q76.64308219204668,76.35769425824037 80.56460678126132, 75.28416780326324L80.56460678126132,75.28416780326324Q84.48613137047596,74.21064134828612 84.41333637441085, 75.1127998494685L84.41333637441085,75.1127998494685Q84.34054137834573,76.01495835065089 83.68301331127077, 80.0617839245524L83.68301331127077,80.0617839245524Q83.0254852441958,84.10860949845392 78.89725582138908, 84.8863159410671L78.89725582138908,84.8863159410671Q74.76902639858235,85.66402238368028 74.88509829946997, 84.1657651767373L74.88509829946997,84.1657651767373Q75.00117020035759,82.66750796979431 75.82212619620213, 79.51260111401734L75.82212619620213,79.51260111401734');
+       shape.attr({"stroke":"#000000","stroke-width":1,"fill":"#B3003B","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M78.08874320228006,66.22087237161668Q78.6520011603643,61.82042499999989 82.80137846423531, 63.83949036716558L82.80137846423531,63.83949036716558Q86.95075576810632,65.85855573433128 87.23812050615106, 69.7335826163926L87.23812050615106,69.7335826163926Q87.5254852441958,73.60860949845392 84.77164535611064, 74.2145172492269L84.77164535611064,74.2145172492269Q82.01780546802547,74.82042499999989 79.77164535611064, 72.72087237161668L79.77164535611064,72.72087237161668Q77.5254852441958,70.62131974323347 78.08874320228006, 66.22087237161668L78.08874320228006,66.22087237161668');
+       shape.attr({"stroke":"#000000","stroke-width":1,"fill":"#B3003B","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M72.00824320228003,58.945338564964004Q72.57150116036428,55.89887499999895 76.72087846423528, 57.29668948495964L76.72087846423528,57.29668948495964Q80.87025576810629,58.69450396992033 81.15762050615103, 61.37721488827083L81.15762050615103,61.37721488827083Q81.44498524419578,64.05992580662132 78.69114535611061, 64.47940040331014L78.69114535611061,64.47940040331014Q75.93730546802544,64.89887499999895 73.69114535611061, 63.445338564964004L73.69114535611061,63.445338564964004Q71.44498524419578,61.991802129929056 72.00824320228003, 58.945338564964004L72.00824320228003,58.945338564964004');
+       shape.attr({"stroke":"#000000","stroke-width":1,"fill":"#B3003B","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M54.99077840076916,63.15928806953707Q58.60346313901391,60.82042499999989 60.21880973824318, 62.66769167532493L60.21880973824318,62.66769167532493Q61.83415633747245,64.51495835064998 60.79008121375682, 68.8624316352716L60.79008121375682,68.8624316352716Q59.74600609004119,73.20990491989323 56.56266947235508, 73.98761136250687L56.56266947235508,73.98761136250687Q53.379332854668974,74.7653178051205 52.37871325859669, 70.13173447209738L52.37871325859669,70.13173447209738Q51.37809366252441,65.49815113907425 54.99077840076916, 63.15928806953707L54.99077840076916,63.15928806953707');
+       shape.attr({"stroke":"#000000","stroke-width":1,"fill":"#B3003B","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M64.21922769910543,55.55345494670701Q67.72685314793671,54.89887499999895 69.71922769910543, 55.95862738455435L69.71922769910543,55.95862738455435Q71.71160225027415,57.01837976910974 70.20073069131286, 59.51246751600229L70.20073069131286,59.51246751600229Q68.68985913235156,62.006555262894835 64.15990987274017, 62.667463496247365L64.15990987274017,62.667463496247365Q59.62996061312879,63.328371729599894 60.17078143170147, 59.76820331150748L60.17078143170147,59.76820331150748Q60.711602250274154,56.20803489341506 64.21922769910543, 55.55345494670701L64.21922769910543,55.55345494670701');
+       shape.attr({"stroke":"#000000","stroke-width":1,"fill":"#B3003B","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M81.5 51.5L80.5,52.5Q78.66341705219929,53.156003191998934 77.5, 54.5L76.5,56.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M81.5 51.5L80.5,52.5Q78.66341705219929,53.156003191998934 77.5, 54.5L76.5,56.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M65.5 55.5L64.5,53.5Q63.0351782041962,51.90872203999788 60.5, 50.5L58.5,49.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M65.5 55.5L64.5,53.5Q63.0351782041962,51.90872203999788 60.5, 50.5L58.5,49.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L106.61262500000112,0 L106.61262500000112,259.50000000000045 L0,259.50000000000045");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M106.60618588992817,47.99999999907308Q106.60612499999843,46 106.60612499999843, 44L106.60612499999843,2Q106.60612499999843,0 104.60612499999843, 0L3.6061249999984284,0Q1.6061249999984284,0 1.6061249999984284, 2L1.6061249999984284,44Q1.6061249999984284,46 3.6061249999984284, 46L14.34612499999912,46Q16.34612499999912,46 16.34612499999912, 48L16.34612499999912,257.50000000000045Q16.34612499999912,259.50000000000045 18.34612499999912, 259.50000000000045L104.61262500000112,259.50000000000045Q106.61262500000112,259.50000000000045 106.61256411007138, 257.50000000092734L106.60618588992817,47.99999999907308');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'Output GPIO');
-        shape.attr({"x":4,"y":22.440124999999625,"text-anchor":"start","text":"Output GPIO","font-family":"\"Arial\"","font-size":17,"stroke":"none","fill":"#BD2466","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'1');
-        shape.attr({"x":25.25798524419497,"y":76.6720845357213,"text-anchor":"start","text":"1","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'2');
-        shape.attr({"x":27.25798524419497,"y":102,"text-anchor":"start","text":"2","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'3');
-        shape.attr({"x":27.25798524419497,"y":125.8588749999999,"text-anchor":"start","text":"3","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'4');
-        shape.attr({"x":27.25798524419497,"y":148.8588749999999,"text-anchor":"start","text":"4","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'5');
-        shape.attr({"x":27.25798524419497,"y":172.23327500000005,"text-anchor":"start","text":"5","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'6');
-        shape.attr({"x":27.25798524419497,"y":198.00137499999983,"text-anchor":"start","text":"6","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'7');
-        shape.attr({"x":27.25798524419497,"y":223,"text-anchor":"start","text":"7","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'8');
-        shape.attr({"x":27.25798524419497,"y":244.55374999999958,"text-anchor":"start","text":"8","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Circle
-        shape = this.canvas.paper.ellipse();
-        shape.attr({"rx":15.5,"ry":16.5,"cx":69.08258524419489,"cy":72.39887499999986,"stroke":"none","stroke-width":0,"fill":"#000000","dasharray":null,"opacity":1});
-        shape.data("name","Circle");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M74.66660524419513 63.105025000000296L63.52548524419535 63.105025000000296L63.52548524419535 53.274625000000015L74.66660524419513 53.274625000000015Z');
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"#000000","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M61.83734010744001,86.68742174722047Q61.35368655235516,84.32120856431811 65.01346100532419, 83.53730360715895L65.01346100532419,83.53730360715895Q68.67323545829322,82.75339864999978 71.90351318166176, 83.42978257348136L71.90351318166176,83.42978257348136Q75.13379090503031,84.10616649696294 75.32963807461283, 86.57990071354288L75.32963807461283,86.57990071354288Q75.52548524419535,89.05363493012283 71.81073687939511, 90.32220267578282L71.81073687939511,90.32220267578282Q68.09598851459486,91.59077042144281 65.20849108855987, 90.32220267578282L65.20849108855987,90.32220267578282Q62.32099366252487,89.05363493012283 61.83734010744001, 86.68742174722047L61.83734010744001,86.68742174722047');
-        shape.attr({"stroke":"#000000","stroke-width":1,"fill":"#B3003B","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M86.36671018903576,55.684774099766614Q84.64625958284705,59.295874999999796 80.64798934134767, 59.17825240038365L76.59667989113616,59.05906947361763Q72.59840964963678,58.941446874001485 72.35215719243024, 54.9490341038436L72.30185043740175,54.133426684209084Q72.05559798019522,50.1410139140512 74.47178476809222, 48.07721283353885L74.47178476809222,48.07721283353885Q76.88797155598922,46.0134117530265 79.84102925588559, 45.42600568051239L79.84102925588559,45.42600568051239Q82.79408695578195,44.838599607998276 86.76311827786273, 45.33537960391366L87.07330073811639,45.37420329383533Q91.04233206019717,45.87098328975071 89.32188145400846, 49.482084189983894L86.36671018903576,55.684774099766614');
-        shape.attr({"stroke":"#000000","stroke-width":2,"fill":"#6B8E23","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Circle
-        shape = this.canvas.paper.ellipse();
-        shape.attr({"rx":5.5,"ry":5.5,"cx":69.02548524419535,"cy":78.10027500000024,"stroke":"#000000","stroke-width":1,"fill":"#B3003B","dasharray":null,"opacity":1});
-        shape.data("name","Circle");
-        
-        // Circle
-        shape = this.canvas.paper.ellipse();
-        shape.attr({"rx":4,"ry":4.5,"cx":73.94498524419532,"cy":68.82042500000034,"stroke":"none","stroke-width":0,"fill":"#B3003B","dasharray":null,"opacity":1});
-        shape.data("name","Circle");
-        
-        // Circle
-        shape = this.canvas.paper.ellipse();
-        shape.attr({"rx":4,"ry":4.5,"cx":65.44498524419532,"cy":68.32042500000034,"stroke":"none","stroke-width":0,"fill":"#B3003B","dasharray":null,"opacity":1});
-        shape.data("name","Circle");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M71.75309366252463,52.09992905405329Q70.12809366252486,55.84992905405397 66.1280936625235, 57.572902027026885L66.1280936625235,57.572902027026885Q62.12809366252213,59.295874999999796 59.784343662523725, 58.383712837837265L59.784343662523725,58.383712837837265Q57.440593662525316,57.471550675674735 55.846843662524634, 55.545874999999114L55.846843662524634,55.545874999999114Q54.25309366252395,53.620199324323494 52.81559366252418, 49.870199324323494L52.81559366252418,49.870199324323494Q51.37809366252441,46.120199324323494 57.25309366252418, 45.208037162161645L57.25309366252418,45.208037162161645Q63.12809366252395,44.295874999999796 68.25309366252418, 46.3229020270262L68.25309366252418,46.3229020270262Q73.3780936625244,48.34992905405261 71.75309366252463, 52.09992905405329L71.75309366252463,52.09992905405329');
-        shape.attr({"stroke":"#000000","stroke-width":2,"fill":"#6B8E23","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M53.94135162060866,77.0007223716168Q54.50460957869291,72.60027500000024 58.653986882563686, 74.61934036716593L58.653986882563686,74.61934036716593Q62.803364186434465,76.63840573433163 63.090728924479436, 80.51343261639295L63.090728924479436,80.51343261639295Q63.37809366252441,84.38845949845427 60.62425377443901, 84.99436724922725L60.62425377443901,84.99436724922725Q57.87041388635362,85.60027500000024 55.62425377443901, 83.5007223716168L55.62425377443901,83.5007223716168Q53.37809366252441,81.40116974323337 53.94135162060866, 77.0007223716168L53.94135162060866,77.0007223716168');
-        shape.attr({"stroke":"#000000","stroke-width":1,"fill":"#B3003B","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M75.8221261962019,79.51260111401803Q76.64308219204622,76.35769425824128 80.56460678126086, 75.28416780326393L80.56460678126086,75.28416780326393Q84.4861313704755,74.21064134828657 84.41333637441039, 75.11279984946896L84.41333637441039,75.11279984946896Q84.34054137834528,76.01495835065134 83.68301331127032, 80.06178392455286L83.68301331127032,80.06178392455286Q83.02548524419535,84.10860949845437 78.89725582138863, 84.88631594106755L78.89725582138863,84.88631594106755Q74.7690263985819,85.66402238368073 74.88509829946975, 84.16576517673775L74.88509829946975,84.16576517673775Q75.00117020035759,82.66750796979477 75.8221261962019, 79.51260111401803L75.8221261962019,79.51260111401803');
-        shape.attr({"stroke":"#000000","stroke-width":1,"fill":"#B3003B","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M78.0887432022796,66.2208723716169Q78.65200116036385,61.82042500000034 82.80137846423463, 63.839490367166036L82.80137846423463,63.839490367166036Q86.95075576810541,65.85855573433173 87.23812050615038, 69.73358261639305L87.23812050615038,69.73358261639305Q87.52548524419535,73.60860949845437 84.77164535610996, 74.21451724922736L84.77164535610996,74.21451724922736Q82.01780546802456,74.82042500000034 79.77164535610996, 72.7208723716169L79.77164535610996,72.7208723716169Q77.52548524419535,70.62131974323347 78.0887432022796, 66.2208723716169L78.0887432022796,66.2208723716169');
-        shape.attr({"stroke":"#000000","stroke-width":1,"fill":"#B3003B","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M72.00824320227957,58.94533856496514Q72.57150116036382,55.89887499999986 76.7208784642346, 57.29668948496078L76.7208784642346,57.29668948496078Q80.87025576810538,58.6945039699217 81.15762050615035, 61.37721488827174L81.15762050615035,61.37721488827174Q81.44498524419532,64.05992580662178 78.69114535610993, 64.47940040331082L78.69114535610993,64.47940040331082Q75.93730546802453,64.89887499999986 73.69114535610993, 63.44533856496514L73.69114535610993,63.44533856496514Q71.44498524419532,61.99180212993042 72.00824320227957, 58.94533856496514L72.00824320227957,58.94533856496514');
-        shape.attr({"stroke":"#000000","stroke-width":1,"fill":"#B3003B","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M54.990778400769386,63.159288069537524Q58.603463139014366,60.82042500000034 60.21880973824341, 62.667691675325386L60.21880973824341,62.667691675325386Q61.83415633747245,64.51495835065043 60.79008121375705, 68.86243163527183L60.79008121375705,68.86243163527183Q59.74600609004165,73.20990491989323 56.56266947235554, 73.9876113625071L56.56266947235554,73.9876113625071Q53.37933285466943,74.76531780512096 52.37871325859692, 70.13173447209783L52.37871325859692,70.13173447209783Q51.37809366252441,65.49815113907471 54.990778400769386, 63.159288069537524L54.990778400769386,63.159288069537524');
-        shape.attr({"stroke":"#000000","stroke-width":1,"fill":"#B3003B","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M64.21922769910566,55.553454946707916Q67.72685314793716,54.89887499999986 69.71922769910566, 55.958627384555484L69.71922769910566,55.958627384555484Q71.71160225027415,57.01837976911111 70.20073069131286, 59.5124675160032L70.20073069131286,59.5124675160032Q68.68985913235156,62.00655526289529 64.1599098727404, 62.66746349624805L64.1599098727404,62.66746349624805Q59.62996061312924,63.3283717296008 60.1707814317017, 59.76820331150839L60.1707814317017,59.76820331150839Q60.711602250274154,56.20803489341597 64.21922769910566, 55.553454946707916L64.21922769910566,55.553454946707916');
-        shape.attr({"stroke":"#000000","stroke-width":1,"fill":"#B3003B","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M81.5 51.5L80.5,52.5Q78.66341705219929,53.15600319199939 77.5, 54.5L76.5,56.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M81.5 51.5L80.5,52.5Q78.66341705219929,53.15600319199939 77.5, 54.5L76.5,56.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M65.5 55.5L64.5,53.5Q63.035178204195745,51.90872203999788 60.5, 50.5L58.5,49.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M65.5 55.5L64.5,53.5Q63.035178204195745,51.90872203999788 60.5, 50.5L58.5,49.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-
-        return this.canvas.paper.setFinish();
+       return this.canvas.paper.setFinish();
    },
 
    applyAlpha: function()
@@ -412,4 +411,3 @@ draw2d_circuit_hardware_RaspiOUTPUT = draw2d_circuit_hardware_RaspiOUTPUT.extend
     {
     }
 });
-draw2d_circuit_hardware_RaspiOUTPUT.github="./shapes/org/draw2d/circuit/hardware/RaspiOUTPUT.shape";

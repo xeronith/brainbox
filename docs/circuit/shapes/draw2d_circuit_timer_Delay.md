@@ -1,15 +1,13 @@
-# Clock Signal
+# Delay Object
 
-In electronics and especially synchronous digital circuits, 
-a clock signal is a particular type of signal that 
-oscillates between a `high` and a `low` state and is 
-utilized like a metronome to coordinate actions 
-of digital circuits.
+In electronics, digital circuits and digital electronics, the propagation 
+delay, or gate delay, is the length of time which starts when the input to a 
+logic gate becomes stable and valid to change, to the time that the output of 
+that logic gate is stable and valid to change.
 
-The hertz (symbol `Hz`) is the unit of frequency in the 
-International System of Units (SI) and is defined as 
-one cycle per second. 
+If you have some logic gates in chain, it is required to compensate the signal 
+delay.
 
-It is named for Heinrich Rudolf Hertz, the first person 
-to provide conclusive proof of the existence of 
-electromagnetic waves.
+This is where the delay Object comes into play. It `delays` the input signal
+to the given time delay.
+

@@ -8,8 +8,7 @@ signals on the 2x13 header pins on the RPi motherboad
 include SPI, I2C, serial UART, 3V3 and 5V power.
 
 ## Interaction
-You can control these GPIO pins on the raspi if you have installed
-the **BrainBox** on your Raspberry via node.js
+You can control these GPIO pins on the raspi with brainbox.
 
 ## Install
 
@@ -20,11 +19,11 @@ sudo npm install -g brainbox
 This takes a while on a raspbery B+ 2 but should success.
 
 ## Start the server on the raspi
-after this you can start the DigitalTrainingStudio server on the raspberry
+after this you can start the `brainbox` server on the raspberry
 with
 
 ```
-brainbox 
+brainbox <ENTER>
 ```
 
 ## Connect with the browser

@@ -15,7 +15,7 @@ export default class MarkdownDialog {
   }
 
   show(markdown) {
-    var markdownParser = new Remarkable('full', this.defaults)
+    let markdownParser = new Remarkable('full', this.defaults)
     $('#markdownDialog .html').html(markdownParser.render(markdown))
     $('#markdownDialog').modal('show')
   }

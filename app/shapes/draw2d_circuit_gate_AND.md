@@ -10,7 +10,7 @@ A HIGH output results only if both the inputs to the AND gate are HIGH. If neith
 
 ## Logic table
 
-| INPUT 1   | INPUT   |  OUTPUT    |
+| INPUT A   | INPUT B |  OUTPUT    |
 |:---------:|:-------:|:----------:|
 | Low       | Low     |  Low       |
 | `High`    | Low     |  Low       |

@@ -1,11 +1,10 @@
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_switch_HighLowArray = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_switch_HighLowArray = draw2d.SetFigure.extend({
 
    NAME: "draw2d_circuit_switch_HighLowArray",
 
@@ -44,7 +43,7 @@ var draw2d_circuit_switch_HighLowArray = draw2d.SetFigure.extend({
      port.setName("port05");
      port.setMaxFanOut(20);
      // port06
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(120, 68.72787499999987));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(120, 68.72787499999959));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("port06");
@@ -56,7 +55,7 @@ var draw2d_circuit_switch_HighLowArray = draw2d.SetFigure.extend({
      port.setName("port07");
      port.setMaxFanOut(20);
      // port08
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(120, 93.93256250000007));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(120, 93.93256250000036));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("port08");
@@ -75,54 +74,54 @@ var draw2d_circuit_switch_HighLowArray = draw2d.SetFigure.extend({
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L20,0 L20,160 L0,160");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // rect01
+       shape = this.canvas.paper.path('M20 20L0 20L0 0L20 0Z');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","rect01");
+       
+       // rect02
+       shape = this.canvas.paper.path('M20 40L0 40L0 20L20 20Z');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","rect02");
+       
+       // rect03
+       shape = this.canvas.paper.path('M20 60L0 60L0 40L20 40Z');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","rect03");
+       
+       // rect04
+       shape = this.canvas.paper.path('M20 80L0 80L0 60L20 60Z');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","rect04");
+       
+       // rect05
+       shape = this.canvas.paper.path('M20 100L0 100L0 80L20 80Z');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","rect05");
+       
+       // rect06
+       shape = this.canvas.paper.path('M20 120L0 120L0 100L20 100Z');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","rect06");
+       
+       // rect07
+       shape = this.canvas.paper.path('M20 140L0 140L0 120L20 120Z');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","rect07");
+       
+       // rect08
+       shape = this.canvas.paper.path('M20 160L0 160L0 140L20 140Z');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","rect08");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L20,0 L20,160 L0,160");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // rect01
-        shape = this.canvas.paper.path('M20 20L0 20L0 0L20 0Z');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","rect01");
-        
-        // rect02
-        shape = this.canvas.paper.path('M20 40L0 40L0 20L20 20Z');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","rect02");
-        
-        // rect03
-        shape = this.canvas.paper.path('M20 60L0 60L0 40L20 40Z');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","rect03");
-        
-        // rect04
-        shape = this.canvas.paper.path('M20 80L0 80L0 60L20 60Z');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","rect04");
-        
-        // rect05
-        shape = this.canvas.paper.path('M20 100L0 100L0 80L20 80Z');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","rect05");
-        
-        // rect06
-        shape = this.canvas.paper.path('M20 120L0 120L0 100L20 100Z');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","rect06");
-        
-        // rect07
-        shape = this.canvas.paper.path('M20 140L0 140L0 120L20 120Z');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","rect07");
-        
-        // rect08
-        shape = this.canvas.paper.path('M20 160L0 160L0 140L20 140Z');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","rect08");
-        
-
-        return this.canvas.paper.setFinish();
+       return this.canvas.paper.setFinish();
    },
 
    applyAlpha: function()
@@ -296,4 +295,3 @@ draw2d_circuit_switch_HighLowArray = draw2d_circuit_switch_HighLowArray.extend({
     }
 
 });
-draw2d_circuit_switch_HighLowArray.github="./shapes/org/draw2d/circuit/switch/HighLowArray.shape";

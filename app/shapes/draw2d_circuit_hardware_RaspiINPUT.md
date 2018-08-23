@@ -8,8 +8,8 @@ signals on the 2x13 header pins on the RPi motherboad
 include SPI, I2C, serial UART, 3V3 and 5V power.
 
 ## Interaction
-You can control these GPIO pins on the raspi if you have installed
-the BrainBox as node program on your Raspberry via npm
+You can control these GPIO pins on the raspi. Just install `brainbox` 
+on your RaspberryPi.
 
 ## Install
 
@@ -32,5 +32,5 @@ brainbox
 After this the BrainBox echos the url on the console 
 how to connect with your browser to your Hardware.
 
-Now you can drive the GPIO pins on raspi with the DigitalTrainingStudio
+Now you can drive the GPIO pins on raspi with the `brainbox`
 
