@@ -1,4 +1,4 @@
-# BCD to 7 segment decoder
+# BCD to 7 Segment Decoder
 
 A **BCD to 7-segment decoder** driver. Its function is to convert 
 the logic states at the outputs of a BCD, or binary coded decimal, 

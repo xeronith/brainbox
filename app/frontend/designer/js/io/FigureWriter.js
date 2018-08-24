@@ -23,7 +23,9 @@ export default shape_designer.FigureWriter = draw2d.io.Writer.extend({
    */
   marshal: function (canvas, className, resultCallback) {
     var baseClass = shape_designer.app.getConfiguration("baseClass")
-    var customCode = shape_designer.app.getConfiguration("code")
+    var customCode =  shape_designer.app.getConfiguration("code")
+    customCode = customCode.replace(/testShape/g, className);
+
     var figures = canvas.getExtFigures()
     var b = canvas.getBoundingBox()
 
@@ -111,8 +113,12 @@ export default shape_designer.FigureWriter = draw2d.io.Writer.extend({
 
     var template = $("#shape-base-template").text().trim()
 
+    var tags = className.split("_")
     var compiled = Hogan.compile(template)
+    var tooltip= tags.length>0?tags.slice(-1)[0]:name;
+    tooltip = tooltip.split(/\s*(?=[A-Z][a-z])/).join(" ")
     var output = compiled.render({
+      tooltip: tooltip,
       className: className,
       baseClass: baseClass,
       figures: shapes,

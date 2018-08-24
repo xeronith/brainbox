@@ -11,7 +11,7 @@ var markdown = app.getConfiguration("markdown");
 markdown = markdown?markdown:"";
 var writer = new shape_designer.FigureWriter();
 try {
-    writer.marshal(app.view, "testShape", function (js) {
+    writer.marshal(app.view, pkg, function (js) {
         code = js;
         try {
             eval(js);
@@ -31,7 +31,7 @@ try {
         // zufrieden.
         $("body").append(splash);
         var canvas = new draw2d.Canvas("test_canvas");
-        var test = new testShape();
+        var test = eval("new "+pkg+"()");
         canvas.add(test, 400, 160);
         canvas.commonPorts.each(function (i, p) {
             p.setVisible(false);

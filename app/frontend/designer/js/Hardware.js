@@ -1,7 +1,7 @@
-// just a simple mock object tfor the DigitalTrainingStudio
+// just a simple mock object for the brainbox
 // Hardware binding
 //
-var hardware = {
+export default {
 
   gpio: {
     set: function (pin, value) {

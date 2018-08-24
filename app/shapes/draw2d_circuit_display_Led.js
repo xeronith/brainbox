@@ -1,16 +1,19 @@
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_display_Led = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_display_Led = draw2d.SetFigure.extend({
 
    NAME: "draw2d_circuit_display_Led",
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+     this.tooltip = null;
+     this.tooltipTimer = -1;
+
      this._super( $.extend({stroke:0, bgColor:null, width:30,height:32},attr), setter, getter);
      var port;
      // Port
@@ -20,7 +23,82 @@ var draw2d_circuit_display_Led = draw2d.SetFigure.extend({
      port.setName("Port");
      port.setMaxFanOut(20);
      this.persistPorts=false;
+     this.zoomCallback = $.proxy(this.positionTooltip,this);
+
+     this.on("dragstart", function() {
+      _this.hideTooltip(true)
+    })
+
+    this.on("mouseenter", function() {
+      _this.tooltipTimer = window.setTimeout(function() {
+        _this.tooltipTimer = -1
+        _this.showTooltip()
+      }, 500)
+    })
+
+    this.on("mouseleave", function(){
+      _this.hideTooltip()
+    })
+
+    this.on("move", function(){
+      _this.positionTooltip()
+    })
+
    },
+
+    setCanvas: function(canvas)
+    {
+        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
+        this._super(canvas);
+        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
+    },
+
+    hideTooltip: function (fast) {
+      if (this.tooltipTimer !== -1) {
+        window.clearTimeout(this.tooltipTimer)
+        this.tooltipTimer = -1
+      }
+      else if(this.tooltip!==null){
+        if(fast) {
+          this.tooltip.remove()
+        }
+        else{
+          this.tooltip.fadeOut(500, function () {
+            $(this).remove()
+          })
+        }
+        this.tooltip = null
+      }
+    },
+
+    showTooltip:function()
+    {
+        this.tooltip= $('<div class="draw2d_tooltip">Led</div>')
+            .appendTo('body')
+            .hide()
+            .fadeIn(1000);
+        this.positionTooltip();
+    },
+
+
+    positionTooltip: function()
+    {
+        if( this.tooltip===null){
+            return;
+        }
+
+        var width =  this.tooltip.outerWidth(true);
+        var pos = this.canvas.fromCanvasToDocumentCoordinate(
+                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
+                this.getAbsoluteY()+this.getHeight() + 10);
+
+        // remove the scrolling part from the tooltip because the tooltip is placed
+        // inside the scrolling container
+        pos.x +=this.canvas.getScrollLeft();
+        pos.y +=this.canvas.getScrollTop();
+
+        this.tooltip.css({'top': pos.y, 'left': pos.x});
+    },
 
    createShapeElement : function()
    {
@@ -33,39 +111,39 @@ var draw2d_circuit_display_Led = draw2d.SetFigure.extend({
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L30,0 L30,32 L0,32");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // circle
+       shape = this.canvas.paper.ellipse();
+       shape.attr({"rx":15,"ry":16,"cx":15,"cy":16,"stroke":"#1B1B1B","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","circle");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M5.5 5.5L15.5,16.5L24.5,27.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M5.5 5.5L15.5,16.5L24.5,27.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M25.5 5.5L5.5,27.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M25.5 5.5L5.5,27.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L30,0 L30,32 L0,32");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // circle
-        shape = this.canvas.paper.ellipse();
-        shape.attr({"rx":15,"ry":16,"cx":15,"cy":16,"stroke":"#1B1B1B","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","circle");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M5.5 5.5L15.5,16.5L24.5,27.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M5.5 5.5L15.5,16.5L24.5,27.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M25.5 5.5L5.5,27.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M25.5 5.5L5.5,27.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-
-        return this.canvas.paper.setFinish();
+       return this.canvas.paper.setFinish();
    },
 
    applyAlpha: function()
@@ -232,4 +310,3 @@ draw2d_circuit_display_Led = draw2d_circuit_display_Led.extend({
         }
     }
 });
-draw2d_circuit_display_Led.github="./shapes/org/draw2d/circuit/display/Led.shape";

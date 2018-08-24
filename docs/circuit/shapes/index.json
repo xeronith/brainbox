@@ -70,17 +70,6 @@
     "filePath": "draw2d_circuit_display_Led.shape"
   },
   {
-    "name": "draw2d_circuit_flipflop_D_FlipFlop",
-    "tags": [
-      "draw2d",
-      "circuit",
-      "flipflop",
-      "D",
-      "FlipFlop"
-    ],
-    "filePath": "draw2d_circuit_flipflop_D_FlipFlop.shape"
-  },
-  {
     "name": "draw2d_circuit_flipflop_DFlipFlop",
     "tags": [
       "draw2d",
@@ -119,16 +108,6 @@
       "TFlipFlop"
     ],
     "filePath": "draw2d_circuit_flipflop_TFlipFlop.shape"
-  },
-  {
-    "name": "draw2d_circuit_flipflop_ToggleFlipFlop",
-    "tags": [
-      "draw2d",
-      "circuit",
-      "flipflop",
-      "ToggleFlipFlop"
-    ],
-    "filePath": "draw2d_circuit_flipflop_ToggleFlipFlop.shape"
   },
   {
     "name": "draw2d_circuit_gate_AND",

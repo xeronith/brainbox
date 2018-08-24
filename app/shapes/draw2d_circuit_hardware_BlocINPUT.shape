@@ -1,167 +1,170 @@
-[
-  {
-    "type": "shape_designer.figure.ExtPort",
-    "id": "d73d3576-a22c-bddf-3ab8-483ca609ed41",
-    "x": 4024.3036,
-    "y": 3992.9609375,
-    "width": 10,
-    "height": 10,
-    "alpha": 1,
-    "angle": 0,
-    "userData": {
-      "baseClass": "draw2d.SetFigure",
-      "code": "/**\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custome code and event handler here.\n *\n *\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n        var _this = this;\n        this._super(attr, setter, getter);\n\n        this.attr({\n            resizeable:false,\n            \"userData.blockID\":\"-unset-\"\n        });\n        this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());\n        this.on(\"added\",function(){\n\n            if(hardware.bloc.isConnected(_this.getUserData().blocId)){\n               _this.layerAttr(\"indicator\",{fill:\"#00FF00\"});\n            }\n            else{\n               _this.layerAttr(\"indicator\",{fill:\"#FF0000\"});\n            }\n            hardware.bloc.on(\"bloc:register\",function(device){\n                var blockId = _this.getUserData().blocId;\n                if(blockId === device.blocId){\n                   _this.layerAttr(\"indicator\",{fill:\"#00FF00\"});\n                }\n            });\n            hardware.bloc.on(\"bloc:unregister\",function(device){\n                var blockId = _this.getUserData().blocId;\n                if(blockId === device.blocId){\n                   _this.layerAttr(\"indicator\",{fill:\"#FF0000\"});\n                }\n            });            \n        });\n        this.on(\"removed\",function(){\n            hardware.bloc.off(\"bloc:register\");\n            hardware.bloc.off(\"bloc:unregister\");            \n        });\n        \n    },\n    \n    /**\n     * called every '10 [ms]' from the application.\n     * \n     **/\n    calculate:function()\n    {\n        var blocValue = hardware.bloc.get(this.getUserData().blocId);\n        \n       this.getOutputPort(0).setValue(blocValue);\n    },\n    \n\n    /**\n     *  Called if the simulation mode is starting\n     *  @required\n     **/\n    onStart:function()\n    {\n    },\n\n    /**\n     *  Called if the simulation mode is stopping\n     *  @required\n     **/\n    onStop:function()\n    {\n    },\n    \n    getParameterSettings: function()\n    {\n        return [\n        {\n            name:\"blocId\",\n            label:\"Bloc Id\",\n            property:{\n                type: \"blocid\"\n        }\n        \n        }];\n    }\n});",
-      "name": "output_01",
-      "markdown": "# Raspberry Pi Input \n\n## About the GPIO of the raspi\nThe Raspberry Pi provides Input/Outport ports \nintended to control or monitor other devices and \nsubsystem modules. These `GPIO` (general purpose I/O) \nsignals on the 2x13 header pins on the RPi motherboad \ninclude SPI, I2C, serial UART, 3V3 and 5V power.\n\n## Interaction\nYou can control these GPIO pins on the raspi if you have installed\nthe BrainBox as node program on your Raspberry via npm\n\n## Install\n\n```\nsudo npm install -g brainbox\n````\n\nThis takes a while on a raspbery B+ 2 but should success.\n\n## Start the server on the raspi\nafter this you can start the BrainBox server on the raspberry\nwith\n\n```\nbrainbox \n```\n\n## Connect with the browser\n\nAfter this the BrainBox echos the url on the console \nhow to connect with your browser to your Hardware.\n\nNow you can drive the GPIO pins on raspi with the DigitalTrainingStudio\n\n",
-      "type": "Output",
-      "direction": 1,
-      "fanout": 20
+{
+  "draw2d": [
+    {
+      "type": "shape_designer.figure.ExtPort",
+      "id": "d73d3576-a22c-bddf-3ab8-483ca609ed41",
+      "x": 8024.3036,
+      "y": 7992.8609375,
+      "width": 10,
+      "height": 10,
+      "alpha": 1,
+      "angle": 0,
+      "userData": {
+        "baseClass": "draw2d.SetFigure",
+        "code": "/**\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custome code and event handler here.\n *\n *\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n        var _this = this;\n        this._super(attr, setter, getter);\n\n        this.attr({\n            resizeable:false,\n            \"userData.blockID\":\"-unset-\"\n        });\n        this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());\n        this.on(\"added\",function(){\n\n            if(hardware.bloc.isConnected(_this.getUserData().blocId)){\n               _this.layerAttr(\"indicator\",{fill:\"#00FF00\"});\n            }\n            else{\n               _this.layerAttr(\"indicator\",{fill:\"#FF0000\"});\n            }\n            hardware.bloc.on(\"bloc:register\",function(device){\n                var blockId = _this.getUserData().blocId;\n                if(blockId === device.blocId){\n                   _this.layerAttr(\"indicator\",{fill:\"#00FF00\"});\n                }\n            });\n            hardware.bloc.on(\"bloc:unregister\",function(device){\n                var blockId = _this.getUserData().blocId;\n                if(blockId === device.blocId){\n                   _this.layerAttr(\"indicator\",{fill:\"#FF0000\"});\n                }\n            });            \n        });\n        this.on(\"removed\",function(){\n            hardware.bloc.off(\"bloc:register\");\n            hardware.bloc.off(\"bloc:unregister\");            \n        });\n        \n    },\n    \n    /**\n     * called every '10 [ms]' from the application.\n     * \n     **/\n    calculate:function()\n    {\n        var blocValue = hardware.bloc.get(this.getUserData().blocId);\n        \n       this.getOutputPort(0).setValue(blocValue);\n    },\n    \n\n    /**\n     *  Called if the simulation mode is starting\n     *  @required\n     **/\n    onStart:function()\n    {\n    },\n\n    /**\n     *  Called if the simulation mode is stopping\n     *  @required\n     **/\n    onStop:function()\n    {\n    },\n    \n    getParameterSettings: function()\n    {\n        return [\n        {\n            name:\"blocId\",\n            label:\"Bloc Id\",\n            property:{\n                type: \"blocid\"\n        }\n        \n        }];\n    }\n});",
+        "name": "output_01",
+        "markdown": "# Raspberry Pi Input \n\n## About the GPIO of the raspi\nThe Raspberry Pi provides Input/Outport ports \nintended to control or monitor other devices and \nsubsystem modules. These `GPIO` (general purpose I/O) \nsignals on the 2x13 header pins on the RPi motherboad \ninclude SPI, I2C, serial UART, 3V3 and 5V power.\n\n## Interaction\nYou can control these GPIO pins on the raspi if you have installed\nthe BrainBox as node program on your Raspberry via npm\n\n## Install\n\n```\nsudo npm install -g brainbox\n````\n\nThis takes a while on a raspbery B+ 2 but should success.\n\n## Start the server on the raspi\nafter this you can start the BrainBox server on the raspberry\nwith\n\n```\nbrainbox \n```\n\n## Connect with the browser\n\nAfter this the BrainBox echos the url on the console \nhow to connect with your browser to your Hardware.\n\nNow you can drive the GPIO pins on raspi with the DigitalTrainingStudio\n\n",
+        "type": "Output",
+        "direction": 1,
+        "fanout": 20
+      },
+      "cssClass": "shape_designer_figure_ExtPort",
+      "ports": [],
+      "bgColor": "#37B1DE",
+      "color": "#1B1B1B",
+      "stroke": 1,
+      "dasharray": null,
+      "filters": [
+        {
+          "name": "shape_designer.filter.PositionFilter"
+        },
+        {
+          "name": "shape_designer.filter.FanoutFilter"
+        },
+        {
+          "name": "shape_designer.filter.PortDirectionFilter"
+        },
+        {
+          "name": "shape_designer.filter.PortTypeFilter"
+        }
+      ]
     },
-    "cssClass": "shape_designer_figure_ExtPort",
-    "ports": [],
-    "bgColor": "#37B1DE",
-    "color": "#1B1B1B",
-    "stroke": 1,
-    "dasharray": null,
-    "filters": [
-      {
-        "name": "shape_designer.filter.PositionFilter"
+    {
+      "type": "shape_designer.figure.PolyRect",
+      "id": "126fd128-6c7e-28a9-3d5c-b7209268b7d7",
+      "x": 7972,
+      "y": 7964.8609375,
+      "width": 56,
+      "height": 66,
+      "alpha": 1,
+      "angle": 0,
+      "userData": {
+        "name": "Rectangle"
       },
-      {
-        "name": "shape_designer.filter.FanoutFilter"
-      },
-      {
-        "name": "shape_designer.filter.PortDirectionFilter"
-      },
-      {
-        "name": "shape_designer.filter.PortTypeFilter"
-      }
-    ]
-  },
-  {
-    "type": "shape_designer.figure.PolyRect",
-    "id": "126fd128-6c7e-28a9-3d5c-b7209268b7d7",
-    "x": 3972,
-    "y": 3964.9609375,
-    "width": 56,
-    "height": 66,
-    "alpha": 1,
-    "angle": 0,
-    "userData": {
-      "name": "Rectangle"
+      "cssClass": "shape_designer_figure_PolyRect",
+      "ports": [],
+      "bgColor": "#FFFFFF",
+      "color": "#303030",
+      "stroke": 1,
+      "radius": 8,
+      "dasharray": null,
+      "vertices": [
+        {
+          "x": 7972,
+          "y": 7964.8609375
+        },
+        {
+          "x": 8028,
+          "y": 7964.8609375
+        },
+        {
+          "x": 8028,
+          "y": 8030.8609375
+        },
+        {
+          "x": 7972,
+          "y": 8030.8609375
+        }
+      ],
+      "blur": 0,
+      "filters": [
+        {
+          "name": "shape_designer.filter.PositionFilter"
+        },
+        {
+          "name": "shape_designer.filter.SizeFilter"
+        },
+        {
+          "name": "shape_designer.filter.StrokeFilter"
+        },
+        {
+          "name": "shape_designer.filter.FillColorFilter"
+        },
+        {
+          "name": "shape_designer.filter.RadiusFilter"
+        }
+      ]
     },
-    "cssClass": "shape_designer_figure_PolyRect",
-    "ports": [],
-    "bgColor": "#FFFFFF",
-    "color": "#303030",
-    "stroke": 1,
-    "radius": 8,
-    "dasharray": null,
-    "vertices": [
-      {
-        "x": 3972,
-        "y": 3964.9609375
+    {
+      "type": "shape_designer.figure.PolyCircle",
+      "id": "13e78f12-388b-8735-fcc5-08362d2fb084",
+      "x": 7974.977199999999,
+      "y": 8017.3609375,
+      "width": 10,
+      "height": 10,
+      "alpha": 1,
+      "angle": 0,
+      "userData": {
+        "name": "indicator"
       },
-      {
-        "x": 4028,
-        "y": 3964.9609375
-      },
-      {
-        "x": 4028,
-        "y": 4030.9609375
-      },
-      {
-        "x": 3972,
-        "y": 4030.9609375
-      }
-    ],
-    "blur": 0,
-    "filters": [
-      {
-        "name": "shape_designer.filter.PositionFilter"
-      },
-      {
-        "name": "shape_designer.filter.SizeFilter"
-      },
-      {
-        "name": "shape_designer.filter.StrokeFilter"
-      },
-      {
-        "name": "shape_designer.filter.FillColorFilter"
-      },
-      {
-        "name": "shape_designer.filter.RadiusFilter"
-      }
-    ]
-  },
-  {
-    "type": "shape_designer.figure.PolyCircle",
-    "id": "13e78f12-388b-8735-fcc5-08362d2fb084",
-    "x": 3974.9772,
-    "y": 4017.4609375,
-    "width": 10,
-    "height": 10,
-    "alpha": 1,
-    "angle": 0,
-    "userData": {
-      "name": "indicator"
+      "cssClass": "shape_designer_figure_PolyCircle",
+      "ports": [],
+      "bgColor": "none",
+      "color": "#999999",
+      "stroke": 1,
+      "radius": 0,
+      "dasharray": null,
+      "blur": 0,
+      "filters": [
+        {
+          "name": "shape_designer.filter.PositionFilter"
+        },
+        {
+          "name": "shape_designer.filter.SizeFilter"
+        },
+        {
+          "name": "shape_designer.filter.StrokeFilter"
+        }
+      ]
     },
-    "cssClass": "shape_designer_figure_PolyCircle",
-    "ports": [],
-    "bgColor": "none",
-    "color": "#999999",
-    "stroke": 1,
-    "radius": 0,
-    "dasharray": null,
-    "blur": 0,
-    "filters": [
-      {
-        "name": "shape_designer.filter.PositionFilter"
+    {
+      "type": "shape_designer.figure.ExtLabel",
+      "id": "582681a1-29c2-34fd-2f99-f20ad6e62178",
+      "x": 7984.328125,
+      "y": 8009.1390625,
+      "width": 28.328125,
+      "height": 21.125,
+      "alpha": 1,
+      "angle": 0,
+      "userData": {
+        "name": "Label"
       },
-      {
-        "name": "shape_designer.filter.SizeFilter"
-      },
-      {
-        "name": "shape_designer.filter.StrokeFilter"
-      }
-    ]
-  },
-  {
-    "type": "shape_designer.figure.ExtLabel",
-    "id": "582681a1-29c2-34fd-2f99-f20ad6e62178",
-    "x": 3984.328125,
-    "y": 4009.2390625,
-    "width": 28.328125,
-    "height": 21.125,
-    "alpha": 1,
-    "angle": 0,
-    "userData": {
-      "name": "Label"
-    },
-    "cssClass": "shape_designer_figure_ExtLabel",
-    "ports": [],
-    "bgColor": "none",
-    "color": "#1B1B1B",
-    "stroke": 0,
-    "radius": 0,
-    "dasharray": null,
-    "text": "bloc",
-    "outlineStroke": 0,
-    "outlineColor": "none",
-    "fontSize": 16,
-    "fontColor": "#8C8C8C",
-    "fontFamily": null,
-    "editor": "draw2d.ui.LabelInplaceEditor",
-    "filters": [
-      {
-        "name": "shape_designer.filter.PositionFilter"
-      },
-      {
-        "name": "shape_designer.filter.FontSizeFilter"
-      },
-      {
-        "name": "shape_designer.filter.FontColorFilter"
-      }
-    ]
-  }
-]
+      "cssClass": "shape_designer_figure_ExtLabel",
+      "ports": [],
+      "bgColor": "none",
+      "color": "#1B1B1B",
+      "stroke": 0,
+      "radius": 0,
+      "dasharray": null,
+      "text": "bloc",
+      "outlineStroke": 0,
+      "outlineColor": "none",
+      "fontSize": 16,
+      "fontColor": "#8C8C8C",
+      "fontFamily": null,
+      "editor": "draw2d.ui.LabelInplaceEditor",
+      "filters": [
+        {
+          "name": "shape_designer.filter.PositionFilter"
+        },
+        {
+          "name": "shape_designer.filter.FontSizeFilter"
+        },
+        {
+          "name": "shape_designer.filter.FontColorFilter"
+        }
+      ]
+    }
+  ],
+  "image": "data:image/png;base64,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"
+}

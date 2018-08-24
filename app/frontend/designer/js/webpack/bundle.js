@@ -690,6 +690,47 @@ module.exports = exports["default"];
 
 /***/ }),
 
+/***/ "./app/frontend/designer/js/Hardware.js":
+/*!**********************************************!*\
+  !*** ./app/frontend/designer/js/Hardware.js ***!
+  \**********************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+// just a simple mock object for the brainbox
+// Hardware binding
+//
+exports.default = {
+
+  gpio: {
+    set: function set(pin, value) {},
+    get: function get(pin) {
+      return false;
+    }
+  },
+
+  bloc: {
+    set: function set(blocId, value) {},
+    get: function get(blocId) {
+      return false;
+    },
+    on: function on() {},
+    off: function off() {},
+    isConnected: function isConnected(blocId) {
+      return true;
+    }
+  }
+};
+module.exports = exports["default"];
+
+/***/ }),
+
 /***/ "./app/frontend/designer/js/Layer.js":
 /*!*******************************************!*\
   !*** ./app/frontend/designer/js/Layer.js ***!
@@ -5380,9 +5421,14 @@ __webpack_require__(/*! ./util/mousetrap-global */ "./app/frontend/designer/js/u
 
 __webpack_require__(/*! ./util/mousetrap-pause */ "./app/frontend/designer/js/util/mousetrap-pause.js");
 
+var _Hardware = __webpack_require__(/*! ./Hardware */ "./app/frontend/designer/js/Hardware.js");
+
+var _Hardware2 = _interopRequireDefault(_Hardware);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
+  hardware: _Hardware2.default,
   DecoratedInputPort: _DecoratedInputPort2.default,
   Mousetrap: _mousetrap2.default
 };
@@ -5677,6 +5723,8 @@ exports.default = shape_designer.FigureWriter = draw2d.io.Writer.extend({
   marshal: function marshal(canvas, className, resultCallback) {
     var baseClass = shape_designer.app.getConfiguration("baseClass");
     var customCode = shape_designer.app.getConfiguration("code");
+    customCode = customCode.replace(/testShape/g, className);
+
     var figures = canvas.getExtFigures();
     var b = canvas.getBoundingBox();
 
@@ -5764,8 +5812,12 @@ exports.default = shape_designer.FigureWriter = draw2d.io.Writer.extend({
 
     var template = $("#shape-base-template").text().trim();
 
+    var tags = className.split("_");
     var compiled = _hogan2.default.compile(template);
+    var tooltip = tags.length > 0 ? tags.slice(-1)[0] : name;
+    tooltip = tooltip.split(/\s*(?=[A-Z][a-z])/).join(" ");
     var output = compiled.render({
+      tooltip: tooltip,
       className: className,
       baseClass: baseClass,
       figures: shapes,

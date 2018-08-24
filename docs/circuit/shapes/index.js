@@ -10,6 +10,10 @@ var draw2d_circuit_alu_FullAdder = draw2d.SetFigure.extend({
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+     this.tooltip = null;
+     this.tooltipTimer = -1;
+
      this._super( $.extend({stroke:0, bgColor:null, width:70,height:77.53125},attr), setter, getter);
      var port;
      // output_s
@@ -43,7 +47,82 @@ var draw2d_circuit_alu_FullAdder = draw2d.SetFigure.extend({
      port.setName("input_c");
      port.setMaxFanOut(20);
      this.persistPorts=false;
+     this.zoomCallback = $.proxy(this.positionTooltip,this);
+
+     this.on("dragstart", function() {
+      _this.hideTooltip(true)
+    })
+
+    this.on("mouseenter", function() {
+      _this.tooltipTimer = window.setTimeout(function() {
+        _this.tooltipTimer = -1
+        _this.showTooltip()
+      }, 500)
+    })
+
+    this.on("mouseleave", function(){
+      _this.hideTooltip()
+    })
+
+    this.on("move", function(){
+      _this.positionTooltip()
+    })
+
    },
+
+    setCanvas: function(canvas)
+    {
+        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
+        this._super(canvas);
+        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
+    },
+
+    hideTooltip: function (fast) {
+      if (this.tooltipTimer !== -1) {
+        window.clearTimeout(this.tooltipTimer)
+        this.tooltipTimer = -1
+      }
+      else if(this.tooltip!==null){
+        if(fast) {
+          this.tooltip.remove()
+        }
+        else{
+          this.tooltip.fadeOut(500, function () {
+            $(this).remove()
+          })
+        }
+        this.tooltip = null
+      }
+    },
+
+    showTooltip:function()
+    {
+        this.tooltip= $('<div class="draw2d_tooltip">FullAdder</div>')
+            .appendTo('body')
+            .hide()
+            .fadeIn(1000);
+        this.positionTooltip();
+    },
+
+
+    positionTooltip: function()
+    {
+        if( this.tooltip===null){
+            return;
+        }
+
+        var width =  this.tooltip.outerWidth(true);
+        var pos = this.canvas.fromCanvasToDocumentCoordinate(
+                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
+                this.getAbsoluteY()+this.getHeight() + 10);
+
+        // remove the scrolling part from the tooltip because the tooltip is placed
+        // inside the scrolling container
+        pos.x +=this.canvas.getScrollLeft();
+        pos.y +=this.canvas.getScrollTop();
+
+        this.tooltip.css({'top': pos.y, 'left': pos.x});
+    },
 
    createShapeElement : function()
    {
@@ -1363,6 +1442,10 @@ var draw2d_circuit_decoder_BCDto7Seg = draw2d.SetFigure.extend({
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+     this.tooltip = null;
+     this.tooltipTimer = -1;
+
      this._super( $.extend({stroke:0, bgColor:null, width:87,height:185},attr), setter, getter);
      var port;
      // out_a
@@ -1432,7 +1515,82 @@ var draw2d_circuit_decoder_BCDto7Seg = draw2d.SetFigure.extend({
      port.setName("out_g");
      port.setMaxFanOut(20);
      this.persistPorts=false;
+     this.zoomCallback = $.proxy(this.positionTooltip,this);
+
+     this.on("dragstart", function() {
+      _this.hideTooltip(true)
+    })
+
+    this.on("mouseenter", function() {
+      _this.tooltipTimer = window.setTimeout(function() {
+        _this.tooltipTimer = -1
+        _this.showTooltip()
+      }, 500)
+    })
+
+    this.on("mouseleave", function(){
+      _this.hideTooltip()
+    })
+
+    this.on("move", function(){
+      _this.positionTooltip()
+    })
+
    },
+
+    setCanvas: function(canvas)
+    {
+        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
+        this._super(canvas);
+        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
+    },
+
+    hideTooltip: function (fast) {
+      if (this.tooltipTimer !== -1) {
+        window.clearTimeout(this.tooltipTimer)
+        this.tooltipTimer = -1
+      }
+      else if(this.tooltip!==null){
+        if(fast) {
+          this.tooltip.remove()
+        }
+        else{
+          this.tooltip.fadeOut(500, function () {
+            $(this).remove()
+          })
+        }
+        this.tooltip = null
+      }
+    },
+
+    showTooltip:function()
+    {
+        this.tooltip= $('<div class="draw2d_tooltip">BC Dto7 Seg</div>')
+            .appendTo('body')
+            .hide()
+            .fadeIn(1000);
+        this.positionTooltip();
+    },
+
+
+    positionTooltip: function()
+    {
+        if( this.tooltip===null){
+            return;
+        }
+
+        var width =  this.tooltip.outerWidth(true);
+        var pos = this.canvas.fromCanvasToDocumentCoordinate(
+                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
+                this.getAbsoluteY()+this.getHeight() + 10);
+
+        // remove the scrolling part from the tooltip because the tooltip is placed
+        // inside the scrolling container
+        pos.x +=this.canvas.getScrollLeft();
+        pos.y +=this.canvas.getScrollTop();
+
+        this.tooltip.css({'top': pos.y, 'left': pos.x});
+    },
 
    createShapeElement : function()
    {
@@ -2022,19 +2180,22 @@ draw2d_circuit_display_7Segment = draw2d_circuit_display_7Segment.extend({
 draw2d_circuit_display_7Segment.github="./shapes/org/draw2d/circuit/display/7Segment.shape";
 
 
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_display_Led = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_display_Led = draw2d.SetFigure.extend({
 
    NAME: "draw2d_circuit_display_Led",
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+     this.tooltip = null;
+     this.tooltipTimer = -1;
+
      this._super( $.extend({stroke:0, bgColor:null, width:30,height:32},attr), setter, getter);
      var port;
      // Port
@@ -2044,7 +2205,82 @@ var draw2d_circuit_display_Led = draw2d.SetFigure.extend({
      port.setName("Port");
      port.setMaxFanOut(20);
      this.persistPorts=false;
+     this.zoomCallback = $.proxy(this.positionTooltip,this);
+
+     this.on("dragstart", function() {
+      _this.hideTooltip(true)
+    })
+
+    this.on("mouseenter", function() {
+      _this.tooltipTimer = window.setTimeout(function() {
+        _this.tooltipTimer = -1
+        _this.showTooltip()
+      }, 500)
+    })
+
+    this.on("mouseleave", function(){
+      _this.hideTooltip()
+    })
+
+    this.on("move", function(){
+      _this.positionTooltip()
+    })
+
    },
+
+    setCanvas: function(canvas)
+    {
+        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
+        this._super(canvas);
+        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
+    },
+
+    hideTooltip: function (fast) {
+      if (this.tooltipTimer !== -1) {
+        window.clearTimeout(this.tooltipTimer)
+        this.tooltipTimer = -1
+      }
+      else if(this.tooltip!==null){
+        if(fast) {
+          this.tooltip.remove()
+        }
+        else{
+          this.tooltip.fadeOut(500, function () {
+            $(this).remove()
+          })
+        }
+        this.tooltip = null
+      }
+    },
+
+    showTooltip:function()
+    {
+        this.tooltip= $('<div class="draw2d_tooltip">Led</div>')
+            .appendTo('body')
+            .hide()
+            .fadeIn(1000);
+        this.positionTooltip();
+    },
+
+
+    positionTooltip: function()
+    {
+        if( this.tooltip===null){
+            return;
+        }
+
+        var width =  this.tooltip.outerWidth(true);
+        var pos = this.canvas.fromCanvasToDocumentCoordinate(
+                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
+                this.getAbsoluteY()+this.getHeight() + 10);
+
+        // remove the scrolling part from the tooltip because the tooltip is placed
+        // inside the scrolling container
+        pos.x +=this.canvas.getScrollLeft();
+        pos.y +=this.canvas.getScrollTop();
+
+        this.tooltip.css({'top': pos.y, 'left': pos.x});
+    },
 
    createShapeElement : function()
    {
@@ -2057,39 +2293,39 @@ var draw2d_circuit_display_Led = draw2d.SetFigure.extend({
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L30,0 L30,32 L0,32");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // circle
+       shape = this.canvas.paper.ellipse();
+       shape.attr({"rx":15,"ry":16,"cx":15,"cy":16,"stroke":"#1B1B1B","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","circle");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M5.5 5.5L15.5,16.5L24.5,27.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M5.5 5.5L15.5,16.5L24.5,27.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M25.5 5.5L5.5,27.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M25.5 5.5L5.5,27.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L30,0 L30,32 L0,32");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // circle
-        shape = this.canvas.paper.ellipse();
-        shape.attr({"rx":15,"ry":16,"cx":15,"cy":16,"stroke":"#1B1B1B","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","circle");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M5.5 5.5L15.5,16.5L24.5,27.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M5.5 5.5L15.5,16.5L24.5,27.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M25.5 5.5L5.5,27.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M25.5 5.5L5.5,27.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-
-        return this.canvas.paper.setFinish();
+       return this.canvas.paper.setFinish();
    },
 
    applyAlpha: function()
@@ -2256,359 +2492,182 @@ draw2d_circuit_display_Led = draw2d_circuit_display_Led.extend({
         }
     }
 });
-draw2d_circuit_display_Led.github="./shapes/org/draw2d/circuit/display/Led.shape";
 
 
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_flipflop_D_FlipFlop = draw2d.SetFigure.extend({            
-
-   NAME: "draw2d_circuit_flipflop_D_FlipFlop",
-
-   init:function(attr, setter, getter)
-   {
-     this._super( $.extend({stroke:0, bgColor:null, width:41.5,height:53.05297500000006},attr), setter, getter);
-     var port;
-     // output_q
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(103.63403614457793, 20.526652840863044));
-     port.setConnectionDirection(1);
-     port.setBackgroundColor("#1C9BAB");
-     port.setName("output_q");
-     port.setMaxFanOut(20);
-     // input_t
-     port = this.createPort("input", new draw2d.layout.locator.XYRelPortLocator(-4.819277108433735, 79.9873852503084));
-     port.setConnectionDirection(3);
-     port.setBackgroundColor("#1C9BAB");
-     port.setName("input_t");
-     port.setMaxFanOut(20);
-     // input_d
-     port = this.createPort("input", new draw2d.layout.locator.XYRelPortLocator(-4.819277108433735, 20.526652840863044));
-     port.setConnectionDirection(3);
-     port.setBackgroundColor("#1C9BAB");
-     port.setName("input_d");
-     port.setMaxFanOut(20);
-     // output_q_not
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(103.63403614457793, 79.9873852503084));
-     port.setConnectionDirection(1);
-     port.setBackgroundColor("#1C9BAB");
-     port.setName("output_q_not");
-     port.setMaxFanOut(20);
-     this.persistPorts=false;
-   },
-
-   createShapeElement : function()
-   {
-      var shape = this._super();
-      this.originalWidth = 41.5;
-      this.originalHeight= 53.05297500000006;
-      return shape;
-   },
-
-   createSet: function()
-   {
-       this.canvas.paper.setStart();
-
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L41.5,0 L41.5,53.05297500000006 L0,53.05297500000006");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M1.5,2Q1.5,1 2.5, 1L40.5,1Q41.5,1 41.5, 2L41.5,50Q41.5,51 40.5, 51L2.5,51Q1.5,51 1.5, 50L1.5,2');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'D');
-        shape.attr({"x":4,"y":10.6796875,"text-anchor":"start","text":"D","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M1.5 37.12699999999995L13.541999999999916 42.03299999999899L1.5 47.38499999999976Z');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"none","opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'Q');
-        shape.attr({"x":28.28125,"y":11.1796875,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'Q');
-        shape.attr({"x":27.78125,"y":42.37328750000006,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M27.8479999999995 36.49839999999767L35.374799999999595,36.49839999999767');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M27.8479999999995 36.49839999999767L35.374799999999595,36.49839999999767');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"opacity":1});
-        shape.data("name","Line");
-        
-
-        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
-});
-
-/**
- * by 'Draw2D Shape Designer'
- *
- * Custom JS code to tweak the standard behaviour of the generated
- * shape. add your custome code and event handler here.
- *
- *
- */
-draw2d_circuit_flipflop_D_FlipFlop = draw2d_circuit_flipflop_D_FlipFlop.extend({
-
-    init: function(attr, setter, getter){
-         this._super(attr, setter, getter);
-
-        this.attr({resizeable:false});
-        this.last_t = false;
-    },
-    
-    calculate:function()
-    {
-        var d = this.getInputPort("input_d").getValue();
-        var t = this.getInputPort("input_t").getValue();
-        
-        var q = this.getOutputPort("output_q");
-        var q_ = this.getOutputPort("output_q_not");
-        
-        var rising = this.last_t===false && t===true; 
-        
-        if(rising===true){
-            q.setValue(d);
-            q_.setValue(!d)
-        }
-        this.last_t = t;
-    }
-});
-draw2d_circuit_flipflop_D_FlipFlop.logic="calculate: function () {\n    var d = this.getInputPort(\'input_d\').getValue();\n    var t = this.getInputPort(\'input_t\').getValue();\n    var q = this.getOutputPort(\'output_q\');\n    var q_ = this.getOutputPort(\'output_q_not\');\n    var rising = this.last_t === false && t === true;\n    if (rising === true) {\n        q.setValue(d);\n        q_.setValue(!d);\n    }\n    this.last_t = t;\n}";
-draw2d_circuit_flipflop_D_FlipFlop.github="./shapes/org/draw2d/circuit/flipflop/D_FlipFlop.shape";
-draw2d_circuit_flipflop_D_FlipFlop.markdown="# D-FlipFlop\n\n## Description\n\nThe D FlipFLop is widely used. It is also known as a \n*data* or *delay* flip-flop.\n\nThe D flip-flop captures the value of the `D` input \nat a definite portion of the clock cycle (such \nas the rising edge of the clock). That captured \nvalue becomes the `Q` output. At other times, the \noutput Q does not change. The `D flip-flop` \ncan be viewed as a memory cell, a zero-order hold, \nor a delay line.\n\n\n## Logic table\n\n| Clock        | D       |  **Q***next*   |\n|:------------:|:-------:|:----------:|\n| Rising edge  | Low     |  **Low**       |\n| Rising edge  | High    |  **High**      |\n| non rising   | *       |  **Q***last*   |\n\n";
-
-
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_flipflop_DFlipFlop = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_flipflop_DFlipFlop = draw2d.SetFigure.extend({
 
    NAME: "draw2d_circuit_flipflop_DFlipFlop",
 
    init:function(attr, setter, getter)
    {
-     this._super( $.extend({stroke:0, bgColor:null, width:41.5,height:53.69360000000006},attr), setter, getter);
+     var _this = this;
+     this.tooltip = null;
+     this.tooltipTimer = -1;
+
+     this._super( $.extend({stroke:0, bgColor:null, width:41.5,height:53.052974999999606},attr), setter, getter);
      var port;
      // output_q
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.42921686746949, 20.281746800363283));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.42921686747059, 20.526652840864077));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#1C9BAB");
      port.setName("output_q");
      port.setMaxFanOut(20);
      // output_q_not
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.42921686746949, 79.03304583786486));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.42921686747059, 79.98738525030996));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#1C9BAB");
      port.setName("output_q_not");
      port.setMaxFanOut(20);
      // input_d
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(0, 20.281746800363283));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(0, 20.526652840864077));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#1C9BAB");
      port.setName("input_d");
      port.setMaxFanOut(20);
      // input_t
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(0, 79.03304583786486));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(0, 79.98738525030996));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#1C9BAB");
      port.setName("input_t");
      port.setMaxFanOut(20);
      this.persistPorts=false;
+     this.zoomCallback = $.proxy(this.positionTooltip,this);
+
+     this.on("dragstart", function() {
+      _this.hideTooltip(true)
+    })
+
+    this.on("mouseenter", function() {
+      _this.tooltipTimer = window.setTimeout(function() {
+        _this.tooltipTimer = -1
+        _this.showTooltip()
+      }, 500)
+    })
+
+    this.on("mouseleave", function(){
+      _this.hideTooltip()
+    })
+
+    this.on("move", function(){
+      _this.positionTooltip()
+    })
+
    },
+
+    setCanvas: function(canvas)
+    {
+        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
+        this._super(canvas);
+        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
+    },
+
+    hideTooltip: function (fast) {
+      if (this.tooltipTimer !== -1) {
+        window.clearTimeout(this.tooltipTimer)
+        this.tooltipTimer = -1
+      }
+      else if(this.tooltip!==null){
+        if(fast) {
+          this.tooltip.remove()
+        }
+        else{
+          this.tooltip.fadeOut(500, function () {
+            $(this).remove()
+          })
+        }
+        this.tooltip = null
+      }
+    },
+
+    showTooltip:function()
+    {
+        this.tooltip= $('<div class="draw2d_tooltip">D Flip Flop</div>')
+            .appendTo('body')
+            .hide()
+            .fadeIn(1000);
+        this.positionTooltip();
+    },
+
+
+    positionTooltip: function()
+    {
+        if( this.tooltip===null){
+            return;
+        }
+
+        var width =  this.tooltip.outerWidth(true);
+        var pos = this.canvas.fromCanvasToDocumentCoordinate(
+                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
+                this.getAbsoluteY()+this.getHeight() + 10);
+
+        // remove the scrolling part from the tooltip because the tooltip is placed
+        // inside the scrolling container
+        pos.x +=this.canvas.getScrollLeft();
+        pos.y +=this.canvas.getScrollTop();
+
+        this.tooltip.css({'top': pos.y, 'left': pos.x});
+    },
 
    createShapeElement : function()
    {
       var shape = this._super();
       this.originalWidth = 41.5;
-      this.originalHeight= 53.69360000000006;
+      this.originalHeight= 53.052974999999606;
       return shape;
    },
 
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L41.5,0 L41.5,53.052974999999606 L0,53.052974999999606");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M1.5,2Q1.5,1 2.5, 1L40.5,1Q41.5,1 41.5, 2L41.5,50Q41.5,51 40.5, 51L2.5,51Q1.5,51 1.5, 50L1.5,2');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'D');
+       shape.attr({"x":4,"y":10.6796875,"text-anchor":"start","text":"D","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'Q');
+       shape.attr({"x":28.28125,"y":11.1796875,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'Q');
+       shape.attr({"x":27.78125,"y":42.373287499999606,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M1.5 37.1269999999995L13.541999999999462 42.03299999999854L1.5 47.38499999999931Z');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"none","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M27.5 36.5L35.5,36.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M27.5 36.5L35.5,36.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L41.5,0 L41.5,53.69360000000006 L0,53.69360000000006");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M1.5,2Q1.5,1 2.5, 1L40.5,1Q41.5,1 41.5, 2L41.5,50Q41.5,51 40.5, 51L2.5,51Q1.5,51 1.5, 50L1.5,2');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'D');
-        shape.attr({"x":4,"y":11,"text-anchor":"start","text":"D","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'Q');
-        shape.attr({"x":28.28125,"y":11.5,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'Q');
-        shape.attr({"x":27.78125,"y":42.69360000000006,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M1.5 37.12699999999995L13.541999999999916 42.03299999999899L1.5 47.38499999999976Z');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"none","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M27.5 36.5L35.5,36.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M27.5 36.5L35.5,36.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-
-        return this.canvas.paper.setFinish();
+       return this.canvas.paper.setFinish();
    },
 
    applyAlpha: function()
@@ -2784,7 +2843,6 @@ draw2d_circuit_flipflop_DFlipFlop = draw2d_circuit_flipflop_DFlipFlop.extend({
         this.last_t = t;
     }
 });
-draw2d_circuit_flipflop_DFlipFlop.github="./shapes/org/draw2d/circuit/flipflop/DFlipFlop.shape";
 
 
 // Generated Code for the Draw2D touch HTML5 lib
@@ -3090,29 +3148,32 @@ draw2d_circuit_flipflop_JKFlipFlop = draw2d_circuit_flipflop_JKFlipFlop.extend({
 draw2d_circuit_flipflop_JKFlipFlop.github="./shapes/org/draw2d/circuit/flipflop/JKFlipFlop.shape";
 
 
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_flipflop_SRFlipFlop = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_flipflop_SRFlipFlop = draw2d.SetFigure.extend({
 
    NAME: "draw2d_circuit_flipflop_SRFlipFlop",
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+     this.tooltip = null;
+     this.tooltipTimer = -1;
+
      this._super( $.extend({stroke:0, bgColor:null, width:40,height:63.12239999999838},attr), setter, getter);
      var port;
      // output_q
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.52031249999959, 16.919013694029815));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.52031250000073, 16.919013694029815));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#1C9BAB");
      port.setName("output_q");
      port.setMaxFanOut(20);
      // output_q_not
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.52031249999959, 81.5763777993222));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.52031250000073, 81.57637779932148));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#1C9BAB");
      port.setName("output_q_not");
@@ -3124,13 +3185,88 @@ var draw2d_circuit_flipflop_SRFlipFlop = draw2d.SetFigure.extend({
      port.setName("input_s");
      port.setMaxFanOut(1);
      // input_r
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-5.052799999996296, 81.5763777993222));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-5.052799999996296, 81.57637779932148));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#1C9BAB");
      port.setName("input_r");
      port.setMaxFanOut(1);
      this.persistPorts=false;
+     this.zoomCallback = $.proxy(this.positionTooltip,this);
+
+     this.on("dragstart", function() {
+      _this.hideTooltip(true)
+    })
+
+    this.on("mouseenter", function() {
+      _this.tooltipTimer = window.setTimeout(function() {
+        _this.tooltipTimer = -1
+        _this.showTooltip()
+      }, 500)
+    })
+
+    this.on("mouseleave", function(){
+      _this.hideTooltip()
+    })
+
+    this.on("move", function(){
+      _this.positionTooltip()
+    })
+
    },
+
+    setCanvas: function(canvas)
+    {
+        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
+        this._super(canvas);
+        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
+    },
+
+    hideTooltip: function (fast) {
+      if (this.tooltipTimer !== -1) {
+        window.clearTimeout(this.tooltipTimer)
+        this.tooltipTimer = -1
+      }
+      else if(this.tooltip!==null){
+        if(fast) {
+          this.tooltip.remove()
+        }
+        else{
+          this.tooltip.fadeOut(500, function () {
+            $(this).remove()
+          })
+        }
+        this.tooltip = null
+      }
+    },
+
+    showTooltip:function()
+    {
+        this.tooltip= $('<div class="draw2d_tooltip">SR Flip Flop</div>')
+            .appendTo('body')
+            .hide()
+            .fadeIn(1000);
+        this.positionTooltip();
+    },
+
+
+    positionTooltip: function()
+    {
+        if( this.tooltip===null){
+            return;
+        }
+
+        var width =  this.tooltip.outerWidth(true);
+        var pos = this.canvas.fromCanvasToDocumentCoordinate(
+                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
+                this.getAbsoluteY()+this.getHeight() + 10);
+
+        // remove the scrolling part from the tooltip because the tooltip is placed
+        // inside the scrolling container
+        pos.x +=this.canvas.getScrollLeft();
+        pos.y +=this.canvas.getScrollTop();
+
+        this.tooltip.css({'top': pos.y, 'left': pos.x});
+    },
 
    createShapeElement : function()
    {
@@ -3143,49 +3279,49 @@ var draw2d_circuit_flipflop_SRFlipFlop = draw2d.SetFigure.extend({
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L40,0 L40,63.12239999999838 L0,63.12239999999838");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M0,1.122399999998379Q0,0.12239999999837892 1, 0.12239999999837892L39,0.12239999999837892Q40,0.12239999999837892 40, 1.122399999998379L40,62.12239999999838Q40,63.12239999999838 39, 63.12239999999838L1,63.12239999999838Q0,63.12239999999838 0, 62.12239999999838L0,1.122399999998379');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'Q');
+       shape.attr({"x":26.28125,"y":51.43056749999869,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'Q');
+       shape.attr({"x":26.28125,"y":10.736967499998173,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'S');
+       shape.attr({"x":8.0078125,"y":10.6796875,"text-anchor":"start","text":"S","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'R');
+       shape.attr({"x":7.978880000001482,"y":51.43056749999869,"text-anchor":"start","text":"R","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M26.5 45.5L33.5,45.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M26.5 45.5L33.5,45.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L40,0 L40,63.12239999999838 L0,63.12239999999838");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M0,1.122399999998379Q0,0.12239999999837892 1, 0.12239999999837892L39,0.12239999999837892Q40,0.12239999999837892 40, 1.122399999998379L40,62.12239999999838Q40,63.12239999999838 39, 63.12239999999838L1,63.12239999999838Q0,63.12239999999838 0, 62.12239999999838L0,1.122399999998379');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'Q');
-        shape.attr({"x":26.28125,"y":51.75087999999823,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'Q');
-        shape.attr({"x":26.28125,"y":11.057279999998173,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'S');
-        shape.attr({"x":8.0078125,"y":11,"text-anchor":"start","text":"S","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'R');
-        shape.attr({"x":7.978880000001482,"y":51.75087999999823,"text-anchor":"start","text":"R","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M26.5 45.5L33.5,45.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M26.5 45.5L33.5,45.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-
-        return this.canvas.paper.setFinish();
+       return this.canvas.paper.setFinish();
    },
 
    applyAlpha: function()
@@ -3371,94 +3507,171 @@ draw2d_circuit_flipflop_SRFlipFlop = draw2d_circuit_flipflop_SRFlipFlop.extend({
         }
     }
 });
-draw2d_circuit_flipflop_SRFlipFlop.github="./shapes/org/draw2d/circuit/flipflop/SRFlipFlop.shape";
 
 
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_flipflop_TFlipFlop = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_flipflop_TFlipFlop = draw2d.SetFigure.extend({
 
    NAME: "draw2d_circuit_flipflop_TFlipFlop",
 
    init:function(attr, setter, getter)
    {
-     this._super( $.extend({stroke:0, bgColor:null, width:40,height:53.19360000000006},attr), setter, getter);
+     var _this = this;
+     this.tooltip = null;
+     this.tooltipTimer = -1;
+
+     this._super( $.extend({stroke:0, bgColor:null, width:40,height:52.552974999999606},attr), setter, getter);
      var port;
      // output_q
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.52031249999959, 19.53242495337759));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.52031250000073, 19.770526787494724));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#1C9BAB");
      port.setName("output_q");
      port.setMaxFanOut(20);
      // output_q_not
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.52031249999959, 78.83596428893667));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.52031250000073, 79.79698104626927));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#1C9BAB");
      port.setName("output_q_not");
      port.setMaxFanOut(20);
      // input_t
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-6.207600000000184, 47.9380978162786));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-6.207600000000184, 48.5224670915399));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#1C9BAB");
      port.setName("input_t");
      port.setMaxFanOut(20);
      this.persistPorts=false;
+     this.zoomCallback = $.proxy(this.positionTooltip,this);
+
+     this.on("dragstart", function() {
+      _this.hideTooltip(true)
+    })
+
+    this.on("mouseenter", function() {
+      _this.tooltipTimer = window.setTimeout(function() {
+        _this.tooltipTimer = -1
+        _this.showTooltip()
+      }, 500)
+    })
+
+    this.on("mouseleave", function(){
+      _this.hideTooltip()
+    })
+
+    this.on("move", function(){
+      _this.positionTooltip()
+    })
+
    },
+
+    setCanvas: function(canvas)
+    {
+        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
+        this._super(canvas);
+        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
+    },
+
+    hideTooltip: function (fast) {
+      if (this.tooltipTimer !== -1) {
+        window.clearTimeout(this.tooltipTimer)
+        this.tooltipTimer = -1
+      }
+      else if(this.tooltip!==null){
+        if(fast) {
+          this.tooltip.remove()
+        }
+        else{
+          this.tooltip.fadeOut(500, function () {
+            $(this).remove()
+          })
+        }
+        this.tooltip = null
+      }
+    },
+
+    showTooltip:function()
+    {
+        this.tooltip= $('<div class="draw2d_tooltip">T Flip Flop</div>')
+            .appendTo('body')
+            .hide()
+            .fadeIn(1000);
+        this.positionTooltip();
+    },
+
+
+    positionTooltip: function()
+    {
+        if( this.tooltip===null){
+            return;
+        }
+
+        var width =  this.tooltip.outerWidth(true);
+        var pos = this.canvas.fromCanvasToDocumentCoordinate(
+                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
+                this.getAbsoluteY()+this.getHeight() + 10);
+
+        // remove the scrolling part from the tooltip because the tooltip is placed
+        // inside the scrolling container
+        pos.x +=this.canvas.getScrollLeft();
+        pos.y +=this.canvas.getScrollTop();
+
+        this.tooltip.css({'top': pos.y, 'left': pos.x});
+    },
 
    createShapeElement : function()
    {
       var shape = this._super();
       this.originalWidth = 40;
-      this.originalHeight= 53.19360000000006;
+      this.originalHeight= 52.552974999999606;
       return shape;
    },
 
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L40,0 L40,52.552974999999606 L0,52.552974999999606");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M0,1.5Q0,0.5 1, 0.5L39,0.5Q40,0.5 40, 1.5L40,49.5Q40,50.5 39, 50.5L1,50.5Q0,50.5 0, 49.5L0,1.5');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'Q');
+       shape.attr({"x":26.78125,"y":10.6796875,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'Q');
+       shape.attr({"x":26.28125,"y":41.873287499999606,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M0.5 20.371000000000095L12.541999999999462 25.276999999999134L0.5 30.628999999999905Z');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"none","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M26.5 35.5L33.5,35.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M26.5 35.5L33.5,35.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L40,0 L40,53.19360000000006 L0,53.19360000000006");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M0,1.5Q0,0.5 1, 0.5L39,0.5Q40,0.5 40, 1.5L40,49.5Q40,50.5 39, 50.5L1,50.5Q0,50.5 0, 49.5L0,1.5');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'Q');
-        shape.attr({"x":26.78125,"y":11,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'Q');
-        shape.attr({"x":26.28125,"y":42.19360000000006,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M0.5 20.371000000000095L12.541999999999916 25.276999999999134L0.5 30.628999999999905Z');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"none","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M26.5 35.5L33.5,35.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M26.5 35.5L33.5,35.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-
-        return this.canvas.paper.setFinish();
+       return this.canvas.paper.setFinish();
    },
 
    applyAlpha: function()
@@ -3634,265 +3847,6 @@ draw2d_circuit_flipflop_TFlipFlop = draw2d_circuit_flipflop_TFlipFlop.extend({
         this.last_t = t;
     }
 });
-draw2d_circuit_flipflop_TFlipFlop.github="./shapes/org/draw2d/circuit/flipflop/TFlipFlop.shape";
-
-
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_flipflop_ToggleFlipFlop = draw2d.SetFigure.extend({            
-
-   NAME: "draw2d_circuit_flipflop_ToggleFlipFlop",
-
-   init:function(attr, setter, getter)
-   {
-     this._super( $.extend({stroke:0, bgColor:null, width:40,height:53.19360000000006},attr), setter, getter);
-     var port;
-     // output_q
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.52031249999959, 19.53242495337759));
-     port.setConnectionDirection(1);
-     port.setBackgroundColor("#1C9BAB");
-     port.setName("output_q");
-     port.setMaxFanOut(20);
-     // output_q_not
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.52031249999959, 78.83596428893667));
-     port.setConnectionDirection(1);
-     port.setBackgroundColor("#1C9BAB");
-     port.setName("output_q_not");
-     port.setMaxFanOut(20);
-     // input_t
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-6.207600000000184, 47.9380978162786));
-     port.setConnectionDirection(3);
-     port.setBackgroundColor("#1C9BAB");
-     port.setName("input_t");
-     port.setMaxFanOut(20);
-     this.persistPorts=false;
-   },
-
-   createShapeElement : function()
-   {
-      var shape = this._super();
-      this.originalWidth = 40;
-      this.originalHeight= 53.19360000000006;
-      return shape;
-   },
-
-   createSet: function()
-   {
-       this.canvas.paper.setStart();
-
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L40,0 L40,53.19360000000006 L0,53.19360000000006");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M0,1.5Q0,0.5 1, 0.5L39,0.5Q40,0.5 40, 1.5L40,49.5Q40,50.5 39, 50.5L1,50.5Q0,50.5 0, 49.5L0,1.5');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'Q');
-        shape.attr({"x":26.78125,"y":11,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'Q');
-        shape.attr({"x":26.28125,"y":42.19360000000006,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M0.5 20.371000000000095L12.541999999999916 25.276999999999134L0.5 30.628999999999905Z');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"none","opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M26.5 35.5L33.5,35.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M26.5 35.5L33.5,35.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"opacity":1});
-        shape.data("name","Line");
-        
-
-        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
-});
-
-/**
- * by 'Draw2D Shape Designer'
- *
- * Custom JS code to tweak the standard behaviour of the generated
- * shape. add your custome code and event handler here.
- *
- *
- */
-draw2d_circuit_flipflop_ToggleFlipFlop = draw2d_circuit_flipflop_ToggleFlipFlop.extend({
-
-    init: function(attr, setter, getter){
-         this._super(attr, setter, getter);
-
-        this.attr({resizeable:false});
-        this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());
-
-        this.last_t = false;
-    },
-    
-    calculate:function()
-    {
-        var t = this.getInputPort("input_t").getValue();
-        
-        var q = this.getOutputPort("output_q");
-        var q_ = this.getOutputPort("output_q_not");
-        
-        var rising = this.last_t===false && t===true; 
-        
-        if(rising===true){
-            var v = q.getValue();
-            q.setValue(!v);
-            q_.setValue(v)
-        }
-        this.last_t = t;
-    }
-});
-draw2d_circuit_flipflop_ToggleFlipFlop.github="./shapes/org/draw2d/circuit/flipflop/ToggleFlipFlop.shape";
 
 
 // Generated Code for the Draw2D touch HTML5 lib.
@@ -5069,64 +5023,142 @@ draw2d_circuit_gate_OR = draw2d_circuit_gate_OR.extend({
 draw2d_circuit_gate_OR.github="./shapes/org/draw2d/circuit/gate/OR.shape";
 
 
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_hardware_BlocINPUT = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_hardware_BlocINPUT = draw2d.SetFigure.extend({
 
    NAME: "draw2d_circuit_hardware_BlocINPUT",
 
    init:function(attr, setter, getter)
    {
-     this._super( $.extend({stroke:0, bgColor:null, width:56,height:72.27812499999982},attr), setter, getter);
+     var _this = this;
+     this.tooltip = null;
+     this.tooltipTimer = -1;
+
+     this._super( $.extend({stroke:0, bgColor:null, width:56,height:70.15312500000073},attr), setter, getter);
      var port;
      // output_01
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.32785714285748, 45.65696744346935));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.32785714285748, 47.039957236402024));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("output_01");
      port.setMaxFanOut(20);
      this.persistPorts=false;
+     this.zoomCallback = $.proxy(this.positionTooltip,this);
+
+     this.on("dragstart", function() {
+      _this.hideTooltip(true)
+    })
+
+    this.on("mouseenter", function() {
+      _this.tooltipTimer = window.setTimeout(function() {
+        _this.tooltipTimer = -1
+        _this.showTooltip()
+      }, 500)
+    })
+
+    this.on("mouseleave", function(){
+      _this.hideTooltip()
+    })
+
+    this.on("move", function(){
+      _this.positionTooltip()
+    })
+
    },
+
+    setCanvas: function(canvas)
+    {
+        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
+        this._super(canvas);
+        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
+    },
+
+    hideTooltip: function (fast) {
+      if (this.tooltipTimer !== -1) {
+        window.clearTimeout(this.tooltipTimer)
+        this.tooltipTimer = -1
+      }
+      else if(this.tooltip!==null){
+        if(fast) {
+          this.tooltip.remove()
+        }
+        else{
+          this.tooltip.fadeOut(500, function () {
+            $(this).remove()
+          })
+        }
+        this.tooltip = null
+      }
+    },
+
+    showTooltip:function()
+    {
+        this.tooltip= $('<div class="draw2d_tooltip">BlocINPUT</div>')
+            .appendTo('body')
+            .hide()
+            .fadeIn(1000);
+        this.positionTooltip();
+    },
+
+
+    positionTooltip: function()
+    {
+        if( this.tooltip===null){
+            return;
+        }
+
+        var width =  this.tooltip.outerWidth(true);
+        var pos = this.canvas.fromCanvasToDocumentCoordinate(
+                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
+                this.getAbsoluteY()+this.getHeight() + 10);
+
+        // remove the scrolling part from the tooltip because the tooltip is placed
+        // inside the scrolling container
+        pos.x +=this.canvas.getScrollLeft();
+        pos.y +=this.canvas.getScrollTop();
+
+        this.tooltip.css({'top': pos.y, 'left': pos.x});
+    },
 
    createShapeElement : function()
    {
       var shape = this._super();
       this.originalWidth = 56;
-      this.originalHeight= 72.27812499999982;
+      this.originalHeight= 70.15312500000073;
       return shape;
    },
 
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L56,0 L56,70.15312500000073 L0,70.15312500000073");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M0,8Q0,0 8, 0L48,0Q56,0 56, 8L56,58Q56,66 48, 66L8,66Q0,66 0, 58L0,8');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // indicator
+       shape = this.canvas.paper.ellipse();
+       shape.attr({"rx":5,"ry":5,"cx":7.977199999999357,"cy":57.5,"stroke":"#999999","stroke-width":1,"fill":"none","dasharray":null,"opacity":1});
+       shape.data("name","indicator");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'bloc');
+       shape.attr({"x":16.328125,"y":57.21562500000073,"text-anchor":"start","text":"bloc","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#8C8C8C","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L56,0 L56,72.27812499999982 L0,72.27812499999982");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M0,8Q0,0 8, 0L48,0Q56,0 56, 8L56,58Q56,66 48, 66L8,66Q0,66 0, 58L0,8');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // indicator
-        shape = this.canvas.paper.ellipse();
-        shape.attr({"rx":5,"ry":5,"cx":7.9771999999998116,"cy":57.5,"stroke":"#999999","stroke-width":1,"fill":"none","dasharray":null,"opacity":1});
-        shape.data("name","indicator");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'bloc');
-        shape.attr({"x":16.328125,"y":58.27812499999982,"text-anchor":"start","text":"bloc","font-family":"\"Arial\"","font-size":16,"stroke":"none","fill":"#8C8C8C","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-
-        return this.canvas.paper.setFinish();
+       return this.canvas.paper.setFinish();
    },
 
    applyAlpha: function()
@@ -5354,7 +5386,6 @@ draw2d_circuit_hardware_BlocINPUT = draw2d_circuit_hardware_BlocINPUT.extend({
         }];
     }
 });
-draw2d_circuit_hardware_BlocINPUT.github="./shapes/org/draw2d/circuit/hardware/BlocINPUT.shape";
 
 
 // Generated Code for the Draw2D touch HTML5 lib

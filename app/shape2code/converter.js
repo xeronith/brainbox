@@ -77,12 +77,17 @@ page.open('http://localhost:7400/designer', function(status) {
   if (status === "success") {
       console.log("Processing: "+file);
       var json = JSON.parse(fs.read(file));
+      var pkg = fileToPackage(file);
+
       if(json.draw2d) {
         json = json.draw2d
       }
       json = JSON.stringify(json, undefined,2)
       var code = fs.read(shape2CodePath("template.js"));
-      fs.write(shape2CodePath("exporter.js"), "var json="+json+";\n"+code);
+      fs.write(shape2CodePath("exporter.js"),
+        "var json="+json+";\n"+
+        "var pkg='"+pkg+"';\n"+
+        code);
       if (page.injectJs(shape2CodePath('exporter.js'))) {
         waitFor({
           check: function () {
@@ -97,8 +102,6 @@ page.open('http://localhost:7400/designer', function(status) {
               var customCode = page.evaluate(function () { return customCode; });
               var markdown   = page.evaluate(function () { return markdown;});
               var img        = page.evaluate(function () {return img; });
-
-              var pkg = fileToPackage(file);
 
               var pngFilePath      = file.replace(".shape", ".png");
               var jsFilePath       = file.replace(".shape", ".js");
