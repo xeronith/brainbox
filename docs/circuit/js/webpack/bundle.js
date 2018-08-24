@@ -998,6 +998,45 @@ module.exports = exports["default"];
 
 /***/ }),
 
+/***/ "../../app/frontend/circuit/js/LabelInplaceEditor.js":
+/*!*************************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/circuit/js/LabelInplaceEditor.js ***!
+  \*************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = draw2d.ui.LabelInplaceEditor.extend({
+
+  NAME: "LabelInplaceEditor",
+
+  /**
+   * @constructor
+   *
+   */
+  init: function init(attr, setter, getter) {
+    this._super({
+      onStart: function onStart() {
+        Mousetrap.pause();
+      },
+      onCancel: function onCancel() {
+        Mousetrap.unpause();
+      },
+      onCommit: function onCommit() {
+        Mousetrap.unpause();
+      }
+    }, setter, getter);
+  }
+});
+module.exports = exports["default"];
+
+/***/ }),
+
 /***/ "../../app/frontend/circuit/js/Palette.js":
 /*!**************************************************************************************!*\
   !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/circuit/js/Palette.js ***!
@@ -1533,10 +1572,6 @@ var _EditEditPolicy = __webpack_require__(/*! ./EditEditPolicy */ "../../app/fro
 
 var _EditEditPolicy2 = _interopRequireDefault(_EditEditPolicy);
 
-var _mousetrap = __webpack_require__(/*! mousetrap */ "../../node_modules/mousetrap/mousetrap.js");
-
-var _mousetrap2 = _interopRequireDefault(_mousetrap);
-
 var _ProbeFigure = __webpack_require__(/*! ./figures/ProbeFigure */ "../../app/frontend/circuit/js/figures/ProbeFigure.js");
 
 var _ProbeFigure2 = _interopRequireDefault(_ProbeFigure);
@@ -1560,8 +1595,6 @@ var _MarkdownDialog2 = _interopRequireDefault(_MarkdownDialog);
 var _CodeDialog = __webpack_require__(/*! ./dialog/CodeDialog */ "../../app/frontend/circuit/js/dialog/CodeDialog.js");
 
 var _CodeDialog2 = _interopRequireDefault(_CodeDialog);
-
-__webpack_require__(/*! ./util/mousetrap-global */ "../../app/frontend/circuit/js/util/mousetrap-global.js");
 
 var _intro = __webpack_require__(/*! intro.js */ "../../node_modules/intro.js/intro.js");
 
@@ -1655,7 +1688,7 @@ exports.default = draw2d.Canvas.extend({
 
     // Enable Copy&Paste for figures
     //
-    _mousetrap2.default.bindGlobal(['ctrl+c', 'command+c'], function () {
+    Mousetrap.bindGlobal(['ctrl+c', 'command+c'], function () {
       var primarySelection = _this2.getSelection().getPrimary();
       if (primarySelection !== null) {
         _this2.clippboardFigure = primarySelection.clone({ excludePorts: true });
@@ -1663,7 +1696,7 @@ exports.default = draw2d.Canvas.extend({
       }
       return false;
     });
-    _mousetrap2.default.bindGlobal(['ctrl+v', 'command+v'], function () {
+    Mousetrap.bindGlobal(['ctrl+v', 'command+v'], function () {
       if (_this2.clippboardFigure !== null) {
         var cloneToAdd = _this2.clippboardFigure.clone({ excludePorts: true });
         var command = new draw2d.command.CommandAdd(_this2, cloneToAdd, cloneToAdd.getPosition());
@@ -1673,28 +1706,28 @@ exports.default = draw2d.Canvas.extend({
       return false;
     });
 
-    _mousetrap2.default.bindGlobal(['left'], function (event) {
+    Mousetrap.bindGlobal(['left'], function (event) {
       var diff = _this.getZoom() < 0.5 ? 0.5 : 1;
       _this.getSelection().each(function (i, f) {
         f.translate(-diff, 0);
       });
       return false;
     });
-    _mousetrap2.default.bindGlobal(['up'], function (event) {
+    Mousetrap.bindGlobal(['up'], function (event) {
       var diff = _this.getZoom() < 0.5 ? 0.5 : 1;
       _this.getSelection().each(function (i, f) {
         f.translate(0, -diff);
       });
       return false;
     });
-    _mousetrap2.default.bindGlobal(['right'], function (event) {
+    Mousetrap.bindGlobal(['right'], function (event) {
       var diff = _this.getZoom() < 0.5 ? 0.5 : 1;
       _this.getSelection().each(function (i, f) {
         f.translate(diff, 0);
       });
       return false;
     });
-    _mousetrap2.default.bindGlobal(['down'], function (event) {
+    Mousetrap.bindGlobal(['down'], function (event) {
       var diff = _this.getZoom() < 0.5 ? 0.5 : 1;
       _this.getSelection().each(function (i, f) {
         f.translate(0, diff);
@@ -1732,7 +1765,6 @@ exports.default = draw2d.Canvas.extend({
     });
 
     this.deleteSelectionCallback = function () {
-      console.log("called---");
       var selection = _this.getSelection();
       _this.getCommandStack().startTransaction(draw2d.Configuration.i18n.command.deleteShape);
       selection.each(function (index, figure) {
@@ -1756,7 +1788,7 @@ exports.default = draw2d.Canvas.extend({
     };
 
     $(".toolbar").delegate("#editDelete:not(.disabled)", "click", this.deleteSelectionCallback);
-    _mousetrap2.default.bindGlobal(['del', 'backspace'], this.deleteSelectionCallback);
+    Mousetrap.bindGlobal(['del', 'backspace'], this.deleteSelectionCallback);
 
     $(".toolbar").delegate("#editUndo:not(.disabled)", "click", function () {
       _this.getCommandStack().undo();
@@ -1828,8 +1860,9 @@ exports.default = draw2d.Canvas.extend({
                 if (text) {
                   var label = new draw2d.shape.basic.Label({ text: text, stroke: 0, x: -20, y: -40 });
                   var locator = new draw2d.layout.locator.SmartDraggableLocator();
-                  label.installEditor(new draw2d.ui.LabelInplaceEditor());
+                  label.installEditor(new LabelInplaceEditor());
                   figure.add(label, locator);
+                  Object.defineProperty(figure, "canvas", { configurable: false, writable: false });
                 }
                 break;
               case "design":
@@ -2200,6 +2233,7 @@ exports.default = dialog = new (function () {
     value: function show(figure, pos) {
       var _this = this;
 
+      Mousetrap.pause();
       currentFigure = figure;
 
       var settings = figure.getParameterSettings().slice(0);
@@ -2236,6 +2270,7 @@ exports.default = dialog = new (function () {
   }, {
     key: "hide",
     value: function hide() {
+      Mousetrap.unpause();
       if (currentFigure !== null) {
         $("#figureConfigDialog input, #figureConfigDialog select").each(function (i, element) {
           element = $(element);
@@ -2490,6 +2525,7 @@ var FileSave = function () {
   _createClass(FileSave, [{
     key: "show",
     value: function show(canvas) {
+      Mousetrap.pause();
       $("#githubSaveFileDialog .githubFileName").val(_BackendStorage2.default.currentFile);
 
       $('#githubSaveFileDialog').off('shown.bs.modal').on('shown.bs.modal', function (event) {
@@ -2506,6 +2542,7 @@ var FileSave = function () {
           writer.marshal(canvas, function (json) {
             var name = $("#githubSaveFileDialog .githubFileName").val();
             _BackendStorage2.default.saveFile(json, imageDataUrl, name).then(function () {
+              Mousetrap.unpause();
               _BackendStorage2.default.currentFile = name;
               $('#githubSaveFileDialog').modal('hide');
             });
@@ -3599,6 +3636,18 @@ var _Raft = __webpack_require__(/*! ./figures/Raft */ "../../app/frontend/circui
 
 var _Raft2 = _interopRequireDefault(_Raft);
 
+var _mousetrap = __webpack_require__(/*! mousetrap */ "../../node_modules/mousetrap/mousetrap.js");
+
+var _mousetrap2 = _interopRequireDefault(_mousetrap);
+
+var _LabelInplaceEditor = __webpack_require__(/*! ./LabelInplaceEditor */ "../../app/frontend/circuit/js/LabelInplaceEditor.js");
+
+var _LabelInplaceEditor2 = _interopRequireDefault(_LabelInplaceEditor);
+
+__webpack_require__(/*! ./util/mousetrap-global */ "../../app/frontend/circuit/js/util/mousetrap-global.js");
+
+__webpack_require__(/*! ./util/mousetrap-pause */ "../../app/frontend/circuit/js/util/mousetrap-pause.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
@@ -3608,6 +3657,8 @@ exports.default = {
   Connection: _Connection2.default,
   Raft: _Raft2.default,
   ProbeFigure: _ProbeFigure2.default,
+  Mousetrap: _mousetrap2.default,
+  LabelInplaceEditor: _LabelInplaceEditor2.default,
   ConnectionRouter: _ConnectionRouter2.default
 };
 module.exports = exports["default"];
@@ -4200,6 +4251,50 @@ module.exports = exports['default'];
     }
 
     _globalCallbacks[keys] = true;
+  };
+
+  Mousetrap.init();
+})(Mousetrap);
+
+/***/ }),
+
+/***/ "../../app/frontend/circuit/js/util/mousetrap-pause.js":
+/*!***************************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/circuit/js/util/mousetrap-pause.js ***!
+  \***************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * adds a pause and unpause method to Mousetrap
+ * this allows you to enable or disable keyboard shortcuts
+ * without having to reset Mousetrap and rebind everything
+ */
+/* global Mousetrap:true */
+(function (Mousetrap) {
+  var _originalStopCallback = Mousetrap.prototype.stopCallback;
+
+  Mousetrap.prototype.stopCallback = function (e, element, combo) {
+    var self = this;
+
+    if (self.paused) {
+      return true;
+    }
+
+    return _originalStopCallback.call(self, e, element, combo);
+  };
+
+  Mousetrap.prototype.pause = function () {
+    var self = this;
+    self.paused = true;
+  };
+
+  Mousetrap.prototype.unpause = function () {
+    var self = this;
+    self.paused = false;
   };
 
   Mousetrap.init();

@@ -21,6 +21,7 @@ export default class FileSave {
    * @since 4.0.0
    */
   show(canvas) {
+    Mousetrap.pause()
     $("#githubSaveFileDialog .githubFileName").val(storage.currentFile)
 
     $('#githubSaveFileDialog').off('shown.bs.modal').on('shown.bs.modal', (event) => {
@@ -38,8 +39,9 @@ export default class FileSave {
           let name = $("#githubSaveFileDialog .githubFileName").val()
           storage.saveFile(json, imageDataUrl, name)
             .then(function () {
-            storage.currentFile = name
-            $('#githubSaveFileDialog').modal('hide')
+              Mousetrap.unpause()
+              storage.currentFile = name
+              $('#githubSaveFileDialog').modal('hide')
           })
         })
       }, canvas.getBoundingBox().scale(10, 10))

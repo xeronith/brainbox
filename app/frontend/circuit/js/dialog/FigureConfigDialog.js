@@ -11,6 +11,7 @@ export default dialog= new class FigureConfigDialog {
   }
 
   show(figure, pos) {
+    Mousetrap.pause()
     currentFigure = figure
 
     var settings = figure.getParameterSettings().slice(0)
@@ -68,6 +69,7 @@ export default dialog= new class FigureConfigDialog {
   }
 
   hide() {
+    Mousetrap.unpause()
     if (currentFigure !== null) {
       $("#figureConfigDialog input, #figureConfigDialog select").each(function (i, element) {
         element = $(element)

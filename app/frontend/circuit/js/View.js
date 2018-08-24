@@ -8,15 +8,12 @@ import ProbeWindow from "./ProbeWindow"
 import ConnectionRouter from "./ConnectionRouter"
 import DropInterceptorPolicy from "./DropInterceptorPolicy"
 import EditEditPolicy from "./EditEditPolicy"
-import Mousetrap from "mousetrap"
 import ProbeFigure from "./figures/ProbeFigure"
 import conf from "./Configuration"
 import Connection from "./figures/Connection"
 import SimulationEditPolicy from "./SimulationEditPolicy"
 import MarkdownDialog from "./dialog/MarkdownDialog"
 import CodeDialog from "./dialog/CodeDialog"
-
-import "./util/mousetrap-global"
 
 import introJs from "intro.js"
 import "intro.js/introjs.css"
@@ -178,7 +175,6 @@ export default draw2d.Canvas.extend({
     })
 
     this.deleteSelectionCallback = function () {
-      console.log("called---")
       let selection = _this.getSelection()
       _this.getCommandStack().startTransaction(draw2d.Configuration.i18n.command.deleteShape)
       selection.each(function (index, figure) {
@@ -278,8 +274,9 @@ export default draw2d.Canvas.extend({
                 if (text) {
                   let label = new draw2d.shape.basic.Label({text: text, stroke: 0, x: -20, y: -40})
                   let locator = new draw2d.layout.locator.SmartDraggableLocator()
-                  label.installEditor(new draw2d.ui.LabelInplaceEditor())
+                  label.installEditor(new LabelInplaceEditor())
                   figure.add(label, locator)
+                  Object.defineProperty(figure, "canvas", { configurable: false, writable: false });
                 }
                 break
               case "design":

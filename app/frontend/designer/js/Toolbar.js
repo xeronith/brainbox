@@ -243,6 +243,7 @@ export default class Toolbar {
       return false
     })
 
+    /*
     this.newButton = $('<button  data-toggle="tooltip" title="New Document <span class=\'highlight\'> [ Ctrl+N ]</span>" class=\"btn btn-default\" ><img src="./images/toolbar_file_new.png"></button>')
     buttonGroup.append(this.newButton)
     this.newButton.on("click", () => {
@@ -252,6 +253,7 @@ export default class Toolbar {
       this.undoButton.click()
       return false
     })
+    */
 
     buttonGroup = $('<div class="btn-group"  title="Test and Coding"></div>')
     this.toolbarDiv.append(buttonGroup)
