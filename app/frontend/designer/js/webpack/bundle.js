@@ -1050,17 +1050,10 @@ var Toolbar = function () {
       return false;
     });
 
-    this.shapeButton = $('<label id="tool_shape" class="dropdown">' + '    <img   id="tool_shape_image" class="policyRectangleToolPolicy1 icon"  data-toggle="tooltip" title="Rectangle <span class=\'highlight\'> [ R ]</span>"  src="./images/toolbar_rectangle.svg">' + '    <span data-toggle="dropdown" role="button" href="#" id="tool_shape_caret"><span class="caret">&nbsp;</span></span>' + '    <ul class="dropdown-menu" role="menu" >' + '       <li class="tool_shape_entry policyRectangleToolPolicy2" data-toggle="tooltip" title="Rectangle <span class=\'highlight\'> [ R ]</span>"><a href="#"><img  src="./images/toolbar_rectangle.svg">Rectangle</a></li>' + '       <li class="tool_shape_entry policyCircleToolPolicy"     data-toggle="tooltip" title="Circle <span class=\'highlight\'> [ C ]</span>">   <a href="#"><img  src="./images/toolbar_circle.svg">Circle</a></li>' + '       <li class="tool_shape_entry policyLineToolPolicy"       data-toggle="tooltip" title="Line <span class=\'highlight\'> [ L ]</span>">     <a href="#"><img  src="./images/toolbar_line.svg">Line</a></li>' + '       <li class="tool_shape_entry policyTextToolPolicy"       data-toggle="tooltip" title="Text <span class=\'highlight\'> [ T ]</span>">     <a href="#"><img  src="./images/toolbar_text.svg">Text</a></li>' + '       <li class="tool_shape_entry policyPortToolPolicy"       data-toggle="tooltip" title="Port <span class=\'highlight\'> [ P ]</span>">     <a href="#"><img  src="./images/toolbar_rectangle.svg">Port</a></li>' + '    </ul>' + '</label>');
+    this.shapeButton = $('<label id="tool_shape" class="dropdown">' + '    <img data-toggle="dropdown"  id="tool_shape_image" class="icon"  data-toggle="tooltip" title="Add a new object to your document"  src="./images/toolbar_insert.svg">' + '    <ul class="dropdown-menu" role="menu" >' + '       <li class="tool_shape_entry policyRectangleToolPolicy" data-toggle="tooltip" title="Rectangle <span class=\'highlight\'> [ R ]</span>"><a href="#"><img  src="./images/toolbar_rectangle.svg">Rectangle</a></li>' + '       <li class="tool_shape_entry policyCircleToolPolicy"     data-toggle="tooltip" title="Circle <span class=\'highlight\'> [ C ]</span>">   <a href="#"><img  src="./images/toolbar_circle.svg">Circle</a></li>' + '       <li class="tool_shape_entry policyLineToolPolicy"       data-toggle="tooltip" title="Line <span class=\'highlight\'> [ L ]</span>">     <a href="#"><img  src="./images/toolbar_line.svg">Line</a></li>' + '       <li class="tool_shape_entry policyTextToolPolicy"       data-toggle="tooltip" title="Text <span class=\'highlight\'> [ T ]</span>">     <a href="#"><img  src="./images/toolbar_text.svg">Text</a></li>' + '       <li class="tool_shape_entry policyPortToolPolicy"       data-toggle="tooltip" title="Port <span class=\'highlight\'> [ P ]</span>">     <a href="#"><img  src="./images/toolbar_rectangle.svg">Port</a></li>' + '    </ul>' + '</label>');
     buttonGroup.append(this.shapeButton);
 
-    $(".policyRectangleToolPolicy1").on("click", function () {
-      var p = new _RectangleToolPolicy2.default();
-      p.executed = function () {
-        _this.selectButton.click();
-      };
-      _this.view.installEditPolicy(p);
-    });
-    $(".policyRectangleToolPolicy2").on("click", function () {
+    $(".policyRectangleToolPolicy").on("click", function () {
       var p = new _RectangleToolPolicy2.default();
       p.executed = function () {
         _this.selectButton.click();
