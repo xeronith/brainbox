@@ -30,22 +30,23 @@
 }
 
 #layer{
-  padding:0px;
-  margin:0px;
-  border:0px;
+  padding:0;
+  margin:0;
+  border:0;
   position:absolute;
-  top:@toolbarHeight;
-  left:0px;
-  bottom:0px;
-  width:200px;
+  top:0;
+  left:0;
+  bottom:0;
+  width:@layerPaneWidth;
   background-color: #282a30;
   text-align: center;
-
+  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3);
+  z-index:10000;
   .panetitle {
     position: fixed;
     height: @paneTitleHeight;
-    width: 200px;
-    top:@toolbarHeight;
+    width: @layerPaneWidth;
+    top:0;
     border-bottom: 1px solid #222222;
     border-top: 1px solid #111111;
     font-weight: 500;
@@ -63,10 +64,10 @@
   margin:0px;
   border:0px;
   position:fixed;
-  top:@toolbarHeight+@paneTitleHeight;
+  top:@paneTitleHeight;
   left:0px;
   bottom:0px;
-  width:200px;
+  width:@layerPaneWidth;
   overflow:auto;
 }
 

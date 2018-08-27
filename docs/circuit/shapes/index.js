@@ -1659,10 +1659,10 @@ var draw2d_circuit_decoder_BCDto7Seg = draw2d.SetFigure.extend({
        shape.attr({"x":7.472000000001572,"y":14.5,"text-anchor":"start","text":"A","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
        shape.data("name","Label");
        
-       // Label
+       // Label B
        shape = this.canvas.paper.text(0,0,'B');
        shape.attr({"x":7.472000000001572,"y":39.5,"text-anchor":"start","text":"B","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-       shape.data("name","Label");
+       shape.data("name","Label B");
        
        // Label
        shape = this.canvas.paper.text(0,0,'C');

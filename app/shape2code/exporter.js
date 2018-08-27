@@ -770,7 +770,7 @@ var json=[
     "alpha": 1,
     "angle": 0,
     "userData": {
-      "name": "Label"
+      "name": "Label B"
     },
     "cssClass": "shape_designer_figure_ExtLabel",
     "ports": [],

@@ -4,110 +4,47 @@
 }
 
 #toolbar {
-  background-color:white;
   margin:0;
-  padding-top:3px;
+  padding-top:0;
   padding-right:10px;
   top:0;
-  left:0;
+  left:@layerPaneWidth;
   height:@toolbarHeight;
-  width:100%;
-  overflow: visible !important;
+  right:0;
+  overflow: visible;
   z-index:1000 !important;
-  border-bottom: 10px solid @tintColor;
-
+  position:absolute;
+  background-image: none !important;
+  background-color: transparent;
+  border: none !important;
   * {
     outline:none;
   }
-  .toolbarGroup {
-    background-image: none !important;
-    background-color: transparent !important;
-    border: none !important;
-    margin-top: 35px;
 
-    .btn-group {
+  .group{
+    padding-right:20px;
+    display: inline-block;
+    vertical-align: middle;
 
-      background-color: rgba(0,0,0,0.02) !important;
-      box-shadow: 1px 1px 3px rgba(0,0,0,0.3) !important;
-      margin-left:10px;
-
-      .info-text{
-        position: absolute;
-        top: -16px;
-        left: -2px;
-        font-size: 10px;
-        color: @tintColor;
-        opacity:0;
-        transition: all 1s ease;
-      }
-    }
-    .btn-group:hover {
-      .info-text{
-        opacity:0.3;
-        transition: all 1s ease;
-      }
-    }
-
-
-    .btn:focus,
-    .btn-default,
-    .btn-group,
-    .btn {
-      padding: 2px;
-      background-image: none;
-      background-color: transparent;
+    .icon {
+      width: @toolbarHeight - 10;
+      height: @toolbarHeight - 10;
+      margin: 5px;
+      padding: 0;
+      cursor: pointer;
       border: 1px solid transparent;
-      box-shadow: none;
-      transition: all 0.5s ease;
-    }
-
-    .btn:hover {
-      border: 1px solid @tintColor !important;
-      transition: all 0.5s ease;
-    }
-
-    .btn.active {
-      border: 1px solid @tintColor !important;
-      border-radius: 1px;
-      transition: all 0.5s ease;
-    }
-
-    .btn.disabled,
-    .btn[disabled] {
-      opacity: 0.1;
-      border: 1px solid transparent !important;
-      cursor: default;
+      color: #777;
+      font-size: 45px;
+      &:hover {
+        border: 1px solid @tintColor;
+      }
+      &.disabled {
+        opacity: 0.2;
+        border: 1px solid transparent;
+      }
     }
   }
 
-
-
-  #currentTool_container{
-    margin:0px;
-    margin-top:20px;
-    margin-left:15px;
-    position:absolute;
-    width: 500px;
-  }
-
-  #currentTool_heading{
-    font-family: 'Roboto', sans-serif;
-    font-weight: 300;
-    font-size: 25px;
-    color:@tintColor;
-  }
-
-  #currentTool_image{
-    border-right: 1px solid fade(@tintColor, 40%);
-  }
-
-  #currentTool_message{
-    font-size:12px;
-    color:#404040;
-    font-family:  'Roboto', sans-serif ;
-    font-weight:400;
-    letter-spacing: 0.1em;
-  }
 }
 
 

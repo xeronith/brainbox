@@ -1,4 +1,4 @@
-import 'ionicons-npm/css/ionicons.min.css'
+
 import "../less/index.less"
 import "font-awesome/css/font-awesome.css"
 import "octicons/build/font/octicons.css"

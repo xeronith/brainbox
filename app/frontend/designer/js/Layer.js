@@ -60,11 +60,13 @@ export default class Layer {
 
     $(".layerElement .layer_edit").on("click", $.proxy(function (event) {
       var figure = this.view.getExtFigure($(event.target).data("figure"))
+      Mousetrap.pause()
       bootbox.prompt({
         title: "Layer Name",
         className: "layer-name-prompt",
         value: figure.getUserData().name,
         callback: $.proxy(function (result) {
+          Mousetrap.unpause()
           if (result !== null) {
             figure.getUserData().name = result
             this.stackChanged(null)

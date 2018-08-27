@@ -15,7 +15,7 @@
   position: absolute;
   top: @toolbarHeight;
   right: 200px;
-  left: 200px;
+  left: @layerPaneWidth;
   bottom: 0px;
   overflow: scroll;
   background-color:#FFFFFF;
@@ -48,7 +48,7 @@
   position: fixed;
   font-size:25px;
   top:@toolbarHeight+5;
-  left:205px;
+  left:@layerPaneWidth+ 5px;
   cursor:pointer;
 }
 
@@ -60,7 +60,7 @@
 #canvas_config_items{
   position: fixed;
   top:@toolbarHeight+30;
-  left:205px;
+  left:@layerPaneWidth+5px;
   cursor:pointer;
   padding:10px;
   white-space:nowrap;

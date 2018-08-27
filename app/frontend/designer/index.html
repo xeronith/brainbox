@@ -15,10 +15,10 @@
 
 <script>
 
-  // required for phantomJS. Function is not defined is this env
-  // phantomJS is not optimal for some reason but didn'T have any solution right now
-  // to render the shape preview in the server side.
-  // In this case: DON'T remove it.
+  // required for phantomJS. Function is not defined in this env.
+  // PhantomJS is not optimal for some reason but didn't have any solution right now
+  // to render the shape preview server side.
+  // DON'T remove it even if log2 defined in chrome/FF
   Math.log2 = Math.log2 || function(x) {
     return Math.log(x) * Math.LOG2E;
   };
@@ -50,10 +50,6 @@
 </head>
 
 <body id="container">
-
-   <div id="breadcrumb">
-       dir / test / blubber
-   </div>
 
    <div id="toolbar" class="navbar-default">
    </div>
