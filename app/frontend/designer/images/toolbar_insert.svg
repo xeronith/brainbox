@@ -5,7 +5,7 @@
     <desc>Created with Sketch.</desc>
     <defs></defs>
     <g id="toolbar_insert" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <rect id="Rectangle-2" stroke="#4A4A4A" stroke-width="2" x="11" y="11" width="34" height="34"></rect>
+        <rect id="Rectangle-2" stroke="#4A4A4A" stroke-width="2" x="11" y="11" width="34" height="34" rx="2"></rect>
         <path d="M40,28.25 L16,28.25" id="Line-2" stroke="#4A4A4A" stroke-width="2" stroke-linecap="round"></path>
         <path d="M28.25,40 L28.25,16" id="Line-2" stroke="#4A4A4A" stroke-width="2" stroke-linecap="round"></path>
     </g>

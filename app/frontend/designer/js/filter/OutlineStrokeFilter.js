@@ -8,14 +8,15 @@ export default shape_designer.filter.OutlineStrokeFilter = class OutlineStrokeFi
     super()
     this.NAME = "shape_designer.filter.OutlineStrokeFilter"
     this.colorPicker = null
+    this.cssScope = this.NAME.replace(/[.]/g, "_")
   }
 
   insertPane(figure, $parent) {
 
-    $parent.append('<div id="outlinestroke_filter_conainer" class="panel panel-default">' +
+    $parent.append('<div id="' + this.cssScope + '_conainer" class="panel panel-default">' +
       ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#outlinestroke_width_panel">' +
       '     Outline Stroke' +
-      '    <span id="button_remove_OutlineStrokeFilter" class="btn btn-mini icon ion-ios-close-outline pull-right" ></span>' +
+      '    <img id="button_remove_OutlineStrokeFilter" class="icon pull-right" src="./images/dialog_close.svg"/>' +
       '</div>' +
 
       ' <div class="panel-body collapse in" id="outlinestroke_width_panel">' +
@@ -29,6 +30,7 @@ export default shape_designer.filter.OutlineStrokeFilter = class OutlineStrokeFi
       '   </div>' +
       ' </div>' +
       '</div>')
+    inlineSVG.init({svgSelector:"#"+this.cssScope + "_container img.svg"})
 
     $("input[name='filter_outlinestroke']")
       .TouchSpin({

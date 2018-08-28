@@ -5,14 +5,15 @@ export default shape_designer.filter.FontSizeFilter = class FontSizeFilter exten
   constructor() {
     super()
     this.NAME = "shape_designer.filter.FontSizeFilter"
+    this.cssScope = this.NAME.replace(/[.]/g, "_")
   }
 
   insertPane(figure, $parent) {
 
-    $parent.append('<div id="fontsize_filter_container" class="panel panel-default">' +
+    $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' +
       ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#fontsize_width_panel">' +
       '     Font Size' +
-      '    <span id="button_remove_FontSizeFilter" class="btn btn-mini icon ion-ios-close-outline pull-right" ></span>' +
+      '    <span id="button_remove_FontSizeFilter"><img  class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' +
       '</div>' +
 
       ' <div class="panel-body collapse in" id="fontsize_width_panel">' +
@@ -22,6 +23,7 @@ export default shape_designer.filter.FontSizeFilter = class FontSizeFilter exten
       '   </div>' +
       ' </div>' +
       '</div>')
+    inlineSVG.init({svgSelector:"#"+this.cssScope + "_container img.svg"})
 
     $("#filter_fontsize").TouchSpin({
       min: 4,

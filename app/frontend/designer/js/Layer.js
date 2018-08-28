@@ -39,15 +39,23 @@ export default class Layer {
    **/
   stackChanged(event) {
     this.html.html('')
-    var figures = this.view.getExtFigures()
+    let figures = this.view.getExtFigures()
     figures.each((i, figure) => {
       this.html.append(
         '<div class="layerElement" data-figure="' + figure.id + '" id="layerElement_' + figure.id + '" >' +
         figure.getUserData().name +
-        '<span data-figure="' + figure.id + '" class="icon layer_visibility pull-right ' + (figure.isVisible() ? 'ion-eye' : 'ion-eye-disabled') + '"></span>' +
-        '<span data-figure="' + figure.id + '" class="icon layer_edit pull-right ion-ios-pricetag-outline" ></span>' +
+        '<span data-figure="' + figure.id + '" class="layer_visibility pull-right"><img class="icon svg" src="'+ (figure.isVisible() ? './images/layer_visible.svg' : './images/layer_hidden.svg') + '"/></span>' +
+        '<span data-figure="' + figure.id + '"  data-toggle="tooltip" title="Edit Name of Layer" class="layer_edit pull-right" ><img class="icon svg" src="./images/layer_edit.svg"/></span>' +
         '</div>')
     }, true)
+
+    inlineSVG.init();
+    $('*[data-toggle="tooltip"]').tooltip({
+      placement: "bottom",
+      container: "body",
+      delay: {show: 1000, hide: 100},
+      html: true
+    })
 
     this.html.sortable({
       axis: "y",
@@ -59,7 +67,7 @@ export default class Layer {
     })
 
     $(".layerElement .layer_edit").on("click", $.proxy(function (event) {
-      var figure = this.view.getExtFigure($(event.target).data("figure"))
+      let figure = this.view.getExtFigure($(event.currentTarget).data("figure"))
       Mousetrap.pause()
       bootbox.prompt({
         title: "Layer Name",
@@ -82,20 +90,16 @@ export default class Layer {
 
 
     $(".layerElement .layer_visibility").on("click", $.proxy(function (event) {
-      var figure = this.view.getExtFigure($(event.target).data("figure"))
+      let figure = this.view.getExtFigure($(event.currentTarget).data("figure"))
       figure.setVisible(!figure.isVisible())
       this.view.setCurrentSelection(null)
-      if (figure.isVisible()) {
-        $(event.target).removeClass("ion-eye-disabled").addClass("ion-eye")
-      }
-      else {
-        $(event.target).removeClass("ion-eye").addClass("ion-eye-disabled")
-      }
+      $(event.currentTarget).html('<img class="icon svg" src="'+ (figure.isVisible() ? './images/layer_visible.svg' : './images/layer_hidden.svg') + '"/>')
+      inlineSVG.init()
       return false
     }, this))
 
     $(".layerElement").on("click", $.proxy(function (event) {
-      var figure = this.view.getExtFigure($(event.target).data("figure"))
+      let figure = this.view.getExtFigure($(event.currentTarget).data("figure"))
       if (figure.isVisible()) {
         this.view.setCurrentSelection(figure)
       }
@@ -106,7 +110,7 @@ export default class Layer {
 
   _updateSelection() {
     $(".layerElement").removeClass("layerSelectedElement")
-    var selection = this.view.getSelection()
+    let selection = this.view.getSelection()
     selection.each(function (i, e) {
       $("#layerElement_" + e.id).addClass("layerSelectedElement")
     })

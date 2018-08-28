@@ -13,7 +13,7 @@ export default shape_designer.filter.BlurFilter = class BlurFilter extends Filte
     $parent.append('<div id="' + this.cssScope + '_filter_container" class="panel panel-default">' +
       ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_width_panel">' +
       '     Blur' +
-      '    <span id="button_remove_' + this.cssScope + '" class="btn btn-mini icon ion-ios-close-outline pull-right" ></span>' +
+      '    <span id="button_remove_' + this.cssScope + '"><img class="svg icon pull-right" src="./images/dialog_close.svg"/></span></span>' +
       '</div>' +
 
       ' <div class="panel-body collapse in" id="' + this.cssScope + '_blur_panel">' +
@@ -23,6 +23,7 @@ export default shape_designer.filter.BlurFilter = class BlurFilter extends Filte
       '   </div>' +
       ' </div>' +
       '</div>')
+    inlineSVG.init({svgSelector:"#"+this.cssScope + "_container img.svg"})
 
     $("#filter_blur").TouchSpin({
       min: 0,

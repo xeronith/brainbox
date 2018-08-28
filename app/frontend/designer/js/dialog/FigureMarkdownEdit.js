@@ -38,7 +38,7 @@ export default class FigureMarkdownEdit {
       ' <div class="header">' +
       '<span class="left">Documentation Editor (<a target="_blank" href="https://en.wikipedia.org/wiki/Markdown">markdown syntax </a>)</span>' +
       '<span class="right">HTML Preview</span></div>' +
-      ' <div title="Close" id="test_close" class="icon ion-ios-close-outline"></div>' +
+      ' <img title="Close" id="test_close" class="icon" src="./images/dialog_close.svg"/>' +
       '<div>')
 
     // fadeTo MUSS leider sein. Man kann mit raphael keine paper.text elemente einfügen

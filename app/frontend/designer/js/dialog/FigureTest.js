@@ -25,7 +25,7 @@ export default class FigureTest {
         '<div id="test_canvas">' +
         '</div>' +
         ' <div               id="test_info" >Test page for your designed and coded draw2d shape.</div>' +
-        ' <div title="Close" id="test_close" class="icon ion-ios-close-outline"></div>' +
+        ' <img title="Close" id="test_close" class="icon" src="./images/dialog_close.svg"/>' +
         '<div>')
 
       // fadeTo MUSS leider sein. Man kann mit raphael keine paper.text elemente einfügen

@@ -151,39 +151,6 @@ module.exports = "js/webpack/2e59ba615169ea5c7506a8094f9e1301.png";
 
 /***/ }),
 
-/***/ "./app/frontend/designer/images/toolbar_difference.png":
-/*!*************************************************************!*\
-  !*** ./app/frontend/designer/images/toolbar_difference.png ***!
-  \*************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/48a6cb276a27b2fed061045d459de7cf.png";
-
-/***/ }),
-
-/***/ "./app/frontend/designer/images/toolbar_intersect.png":
-/*!************************************************************!*\
-  !*** ./app/frontend/designer/images/toolbar_intersect.png ***!
-  \************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/3a652beee2c862155fcdc182ac23cbd3.png";
-
-/***/ }),
-
-/***/ "./app/frontend/designer/images/toolbar_union.png":
-/*!********************************************************!*\
-  !*** ./app/frontend/designer/images/toolbar_union.png ***!
-  \********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/fbdd78af0795f16233df88adf53f97e7.png";
-
-/***/ }),
-
 /***/ "./app/frontend/designer/images/tools/CIRCLE_1_064.png":
 /*!*************************************************************!*\
   !*** ./app/frontend/designer/images/tools/CIRCLE_1_064.png ***!
@@ -801,8 +768,16 @@ var Layer = function () {
       this.html.html('');
       var figures = this.view.getExtFigures();
       figures.each(function (i, figure) {
-        _this.html.append('<div class="layerElement" data-figure="' + figure.id + '" id="layerElement_' + figure.id + '" >' + figure.getUserData().name + '<span data-figure="' + figure.id + '" class="icon layer_visibility pull-right ' + (figure.isVisible() ? 'ion-eye' : 'ion-eye-disabled') + '"></span>' + '<span data-figure="' + figure.id + '" class="icon layer_edit pull-right ion-ios-pricetag-outline" ></span>' + '</div>');
+        _this.html.append('<div class="layerElement" data-figure="' + figure.id + '" id="layerElement_' + figure.id + '" >' + figure.getUserData().name + '<span data-figure="' + figure.id + '" class="layer_visibility pull-right"><img class="icon svg" src="' + (figure.isVisible() ? './images/layer_visible.svg' : './images/layer_hidden.svg') + '"/></span>' + '<span data-figure="' + figure.id + '"  data-toggle="tooltip" title="Edit Name of Layer" class="layer_edit pull-right" ><img class="icon svg" src="./images/layer_edit.svg"/></span>' + '</div>');
       }, true);
+
+      inlineSVG.init();
+      $('*[data-toggle="tooltip"]').tooltip({
+        placement: "bottom",
+        container: "body",
+        delay: { show: 1000, hide: 100 },
+        html: true
+      });
 
       this.html.sortable({
         axis: "y",
@@ -814,7 +789,7 @@ var Layer = function () {
       });
 
       $(".layerElement .layer_edit").on("click", $.proxy(function (event) {
-        var figure = this.view.getExtFigure($(event.target).data("figure"));
+        var figure = this.view.getExtFigure($(event.currentTarget).data("figure"));
         Mousetrap.pause();
         bootbox.prompt({
           title: "Layer Name",
@@ -836,19 +811,16 @@ var Layer = function () {
       }, this));
 
       $(".layerElement .layer_visibility").on("click", $.proxy(function (event) {
-        var figure = this.view.getExtFigure($(event.target).data("figure"));
+        var figure = this.view.getExtFigure($(event.currentTarget).data("figure"));
         figure.setVisible(!figure.isVisible());
         this.view.setCurrentSelection(null);
-        if (figure.isVisible()) {
-          $(event.target).removeClass("ion-eye-disabled").addClass("ion-eye");
-        } else {
-          $(event.target).removeClass("ion-eye").addClass("ion-eye-disabled");
-        }
+        $(event.currentTarget).html('<img class="icon svg" src="' + (figure.isVisible() ? './images/layer_visible.svg' : './images/layer_hidden.svg') + '"/>');
+        inlineSVG.init();
         return false;
       }, this));
 
       $(".layerElement").on("click", $.proxy(function (event) {
-        var figure = this.view.getExtFigure($(event.target).data("figure"));
+        var figure = this.view.getExtFigure($(event.currentTarget).data("figure"));
         if (figure.isVisible()) {
           this.view.setCurrentSelection(figure);
         }
@@ -1050,7 +1022,7 @@ var Toolbar = function () {
       return false;
     });
 
-    this.shapeButton = $('<label id="tool_shape" class="dropdown">' + '    <img data-toggle="dropdown"  id="tool_shape_image" class="icon"  data-toggle="tooltip" title="Add a new object to your document"  src="./images/toolbar_insert.svg">' + '    <ul class="dropdown-menu" role="menu" >' + '       <li class="tool_shape_entry policyRectangleToolPolicy" data-toggle="tooltip" title="Rectangle <span class=\'highlight\'> [ R ]</span>"><a href="#"><img  src="./images/toolbar_rectangle.svg">Rectangle</a></li>' + '       <li class="tool_shape_entry policyCircleToolPolicy"     data-toggle="tooltip" title="Circle <span class=\'highlight\'> [ C ]</span>">   <a href="#"><img  src="./images/toolbar_circle.svg">Circle</a></li>' + '       <li class="tool_shape_entry policyLineToolPolicy"       data-toggle="tooltip" title="Line <span class=\'highlight\'> [ L ]</span>">     <a href="#"><img  src="./images/toolbar_line.svg">Line</a></li>' + '       <li class="tool_shape_entry policyTextToolPolicy"       data-toggle="tooltip" title="Text <span class=\'highlight\'> [ T ]</span>">     <a href="#"><img  src="./images/toolbar_text.svg">Text</a></li>' + '       <li class="tool_shape_entry policyPortToolPolicy"       data-toggle="tooltip" title="Port <span class=\'highlight\'> [ P ]</span>">     <a href="#"><img  src="./images/toolbar_rectangle.svg">Port</a></li>' + '    </ul>' + '</label>');
+    this.shapeButton = $('<label id="tool_shape" class="dropdown" >' + '    <img data-toggle="dropdown"  id="tool_shape_image" class="icon" src="./images/toolbar_insert.svg">' + '    <ul class="dropdown-menu" role="menu" >' + '       <li class="tool_shape_entry policyRectangleToolPolicy" data-toggle="tooltip" title="Rectangle <span class=\'highlight\'> [ R ]</span>"><a href="#"><img  src="./images/toolbar_rectangle.svg">Rectangle</a></li>' + '       <li class="tool_shape_entry policyCircleToolPolicy"    data-toggle="tooltip" title="Circle <span class=\'highlight\'> [ C ]</span>">   <a href="#"><img  src="./images/toolbar_circle.svg">Circle</a></li>' + '       <li class="tool_shape_entry policyLineToolPolicy"      data-toggle="tooltip" title="Line <span class=\'highlight\'> [ L ]</span>">     <a href="#"><img  src="./images/toolbar_line.svg">Line</a></li>' + '       <li class="tool_shape_entry policyTextToolPolicy"      data-toggle="tooltip" title="Text <span class=\'highlight\'> [ T ]</span>">     <a href="#"><img  src="./images/toolbar_text.svg">Text</a></li>' + '       <li class="tool_shape_entry policyPortToolPolicy"      data-toggle="tooltip" title="Port <span class=\'highlight\'> [ P ]</span>">     <a href="#"><img  src="./images/toolbar_rectangle.svg">Port</a></li>' + '    </ul>' + '</label>');
     buttonGroup.append(this.shapeButton);
 
     $(".policyRectangleToolPolicy").on("click", function () {
@@ -1110,7 +1082,7 @@ var Toolbar = function () {
       return false;
     });
 
-    this.unionButton = $('<span data-toggle="tooltip" title="Polygon Union <span class=\'highlight\'> [ U ]</span>"><img src="./images/toolbar_union.png"></span>');
+    this.unionButton = $('<img data-toggle="tooltip" class="icon" title="Polygon Union <span class=\'highlight\'> [ U ]</span>" src="./images/toolbar_geo_union.svg"/>');
     buttonGroup.append(this.unionButton);
     this.unionButton.on("click", function () {
       var selection = _this.view.getSelection().getAll();
@@ -1126,7 +1098,7 @@ var Toolbar = function () {
       return false;
     });
 
-    this.differenceButton = $('<span data-toggle="tooltip" title="Polygon Difference <span class=\'highlight\'> [ D ]</span>"  ><img src="./images/toolbar_difference.png"></span>');
+    this.differenceButton = $('<img data-toggle="tooltip" class="icon" title="Polygon Difference <span class=\'highlight\'> [ D ]</span>" src="./images/toolbar_geo_subtract.svg"/>');
     buttonGroup.append(this.differenceButton);
     this.differenceButton.on("click", function () {
       _this.view.installEditPolicy(new _GeoDifferenceToolPolicy2.default());
@@ -1136,7 +1108,7 @@ var Toolbar = function () {
       return false;
     });
 
-    this.intersectionButton = $('<span data-toggle="tooltip" title="Polygon Intersection <span class=\'highlight\'> [ I ]</span>" ><img src="./images/toolbar_intersect.png"></span>');
+    this.intersectionButton = $('<img data-toggle="tooltip" class="icon" title="Polygon Intersection <span class=\'highlight\'> [ I ]</span>" src="./images/toolbar_geo_intersect.svg"/>');
     buttonGroup.append(this.intersectionButton);
     this.intersectionButton.on("click", function () {
       _this.view.installEditPolicy(new _GeoIntersectionToolPolicy2.default());
@@ -1146,9 +1118,9 @@ var Toolbar = function () {
       return false;
     });
 
-    buttonGroup = $('<div class="group"></div>');
+    buttonGroup = $('<div class="group" style="float:right"></div>');
     this.html.append(buttonGroup);
-    this.testButton = $('<span  data-toggle="tooltip" title="Test</span>" class="ion-easel icon"></span>');
+    this.testButton = $('<img  data-toggle="tooltip" title="Test your shape" class="icon"  src="./images/toolbar_element_test.svg"/>');
     buttonGroup.append(this.testButton);
     this.testButton.on("click", function () {
       // if any error happens during the shape code create/execute -> goto the the JS editor
@@ -1160,13 +1132,13 @@ var Toolbar = function () {
       }
     });
 
-    this.codeButton = $('<span data-toggle="tooltip" title="Edit JavaScript code</span>" class="ion-code icon"></span>');
+    this.codeButton = $('<img data-toggle="tooltip" title="Edit JavaScript code</span>" class="icon"  src="./images/toolbar_element_js.svg"/>');
     buttonGroup.append(this.codeButton);
     this.codeButton.on("click", function () {
       new _FigureCodeEdit2.default().show();
     });
 
-    this.markdownButton = $('<span data-toggle="tooltip" title="Helpfile for this shape</span>"><img src="./images/toolbar_markdown.png"></span>');
+    this.markdownButton = $('<img class="icon" data-toggle="tooltip" title="Write documentation for your shape</span>" src="./images/toolbar_element_doc.svg"/>');
     buttonGroup.append(this.markdownButton);
     this.markdownButton.on("click", function () {
       new _FigureMarkdownEdit2.default().show();
@@ -1521,7 +1493,7 @@ var FigureCodeEdit = function () {
     value: function show() {
       Mousetrap.pause();
       var code = shape_designer.app.getConfiguration("code");
-      var splash = $('<pre id="code_overlay">' + code + '</pre>' + '<div title="Run"   id="test_run"  ><i class="icon ion-android-arrow-dropright-circle"></i></div>' + '<div title="Close" id="code_close"><i class="icon ion-ios-close-outline"></i></div>');
+      var splash = $('<pre id="code_overlay">' + code + '</pre>' + '<img title="Run"   id="test_run"   class="icon" src="./images/dialog_run.svg"/>' + '<img title="Close" id="code_close" class="icon" src="./images/dialog_close.svg"/>');
       splash.hide();
       $("body").append(splash);
       splash.fadeIn();
@@ -1668,7 +1640,7 @@ var FigureMarkdownEdit = function () {
 
       var markdown = shape_designer.app.getConfiguration("markdown");
       markdown = markdown ? markdown : "# Header \n## Subheader \nbe nice and write a help file for your new \ncreated ***DigitalTrainingStudion*** shape. \n\n  - point 1\n  - point 2\n  - point 3";
-      var splash = $('<div id="FigureMarkdownEdit" class="overlay-scale">' + '<pre class="source full-height">' + markdown + '</pre>' + '<div class="preview full-height" >' + '' + '</div>' + ' <div class="header">' + '<span class="left">Documentation Editor (<a target="_blank" href="https://en.wikipedia.org/wiki/Markdown">markdown syntax </a>)</span>' + '<span class="right">HTML Preview</span></div>' + ' <div title="Close" id="test_close" class="icon ion-ios-close-outline"></div>' + '<div>');
+      var splash = $('<div id="FigureMarkdownEdit" class="overlay-scale">' + '<pre class="source full-height">' + markdown + '</pre>' + '<div class="preview full-height" >' + '' + '</div>' + ' <div class="header">' + '<span class="left">Documentation Editor (<a target="_blank" href="https://en.wikipedia.org/wiki/Markdown">markdown syntax </a>)</span>' + '<span class="right">HTML Preview</span></div>' + ' <img title="Close" id="test_close" class="icon" src="./images/dialog_close.svg"/>' + '<div>');
 
       // fadeTo MUSS leider sein. Man kann mit raphael keine paper.text elemente einfügen
       // wenn das canvas nicht sichtbar ist. In diesen Fall mach ich das Canvas "leicht" sichtbar und raphael ist
@@ -1910,7 +1882,7 @@ var FigureTest = function () {
           alert("Error in shape code. \nRemove error and try it again:\n\n>>    " + exc);
           throw exc;
         }
-        var splash = $('<div class="overlay-scale">' + '<div id="test_canvas">' + '</div>' + ' <div               id="test_info" >Test page for your designed and coded draw2d shape.</div>' + ' <div title="Close" id="test_close" class="icon ion-ios-close-outline"></div>' + '<div>');
+        var splash = $('<div class="overlay-scale">' + '<div id="test_canvas">' + '</div>' + ' <div               id="test_info" >Test page for your designed and coded draw2d shape.</div>' + ' <img title="Close" id="test_close" class="icon" src="./images/dialog_close.svg"/>' + '<div>');
 
         // fadeTo MUSS leider sein. Man kann mit raphael keine paper.text elemente einfügen
         // wenn das canvas nicht sichtbar ist. In diesen Fall mach ich das Canvas "leicht" sichtbar und raphael ist
@@ -3773,8 +3745,9 @@ exports.default = shape_designer.filter.BlurFilter = function (_Filter) {
   _createClass(BlurFilter, [{
     key: "insertPane",
     value: function insertPane(figure, $parent) {
-      $parent.append('<div id="' + this.cssScope + '_filter_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_width_panel">' + '     Blur' + '    <span id="button_remove_' + this.cssScope + '" class="btn btn-mini icon ion-ios-close-outline pull-right" ></span>' + '</div>' + ' <div class="panel-body collapse in" id="' + this.cssScope + '_blur_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
+      $parent.append('<div id="' + this.cssScope + '_filter_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_width_panel">' + '     Blur' + '    <span id="button_remove_' + this.cssScope + '"><img class="svg icon pull-right" src="./images/dialog_close.svg"/></span></span>' + '</div>' + ' <div class="panel-body collapse in" id="' + this.cssScope + '_blur_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
       '       <input id="filter_blur" type="text" value="' + figure.getBlur() + '"  name="filter_blur" class="form-control" />' + '   </div>' + ' </div>' + '</div>');
+      inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("#filter_blur").TouchSpin({
         min: 0,
@@ -3844,26 +3817,26 @@ exports.default = shape_designer.filter.FanoutFilter = function (_Filter) {
     var _this = _possibleConstructorReturn(this, (FanoutFilter.__proto__ || Object.getPrototypeOf(FanoutFilter)).call(this));
 
     _this.NAME = "shape_designer.filter.FanoutFilter";
+    _this.cssScope = _this.NAME.replace(/[.]/g, "_");
     return _this;
   }
 
   _createClass(FanoutFilter, [{
     key: "insertPane",
     value: function insertPane(figure, $parent) {
-      var cssScope = this.NAME.replace(/[.]/g, "_");
+      $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_width_panel">' + '     Maximal fan out' + '</div>' + ' <div class="panel-body collapse in" id="' + this.cssScope + '_width_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
+      '       <input id="filter_' + this.cssScope + '_fanout" type="text" value="' + figure.getMaxFanOut() + '" name="filter_' + this.cssScope + '_fanout" class="form-control" />' + '   </div>' + ' </div>' + '</div>');
+      inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
-      $parent.append('<div id="' + cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + cssScope + '_width_panel">' + '     Maximal fan out' + '</div>' + ' <div class="panel-body collapse in" id="' + cssScope + '_width_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '       <input id="filter_' + cssScope + '_fanout" type="text" value="' + figure.getMaxFanOut() + '" name="filter_' + cssScope + '_fanout" class="form-control" />' + '   </div>' + ' </div>' + '</div>');
-
-      $("input[name='filter_" + cssScope + "_fanout']").TouchSpin({
+      $("input[name='filter_" + this.cssScope + "_fanout']").TouchSpin({
         min: 0,
         max: 50,
         step: 1,
         maxboostedstep: 1,
         postfix: 'px'
       });
-      $("input[name='filter_" + cssScope + "_fanout']").on("change", $.proxy(function () {
-        this.setMaxFanOut(parseInt($("input[name='filter_" + cssScope + "_fanout']").val()));
+      $("input[name='filter_" + this.cssScope + "_fanout']").on("change", $.proxy(function () {
+        this.setMaxFanOut(parseInt($("input[name='filter_" + this.cssScope + "_fanout']").val()));
       }, figure));
     }
   }, {
@@ -3923,6 +3896,7 @@ exports.default = shape_designer.filter.FillColorFilter = function (_Filter) {
 
     _this.NAME = "shape_designer.filter.FillColorFilter";
     _this.colorPicker = null;
+    _this.cssScope = _this.NAME.replace(/[.]/g, "_");
     return _this;
   }
 
@@ -3930,8 +3904,9 @@ exports.default = shape_designer.filter.FillColorFilter = function (_Filter) {
     key: "insertPane",
     value: function insertPane(figure, $parent) {
 
-      $parent.append('<div id="fill_color_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#color_fill_panel">' + '    Color Fill' + '    <span id="button_remove_FillColorFilter" class="btn btn-mini icon ion-ios-close-outline pull-right" ></span>' + ' </div>' + ' <div class="panel-body collapse in" id="color_fill_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
+      $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#color_fill_panel">' + '    Color Fill' + '    <span id="button_remove_FillColorFilter"><img class="svg icon pull-right" src="./images/dialog_close.svg"/><span>' + ' </div>' + ' <div class="panel-body collapse in" id="color_fill_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
       '      <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="filter_color_fill" type="text" value="" name="filter_color_fill" class="form-control color"/>' + '       </div>' + '    </div>' + ' </div>' + '</div>');
+      inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       var picker = this.colorPicker = new _jscolor2.default.color(document.getElementById('filter_color_fill'), {});
       this.colorPicker.fromString(figure.getBackgroundColor().hash());
@@ -4076,6 +4051,7 @@ exports.default = shape_designer.filter.FontColorFilter = function (_Filter) {
 
     _this.NAME = "shape_designer.filter.FontColorFilter";
     _this.colorPicker = null;
+    _this.cssScope = _this.NAME.replace(/[.]/g, "_");
     return _this;
   }
 
@@ -4084,8 +4060,9 @@ exports.default = shape_designer.filter.FontColorFilter = function (_Filter) {
     value: function insertPane(figure, $parent) {
       var _this2 = this;
 
-      $parent.append('<div id="fill_color_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#color_fill_panel">' + '    Font Color' + '    <span id="button_remove_FillColorFilter" class="btn btn-mini icon ion-ios-close-outline pull-right" ></span>' + ' </div>' + ' <div class="panel-body collapse in" id="color_fill_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
+      $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#color_fill_panel">' + '    Font Color' + '    <span id="button_remove_FillColorFilter"><img class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' + ' </div>' + ' <div class="panel-body collapse in" id="color_fill_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
       '      <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="filter_color_fill" type="text" value="" name="filter_color_fill" class="form-control color"/>' + '       </div>' + '    </div>' + ' </div>' + '</div>');
+      inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       var picker = this.colorPicker = new _jscolor2.default.color(document.getElementById('filter_color_fill'), {});
       this.colorPicker.fromString(figure.getFontColor().hash());
@@ -4159,6 +4136,7 @@ exports.default = shape_designer.filter.FontSizeFilter = function (_Filter) {
     var _this = _possibleConstructorReturn(this, (FontSizeFilter.__proto__ || Object.getPrototypeOf(FontSizeFilter)).call(this));
 
     _this.NAME = "shape_designer.filter.FontSizeFilter";
+    _this.cssScope = _this.NAME.replace(/[.]/g, "_");
     return _this;
   }
 
@@ -4167,8 +4145,9 @@ exports.default = shape_designer.filter.FontSizeFilter = function (_Filter) {
     value: function insertPane(figure, $parent) {
       var _this2 = this;
 
-      $parent.append('<div id="fontsize_filter_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#fontsize_width_panel">' + '     Font Size' + '    <span id="button_remove_FontSizeFilter" class="btn btn-mini icon ion-ios-close-outline pull-right" ></span>' + '</div>' + ' <div class="panel-body collapse in" id="fontsize_width_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
+      $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#fontsize_width_panel">' + '     Font Size' + '    <span id="button_remove_FontSizeFilter"><img  class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' + '</div>' + ' <div class="panel-body collapse in" id="fontsize_width_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
       '       <input id="filter_fontsize" type="text" value="' + figure.getFontSize() + '" name="filter_fontsize" class="form-control" />' + '   </div>' + ' </div>' + '</div>');
+      inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("#filter_fontsize").TouchSpin({
         min: 4,
@@ -4268,8 +4247,9 @@ exports.default = shape_designer.filter.LinearGradientFilter = function (_Filter
     value: function insertPane(figure, $parent) {
       var _this2 = this;
 
-      $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_panel">' + '     Linear Gradient' + '    <span id="button_remove_' + this.cssScope + '" class="btn btn-mini icon ion-ios-close-outline pull-right" ></span>' + '</div>' + ' <div class="panel-body collapse in" id="' + this.cssScope + '_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
+      $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_panel">' + '     Linear Gradient' + '    <span id="button_remove_' + this.cssScope + '"><img  class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' + '</div>' + ' <div class="panel-body collapse in" id="' + this.cssScope + '_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
       '      <div class="input-group text-center" style="width:100%" >' + '           <div id="' + this.cssScope + '_angle" />' + '      </div> ' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="' + this.cssScope + '_color1" type="text" value="' + this.startColor + '" class="form-control color"/>' + '       </div>' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="' + this.cssScope + '_color2" type="text" value="' + this.endColor + '" class="form-control color"/>' + '       </div>' + '   </div>' + ' </div>' + '</div>');
+      inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $('#' + this.cssScope + '_angle').anglepicker({
         start: function start(e, ui) {},
@@ -4394,6 +4374,7 @@ exports.default = shape_designer.filter.OpacityFilter = function (_Filter) {
     var _this = _possibleConstructorReturn(this, (OpacityFilter.__proto__ || Object.getPrototypeOf(OpacityFilter)).call(this));
 
     _this.NAME = "shape_designer.filter.OpacityFilter";
+    _this.cssScope = _this.NAME.replace(/[.]/g, "_");
     return _this;
   }
 
@@ -4402,8 +4383,9 @@ exports.default = shape_designer.filter.OpacityFilter = function (_Filter) {
     value: function insertPane(figure, $parent) {
       var _this2 = this;
 
-      $parent.append('<div id="opacity_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#opacity_panel">' + '    Opacity' + '    <span id="button_remove_OpacityFilter" class="btn btn-mini glyphicon icon ion-ios-close-outline pull-right" ></span>' + '</div>' + ' <div class="panel-body collapse in" id="opacity_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
+      $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#opacity_panel">' + '    Opacity' + '    <span id="button_remove_OpacityFilter"><img  class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' + '</div>' + ' <div class="panel-body collapse in" id="opacity_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
       '      <div class="input-group">' + '         <input class="form-control" id="filter_opacity" type="text" value="' + parseInt(figure.getAlpha() * 100) + '" />' + '      </div>' + '   </div>' + ' </div>' + '</div>');
+      inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("#filter_opacity").TouchSpin({
         min: 0,
@@ -4479,6 +4461,7 @@ exports.default = shape_designer.filter.OutlineStrokeFilter = function (_Filter)
 
     _this.NAME = "shape_designer.filter.OutlineStrokeFilter";
     _this.colorPicker = null;
+    _this.cssScope = _this.NAME.replace(/[.]/g, "_");
     return _this;
   }
 
@@ -4487,8 +4470,9 @@ exports.default = shape_designer.filter.OutlineStrokeFilter = function (_Filter)
     value: function insertPane(figure, $parent) {
       var _this2 = this;
 
-      $parent.append('<div id="outlinestroke_filter_conainer" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#outlinestroke_width_panel">' + '     Outline Stroke' + '    <span id="button_remove_OutlineStrokeFilter" class="btn btn-mini icon ion-ios-close-outline pull-right" ></span>' + '</div>' + ' <div class="panel-body collapse in" id="outlinestroke_width_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
+      $parent.append('<div id="' + this.cssScope + '_conainer" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#outlinestroke_width_panel">' + '     Outline Stroke' + '    <img id="button_remove_OutlineStrokeFilter" class="icon pull-right" src="./images/dialog_close.svg"/>' + '</div>' + ' <div class="panel-body collapse in" id="outlinestroke_width_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
       '       <input id="filter_outlinestroke" type="text" value="' + figure.getOutlineStroke() + '" name="filter_outlinestroke" class="form-control" />' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="filter_outlinestroke_color" type="text" value="" name="outlinestroke-color" class="form-control color"/>' + '       </div>' + '   </div>' + ' </div>' + '</div>');
+      inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("input[name='filter_outlinestroke']").TouchSpin({
         min: 0,
@@ -4589,6 +4573,7 @@ exports.default = shape_designer.filter.PortDirectionFilter = function (_Filter)
       $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_panel">' + '     Connection Direction' + '</div>' + ' <div class="panel-body collapse in" id="' + this.cssScope + '_panel">' + '   <div class="form-group portDirectionOption">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
 
       '<label>' + '  <input ' + (dir === 0 ? ' checked="checked"' : '') + ' type="radio" value="" name="' + this.cssScope + '_label" name="' + this.cssScope + '_label" data-dir="0" />' + '  <span  title="up" class="glyphicon glyphicon-arrow-up"></span>' + '</label>' + '<br>' + '<label>' + '  <input ' + (dir === 3 ? ' checked="checked"' : '') + 'type="radio" value="" name="' + this.cssScope + '_label" name="' + this.cssScope + '_label" data-dir="3" />' + '  <span  title="left" class="glyphicon glyphicon-arrow-left"></span>' + '</label>' + '<label>' + '  <input ' + (dir === null ? ' checked="checked"' : '') + 'type="radio" value="" name="' + this.cssScope + '_label" name="' + this.cssScope + '_label" data-dir="null" />' + '  <span title="automatic" class="glyphicon glyphicon-screenshot"></span>' + '</label>' + '<label>' + '  <input ' + (dir === 1 ? ' checked="checked"' : '') + 'type="radio" value="" name="' + this.cssScope + '_label" name="' + this.cssScope + '_label" data-dir="1" />' + '  <span title="right"  class="glyphicon glyphicon-arrow-right"></span>' + '</label>' + '<br>' + '<label>' + '  <input ' + (dir === 2 ? ' checked="checked"' : '') + 'type="radio" value="" name="' + this.cssScope + '_label" name="' + this.cssScope + '_label" data-dir="2" />' + '  <span  title="down" class="glyphicon glyphicon-arrow-down"></span>' + '</label>' + '       </div>' + '   </div>' + ' </div>' + '</div>');
+      inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("#" + _this.cssScope + "_panel .portDirectionOption input").on("change", function (event) {
         figure.setConnectionDirection($(event.currentTarget).data("dir"));
@@ -4673,6 +4658,7 @@ exports.default = shape_designer.filter.PortTypeFilter = function (_Filter) {
       var _this = this;
       var type = figure.getInputType();
       $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_panel">' + '     Port Type' + '</div>' + ' <div class="panel-body collapse in" id="' + this.cssScope + '_panel">' + '   <div class="form-group portTypeOption">' + '<label>' + '  <input ' + (type == 'Input' ? ' checked="checked"' : '') + 'type="radio" value="" name="' + this.cssScope + '_label" name="' + this.cssScope + '_label" data-type="Input" />' + '  <span  title="down" class="icon ion-log-in">input</span>' + '</label>' + '<br>' + '<label>' + '  <input ' + (type == 'Output' ? ' checked="checked"' : '') + 'type="radio" value="" name="' + this.cssScope + '_label" name="' + this.cssScope + '_label" data-type="Output" />' + '  <span  title="down" class="icon ion-log-out">output</span>' + '</label>' + '<br>' + '<label>' + '  <input ' + (type == 'Hybrid' ? ' checked="checked"' : '') + 'type="radio" value="" name="' + this.cssScope + '_label" name="' + this.cssScope + '_label" data-type="Hybrid" />' + '  <span  title="down" class="icon ion-ios-circle-outline">unspecified</span>' + '</label>' + '       </div>' + '   </div>' + ' </div>' + '</div>');
+      inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("#" + _this.cssScope + "_panel .portTypeOption input").on("change", function (event) {
         figure.setInputType($(event.currentTarget).data("type"));
@@ -4745,6 +4731,7 @@ exports.default = shape_designer.filter.PositionFilter = function (_Filter) {
 
     _this.NAME = "shape_designer.filter.PositionFilter";
     _this.block = false;
+    _this.cssScope = _this.NAME.replace(/[.]/g, "_");
     return _this;
   }
 
@@ -4753,8 +4740,9 @@ exports.default = shape_designer.filter.PositionFilter = function (_Filter) {
     value: function insertPane(figure, $parent) {
       var _this2 = this;
 
-      $parent.append('<div id="position_filter_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#position_width_panel">' + '     Position' + '</div>' + ' <div class="panel-body  collapse in" id="position_width_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
+      $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#position_width_panel">' + '     Position' + '</div>' + ' <div class="panel-body  collapse in" id="position_width_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
       '       <input id="filter_position_x" type="text" value="' + parseFloat(figure.getPosition().x) + '" name="filter_position_x" class="form-control" />' + '       <input id="filter_position_y" type="text" value="' + parseFloat(figure.getPosition().y) + '" name="filter_position_y" class="form-control" />' + '   </div>' + ' </div>' + '</div>');
+      inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("#filter_position_x").TouchSpin({
         min: 0,
@@ -4854,6 +4842,7 @@ exports.default = shape_designer.filter.RadiusFilter = function (_Filter) {
     var _this = _possibleConstructorReturn(this, (RadiusFilter.__proto__ || Object.getPrototypeOf(RadiusFilter)).call(this));
 
     _this.NAME = "shape_designer.filter.RadiusFilter";
+    _this.cssScope = _this.NAME.replace(/[.]/g, "_");
     return _this;
   }
 
@@ -4862,8 +4851,9 @@ exports.default = shape_designer.filter.RadiusFilter = function (_Filter) {
     value: function insertPane(figure, $parent) {
       var _this2 = this;
 
-      $parent.append('<div id="radius_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#radius_panel">' + '    Corner Radius' + '    <span id="button_remove_RadiusFilter" class="btn btn-mini icon ion-ios-close-outline pull-right" ></span>' + '</div>' + ' <div class="panel-body collapse in" id="radius_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
+      $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#radius_panel">' + '    Corner Radius' + '    <span id="button_remove_RadiusFilter"><img class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' + '</div>' + ' <div class="panel-body collapse in" id="radius_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
       '      <div class="input-group">' + '         <input class="form-control" id="filter_radius" type="text" value="' + figure.getRadius() + '" />' + '      </div>' + '   </div>' + ' </div>' + '</div>');
+      inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("#filter_radius").TouchSpin({
         min: 0,
@@ -4934,6 +4924,7 @@ exports.default = shape_designer.filter.SizeFilter = function (_Filter) {
 
     _this.NAME = "shape_designer.filter.SizeFilter";
     _this.block = false;
+    _this.cssScope = _this.NAME.replace(/[.]/g, "_");
     return _this;
   }
 
@@ -4942,8 +4933,9 @@ exports.default = shape_designer.filter.SizeFilter = function (_Filter) {
     value: function insertPane(figure, $parent) {
       var _this2 = this;
 
-      $parent.append('<div id="size_filter_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#size_width_panel">' + '     Size' + ' </div>' + ' <div class="panel-body  collapse in" id="size_width_panel">' + '   <div class="form-group">' + '       <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
+      $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#size_width_panel">' + '     Size' + ' </div>' + ' <div class="panel-body  collapse in" id="size_width_panel">' + '   <div class="form-group">' + '       <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
       '       <input id="filter_width"  type="text" value="' + figure.getWidth() + '"  name="filter_width"  class="form-control" />' + '       <input id="filter_height" type="text" value="' + figure.getHeight() + '" name="filter_height" class="form-control" />' + '   </div>' + ' </div>' + '</div>');
+      inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("#filter_width").TouchSpin({
         min: 0,
@@ -5046,6 +5038,7 @@ exports.default = shape_designer.filter.StrokeFilter = function (_Filter) {
 
     _this.NAME = "shape_designer.filter.StrokeFilter";
     _this.colorPicker = null;
+    _this.cssScope = _this.NAME.replace(/[.]/g, "_");
     return _this;
   }
 
@@ -5054,33 +5047,32 @@ exports.default = shape_designer.filter.StrokeFilter = function (_Filter) {
     value: function insertPane(figure, $parent) {
       var _this2 = this;
 
-      var cssScope = this.NAME.replace(/[.]/g, "_");
+      $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_width_panel">' + '     Stroke' + '    <span id="button_remove_' + this.cssScope + '"><img  class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' + '</div>' + ' <div class="panel-body collapse in" id="' + this.cssScope + '_width_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
+      '       <input id="filter_' + this.cssScope + '_width" type="text" value="' + figure.getStroke() + '" name="filter_' + this.cssScope + '_width" class="form-control" />' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="filter_' + this.cssScope + '_color" type="text" value="" name="stroke_' + this.cssScope + '_color" class="form-control color"/>' + '       </div>' + '   </div>' + ' </div>' + '</div>');
+      inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
-      $parent.append('<div id="' + cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + cssScope + '_width_panel">' + '     Stroke' + '    <span id="button_remove_' + cssScope + '" class="btn btn-mini icon ion-ios-close-outline pull-right" ></span>' + '</div>' + ' <div class="panel-body collapse in" id="' + cssScope + '_width_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '       <input id="filter_' + cssScope + '_width" type="text" value="' + figure.getStroke() + '" name="filter_' + cssScope + '_width" class="form-control" />' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="filter_' + cssScope + '_color" type="text" value="" name="stroke_' + cssScope + '_color" class="form-control color"/>' + '       </div>' + '   </div>' + ' </div>' + '</div>');
-
-      $("input[name='filter_" + cssScope + "_width']").TouchSpin({
+      $("input[name='filter_" + this.cssScope + "_width']").TouchSpin({
         min: 0,
         max: 50,
         step: 1,
         maxboostedstep: 1,
         postfix: 'px'
       });
-      $("input[name='filter_" + cssScope + "_width']").on("change", $.proxy(function () {
-        this.setStroke(parseInt($("input[name='filter_" + cssScope + "_width']").val()));
+      $("input[name='filter_" + this.cssScope + "_width']").on("change", $.proxy(function () {
+        this.setStroke(parseInt($("input[name='filter_" + this.cssScope + "_width']").val()));
       }, figure));
 
-      var picker = this.colorPicker = new _jscolor2.default.color(document.getElementById('filter_' + cssScope + '_color'), {});
+      var picker = this.colorPicker = new _jscolor2.default.color(document.getElementById('filter_' + this.cssScope + '_color'), {});
       this.colorPicker.fromString(figure.getColor().hash());
       this.colorPicker.onImmediateChange = $.proxy(function () {
         this.setColor("#" + picker.toString());
       }, figure);
 
-      $("#button_remove_" + cssScope).on("click", function () {
+      $("#button_remove_" + this.cssScope).on("click", function () {
         figure.removeFilter(_this2);
         figure.setStroke(0);
-        $("#" + cssScope + "_container").animate({ "height": "0", "opacity": 0, "margin-bottom": 0 }, 500, function () {
-          $('#' + cssScope + '_container').remove();
+        $("#" + _this2.cssScope + "_container").animate({ "height": "0", "opacity": 0, "margin-bottom": 0 }, 500, function () {
+          $('#' + _this2.cssScope + '_container').remove();
         });
       });
     }
@@ -5165,8 +5157,9 @@ exports.default = shape_designer.filter.TextLinearGradientFilter = function (_Fi
     value: function insertPane(figure, $parent) {
       var _this2 = this;
 
-      $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_panel">' + '     Linear Gradient' + '    <span id="button_remove_' + this.cssScope + '" class="btn btn-mini icon ion-ios-close-outline pull-right" ></span>' + '</div>' + ' <div class="panel-body collapse in" id="' + this.cssScope + '_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
+      $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_panel">' + '     Linear Gradient' + '    <span id="button_remove_' + this.cssScope + '"><img  class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' + '</div>' + ' <div class="panel-body collapse in" id="' + this.cssScope + '_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
       '      <div class="input-group text-center" style="width:100%" >' + '           <div id="' + this.cssScope + '_angle" />' + '      </div> ' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="' + this.cssScope + '_color1" type="text" value="' + this.startColor + '" class="form-control color"/>' + '       </div>' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="' + this.cssScope + '_color2" type="text" value="' + this.endColor + '" class="form-control color"/>' + '       </div>' + '   </div>' + ' </div>' + '</div>');
+      inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $('#' + this.cssScope + '_angle').anglepicker({
         start: function start(e, ui) {},
@@ -10628,13 +10621,12 @@ exports.push([module.i, "/*!\n *  Font Awesome 4.7.0 by @davegandy - http://font
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-var escape = __webpack_require__(/*! ../../../../node_modules/css-loader/lib/url/escape.js */ "./node_modules/css-loader/lib/url/escape.js");
 exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
 // imports
 
 
 // module
-exports.push([module.i, "#modal-background {\n  display: block;\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: black;\n  opacity: 0.1;\n  -webkit-opacity: 0.1;\n  -moz-opacity: 0.1;\n  filter: alpha(opacity=10);\n  z-index: 1000;\n}\n.modal-dialog {\n  border-radius: 2px;\n  box-shadow: 2px 2px 5px 0 #222;\n}\n.modal-content {\n  border-radius: 2px !important;\n}\n/***BOOTSTRAP****/\n.btn {\n  border-radius: 0px !important;\n}\n.tooltip-inner {\n  border-radius: 0px !important;\n  padding: 10px !important;\n  padding-top: 5px !important;\n  padding-bottom: 5px !important;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300 !important;\n  font-size: 14px !important;\n  color: #b0b0b0 !important;\n}\n/********/\n.blackgradient {\n  background: none repeat scroll 0 0 #303030;\n}\nbody {\n  overflow: hidden;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300;\n}\ninput {\n  background: none repeat scroll 0 0 #f8f8f8;\n  border-color: #C6C6C6 #DADADA #EAEAEA;\n  border-radius: 4px 4px 4px 4px;\n  -moz-box-sizing: border-box;\n  padding-left: 7px;\n  border-style: solid ;\n  border-width: 1px;\n  vertical-align: middle;\n  height: 25px;\n  font-size: 14px;\n  line-height: 25px;\n}\n.input-block-level {\n  display: block;\n  width: 100%;\n  min-height: 28px;\n}\n.control-label {\n  font-family: 'Roboto', sans-serif;\n  font-weight: 300;\n}\n/******************************************************************\n * Einstellungen der PropertyViews im Editmodus der \"Form\".\n ******************************************************************/\n.palette_node_element {\n  width: 48px;\n  height: 48px;\n  cursor: move;\n  margin: 10px auto 10px auto;\n  align: center;\n}\n#tool_shape:hover #tool_shape_caret {\n  color: #C21B7A;\n}\n#tool_shape .tool_shape_entry {\n  text-align: left;\n}\n#tool_shape #tool_shape_caret {\n  border-top: 20px solid transparent;\n  border-bottom: 10px solid transparent;\n  border-right: 4px solid transparent;\n  border-left: 2px solid transparent;\n}\n#tool_shape #tool_shape_caret > span {\n  margin-top: 21px;\n}\n/* Effects */\n.overlay-scale {\n  position: absolute;\n  top: 0px;\n  left: 0px;\n  width: 100%;\n  height: 100%;\n  z-index: 10000;\n  visibility: hidden;\n  opacity: 0;\n  -webkit-transform: scale(0.9);\n  transform: scale(0.9);\n  -webkit-transition: all 0.4s;\n  transition: all 0.4s;\n}\n.overlay-scale.open {\n  visibility: visible;\n  opacity: 1;\n  -webkit-transform: scale(1);\n  transform: scale(1);\n  -webkit-transition: all 0.4s;\n  transition: all 0.4s;\n}\n.readonly-highlight {\n  background-color: rgba(50, 43, 168, 0.5);\n  opacity: 0.2;\n  color: darkblue;\n  position: absolute;\n}\n#canvas {\n  padding: 0px;\n  margin: 0px;\n  border: 0px;\n  position: absolute;\n  top: 60px;\n  right: 200px;\n  left: 220px;\n  bottom: 0px;\n  overflow: scroll;\n  background-color: #FFFFFF;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 220px;\n  background-color: transparent;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #C21B7A !important;\n}\n#canvas_config {\n  position: fixed;\n  font-size: 25px;\n  top: 65px;\n  left: 225px;\n  cursor: pointer;\n}\n#canvas_config:hover {\n  color: #C21B7A;\n}\n#canvas_config_items {\n  position: fixed;\n  top: 90px;\n  left: 225px;\n  cursor: pointer;\n  padding: 10px;\n  white-space: nowrap;\n  min-width: 250px;\n}\n#tool_shape_caret {\n  color: black;\n}\n#toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  left: 220px;\n  height: 60px;\n  right: 0;\n  overflow: visible;\n  z-index: 1000 !important;\n  position: absolute;\n  background-image: none !important;\n  background-color: transparent;\n  border: none !important;\n}\n#toolbar * {\n  outline: none;\n}\n#toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: middle;\n}\n#toolbar .group .icon {\n  width: 50px;\n  height: 50px;\n  margin: 5px;\n  padding: 0;\n  cursor: pointer;\n  border: 1px solid transparent;\n  color: #777;\n  font-size: 45px;\n}\n#toolbar .group .icon:hover {\n  border: 1px solid #C21B7A;\n}\n#toolbar .group .icon.disabled {\n  opacity: 0.2;\n  border: 1px solid transparent;\n}\n.toolbar_delimiter {\n  margin-left: 10px;\n}\n.toolbar_union {\n  background-image: url(" + escape(__webpack_require__(/*! ../images/toolbar_union.png */ "./app/frontend/designer/images/toolbar_union.png")) + ") !important;\n  background-repeat: no-repeat;\n  background-position: 3px !important;\n  width: 55px;\n  height: 48px;\n}\n.toolbar_difference {\n  background-image: url(" + escape(__webpack_require__(/*! ../images/toolbar_difference.png */ "./app/frontend/designer/images/toolbar_difference.png")) + ") !important;\n  background-repeat: no-repeat;\n  background-position: 3px !important;\n  width: 55px;\n  height: 48px;\n}\n.toolbar_intersect {\n  background-image: url(" + escape(__webpack_require__(/*! ../images/toolbar_intersect.png */ "./app/frontend/designer/images/toolbar_intersect.png")) + ") !important;\n  background-repeat: no-repeat;\n  background-position: 2px !important;\n  width: 55px;\n  height: 48px;\n}\n.layer-name-prompt .modal-title {\n  font-weight: 100;\n}\n.layer-name-prompt .modal-footer {\n  border: 0;\n}\n.layer-name-prompt .modal-header {\n  border-bottom: 3px solid #C21B7A;\n}\n.layer-name-prompt input {\n  outline: none !important;\n  -webkit-box-shadow: inset !important;\n  box-shadow: inset !important;\n  background-color: rgba(0, 0, 0, 0.02) !important;\n  border-radius: 1px !important;\n}\n.layer-name-prompt input:focus {\n  border: 1px solid #C21B7A;\n}\n.layer-name-prompt .btn-primary {\n  background-color: #C21B7A;\n  border: 0;\n}\n.layer-name-prompt .btn-primary:hover {\n  background-color: #95155e;\n}\n#layer {\n  padding: 0;\n  margin: 0;\n  border: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  bottom: 0;\n  width: 220px;\n  background-color: #282a30;\n  text-align: center;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3);\n  z-index: 10000;\n}\n#layer .panetitle {\n  position: fixed;\n  height: 30px;\n  width: 220px;\n  top: 0;\n  border-bottom: 1px solid #222222;\n  border-top: 1px solid #111111;\n  font-weight: 500;\n  font-size: 12px;\n  padding-top: 5px;\n  letter-spacing: 5px;\n  text-align: center;\n  color: #C21B7A;\n}\n#layer_elements {\n  padding: 0px;\n  margin: 0px;\n  border: 0px;\n  position: fixed;\n  top: 30px;\n  left: 0px;\n  bottom: 0px;\n  width: 220px;\n  overflow: auto;\n}\n.layerElement {\n  color: #dddddd;\n  cursor: move;\n  font-weight: 200;\n  font-size: 12px;\n  letter-spacing: 1px;\n  padding: 4px 4px 4px 20px;\n  text-align: left;\n  border-bottom: 1px solid #222222;\n}\n.layerElement .icon {\n  cursor: pointer;\n  padding-top: 4px;\n  padding-right: 4px;\n  padding-left: 6px;\n}\n.layerElement .icon:hover {\n  color: #C21B7A;\n}\n.layerSelectedElement {\n  color: white;\n  padding: 4px;\n  padding-left: 20px;\n  background: rgba(255, 255, 255, 0.1);\n}\n#code_overlay {\n  position: absolute;\n  top: 0px;\n  left: 0px;\n  width: 100%;\n  height: 100%;\n  background-color: white;\n  z-index: 10000;\n}\n#code_close {\n  position: fixed;\n  right: 40px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#code_close:hover {\n  color: #C21B7A;\n}\n#test_run {\n  position: fixed;\n  right: 90px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#test_run:hover {\n  color: #C21B7A;\n}\n#export_overlay {\n  position: absolute;\n  top: 0px;\n  left: 0px;\n  width: 100%;\n  height: 100%;\n  background-color: white;\n}\n#export_close {\n  position: fixed;\n  right: 40px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#export_close:hover {\n  color: #C21B7A;\n}\n#export_clipboard {\n  position: fixed;\n  right: 100px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#export_clipboard:hover {\n  color: #C21B7A;\n}\n#test_info {\n  position: absolute;\n  color: black;\n  z-index: 20000;\n  top: 20px;\n  left: 20px;\n  border: 1px solid lightgray;\n  padding: 7px;\n  background-color: white;\n  border-radius: 2px;\n}\n#test_canvas {\n  position: absolute;\n  top: 0px;\n  left: 0px;\n  width: 100%;\n  height: 100%;\n  background-color: white;\n  z-index: 10000;\n}\n#test_close {\n  position: fixed;\n  right: 40px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#test_close:hover {\n  color: #C21B7A;\n}\n#test_clipboard {\n  position: fixed;\n  right: 100px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#test_clipboard:hover {\n  color: #C21B7A;\n}\n.portDirectionOption {\n  height: 60px;\n  text-align: center;\n}\n.portDirectionOption label > input {\n  /* HIDE RADIO */\n  display: none;\n}\n.portDirectionOption label > input + span {\n  /* IMAGE STYLES */\n  cursor: pointer;\n  color: gray !important;\n  padding-right: 5px;\n}\n.portDirectionOption label > input:checked + span {\n  /* (CHECKED) IMAGE STYLES */\n  color: #C21B7A !important;\n}\n.portTypeOption {\n  height: 65px;\n  padding-left: 60px;\n}\n.portTypeOption label > input {\n  /* HIDE RADIO */\n  display: none;\n}\n.portTypeOption label > input + span {\n  /* IMAGE STYLES */\n  cursor: pointer;\n  color: gray !important;\n  padding-right: 5px;\n  font-weight: 100;\n  font-size: 14px;\n}\n.portTypeOption label > input + span:before {\n  padding-right: 10px;\n}\n.portTypeOption label > input:checked + span {\n  /* (CHECKED) IMAGE STYLES */\n  color: #C21B7A !important;\n}\n#filter {\n  position: absolute;\n  top: 60px;\n  right: 0;\n  bottom: 0;\n  width: 200px;\n  padding: 0;\n  margin: 0;\n  border-radius: 0;\n  border: 0;\n  background-color: #282a30;\n}\n#filter .form-control {\n  height: 25px;\n}\n#filter .btn {\n  padding-left: 5px;\n  padding-right: 5px;\n  padding-top: 1px;\n  padding-bottom: 2px;\n}\n#filter .input-group-addon {\n  padding: 0;\n  padding-left: 5px;\n  padding-right: 5px;\n  color: rgba(0, 0, 0, 0.3);\n  background-color: white;\n  border-left: 0;\n  border-radius: 0;\n  font-weight: 100;\n  text-transform: lowercase;\n  font-size: 12px;\n}\n#filter .panel-default {\n  margin: 0;\n  border-radius: 0;\n  background-color: rgba(194, 27, 122, 0.02);\n  border: 0;\n  border-top: 1px solid #303030;\n  border-bottom: 1px solid #202525;\n  margin-top: 3px;\n}\n#filter .panetitle {\n  position: fixed;\n  height: 30px;\n  width: 200px;\n  top: 60px;\n  border-bottom: 1px solid #222222;\n  border-top: 1px solid #111111;\n  font-weight: 500;\n  font-size: 12px;\n  padding-top: 5px;\n  letter-spacing: 5px;\n  text-align: center;\n  color: #C21B7A;\n}\n#filter_toolbar {\n  overflow: visible;\n  border: 0;\n  padding: 3px;\n  padding-left: 10px;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  width: 200px;\n  height: 30px;\n}\n.filter-heading {\n  color: #DDDDDD !important;\n  font-size: 12px;\n  padding-right: 10px !important;\n  padding-top: 1px !important;\n  padding-bottom: 0px !important;\n  background-color: transparent !important;\n  background-image: none !important;\n  border: 0 !important;\n  margin-top: 4px;\n  cursor: pointer;\n  font-weight: 300;\n}\n#filter_actions {\n  position: fixed;\n  top: 90px;\n  bottom: 30px;\n  width: 200px;\n  border: 0;\n  padding: 0;\n  overflow-y: auto;\n}\n#filter_actions .panel-body {\n  padding: 7px;\n  padding-top: 0;\n}\n#filter_actions .form-group {\n  margin-bottom: 2px !important;\n}\n#filter_actions .form-group > .input-group {\n  margin-bottom: 10px;\n}\n#filter_actions .form-group > .input-group:last-child {\n  margin-bottom: 0px;\n}\n#filter_actions .icon {\n  color: #26B4A8;\n  padding: 0;\n  top: -4px;\n  color: rgba(255, 255, 255, 0.25);\n}\n#filter_actions .icon:hover {\n  color: #C21B7A;\n}\n#FigureMarkdownEdit .header {\n  width: 100%;\n  position: absolute;\n  top: 0px;\n  left: 0px;\n  display: inline-block;\n  height: 60px;\n  background-color: white;\n  overflow: hidden;\n}\n#FigureMarkdownEdit .header .left {\n  width: 50%;\n  display: inline-block;\n  height: 60px;\n  font-size: 20px;\n  padding: 6px;\n  color: #CC4F5A;\n  background-color: rgba(0, 0, 0, 0.1);\n  vertical-align: top;\n}\n#FigureMarkdownEdit .header .left small {\n  font-size: 16px;\n}\n#FigureMarkdownEdit .header .right {\n  width: 50%;\n  display: inline-block;\n  height: 60px;\n  font-size: 20px;\n  padding: 6px;\n  color: #CC4F5A;\n  background-color: rgba(0, 0, 0, 0.05);\n  vertical-align: top;\n}\n#FigureMarkdownEdit .source {\n  width: 50%;\n  display: inline-block;\n  font-family: Menlo, Monaco, Consolas, \"Courier New\", monospace;\n  font-size: 13px;\n  padding: 2px;\n  top: 60px;\n  bottom: 0px;\n  position: absolute;\n}\n#FigureMarkdownEdit .preview {\n  width: 50%;\n  display: inline-block;\n  top: 0px;\n  left: 50%;\n  position: absolute;\n  background-color: white;\n  padding: 30px;\n  overflow: auto;\n  top: 60px;\n  bottom: 0px;\n}\n#FigureMarkdownEdit .preview img {\n  max-width: 35%;\n}\n#FigureMarkdownEdit .preview table {\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  margin: 20px;\n  margin-left: 0;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n#FigureMarkdownEdit .preview table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n#FigureMarkdownEdit .preview table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n#FigureMarkdownEdit .preview table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n#FigureMarkdownEdit .preview table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n#FigureMarkdownEdit .preview table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n#FigureMarkdownEdit .preview table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n#FigureMarkdownEdit .preview table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n#FigureMarkdownEdit .preview tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n#FigureMarkdownEdit .preview tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n#FigureMarkdownEdit .preview table tr:last-child td {\n  border-bottom: 0;\n}\n#FigureMarkdownEdit .preview table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n#FigureMarkdownEdit .preview table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.btn-primary {\n  background-color: #C21B7A;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C21B7A;\n}\n.githubFileDialog .githubNavigation .glyphicon,\n.githubFileDialog .githubNavigation .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C21B7A;\n}\n.githubFileDialog .githubNavigation a.list-group-item:hover {\n  text-decoration: underline;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n#githubFileSelectDialog .githubNavigation {\n  height: 300px;\n  overflow: scroll;\n}\n#githubSaveFileDialog .githubFilePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .githubFilePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .githubNavigation {\n  height: 250px;\n  overflow: scroll;\n}\n#breadcrumb {\n  position: absolute;\n  right: 0px;\n  padding: 5px;\n  font-size: 15px;\n  color: rgba(0, 0, 0, 0.2);\n  padding-right: 25px;\n}\n#breadcrumb .separator {\n  padding: 5px;\n}\n#breadcrumb .filename {\n  font-weight: 500;\n}\n#breadcrumb .icon {\n  font-size: 22px;\n  padding-left: 10px;\n  top: 4px;\n  position: relative;\n  color: black;\n  cursor: pointer;\n}\n#breadcrumb .icon:hover {\n  color: #C21B7A;\n}\n.ui-anglepicker {\n  width: 52px;\n  height: 52px;\n  background: #dbdbdb;\n  background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2RiZGJkYiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjIwJSIgc3RvcC1jb2xvcj0iI2UxZTFkZSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmOGY4ZjMiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);\n  background: -moz-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #dbdbdb), color-stop(20%, #e1e1de), color-stop(100%, #f8f8f3));\n  background: -webkit-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -o-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -ms-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: linear-gradient(to bottom, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  border: 2px solid #666;\n  -moz-box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  -webkit-box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  -moz-border-radius: 50%;\n  -webkit-border-radius: 50%;\n  border-radius: 50%;\n  position: relative;\n  display: inline-block;\n}\n.ui-anglepicker-pointer {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  width: 50%;\n  margin: -2px 0 0 -2px;\n  -moz-transform-origin: 2px 2px;\n  -webkit-transform-origin: 2px 2px;\n  -ms-transform-origin: 2px 2px;\n  -o-transform-origin: 2px 2px;\n  transform-origin: 2px 2px;\n}\n.ui-anglepicker:hover,\n.ui-anglepicker.ui-anglepicker-dragging {\n  border-color: #494949;\n}\n.ui-anglepicker-dragging .ui-anglepicker-dot,\n.ui-anglepicker-dragging .ui-anglepicker-line,\n.ui-anglepicker:hover .ui-anglepicker-dot,\n.ui-anglepicker:hover .ui-anglepicker-line {\n  background: #494949;\n}\n.ui-anglepicker-dot {\n  height: 4px;\n  width: 4px;\n  position: absolute;\n  background: #838383;\n  -moz-border-radius: 50%;\n  -webkit-border-radius: 50%;\n  border-radius: 50%;\n}\n.ui-anglepicker-line {\n  margin-top: 1.5px;\n  margin-right: -2px;\n  height: 1px;\n  background: #838383;\n}\n", ""]);
+exports.push([module.i, "#modal-background {\n  display: block;\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: black;\n  opacity: 0.1;\n  -webkit-opacity: 0.1;\n  -moz-opacity: 0.1;\n  filter: alpha(opacity=10);\n  z-index: 1000;\n}\n.modal-dialog {\n  border-radius: 2px;\n  box-shadow: 2px 2px 5px 0 #222;\n}\n.modal-content {\n  border-radius: 2px !important;\n}\n/***BOOTSTRAP****/\n.btn {\n  border-radius: 0px !important;\n}\n.tooltip-inner {\n  border-radius: 0px !important;\n  padding: 10px !important;\n  padding-top: 5px !important;\n  padding-bottom: 5px !important;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300 !important;\n  font-size: 14px !important;\n  color: #b0b0b0 !important;\n}\n/********/\n.blackgradient {\n  background: none repeat scroll 0 0 #303030;\n}\nbody {\n  overflow: hidden;\n  font-family: 'Roboto', sans-serif !important;\n  font-weight: 300;\n}\ninput {\n  background: none repeat scroll 0 0 #f8f8f8;\n  border-color: #C6C6C6 #DADADA #EAEAEA;\n  border-radius: 4px 4px 4px 4px;\n  -moz-box-sizing: border-box;\n  padding-left: 7px;\n  border-style: solid ;\n  border-width: 1px;\n  vertical-align: middle;\n  height: 25px;\n  font-size: 14px;\n  line-height: 25px;\n}\n.input-block-level {\n  display: block;\n  width: 100%;\n  min-height: 28px;\n}\n.control-label {\n  font-family: 'Roboto', sans-serif;\n  font-weight: 300;\n}\n/******************************************************************\n * Einstellungen der PropertyViews im Editmodus der \"Form\".\n ******************************************************************/\n.palette_node_element {\n  width: 48px;\n  height: 48px;\n  cursor: move;\n  margin: 10px auto 10px auto;\n  align: center;\n}\n#tool_shape:hover #tool_shape_caret {\n  color: #C21B7A;\n}\n#tool_shape .tool_shape_entry {\n  text-align: left;\n}\n#tool_shape #tool_shape_caret {\n  border-top: 20px solid transparent;\n  border-bottom: 10px solid transparent;\n  border-right: 4px solid transparent;\n  border-left: 2px solid transparent;\n}\n#tool_shape #tool_shape_caret > span {\n  margin-top: 21px;\n}\n.tooltip {\n  z-index: 1000000;\n}\n/* Effects */\n.overlay-scale {\n  position: absolute;\n  top: 0px;\n  left: 0px;\n  width: 100%;\n  height: 100%;\n  z-index: 10000;\n  visibility: hidden;\n  opacity: 0;\n  -webkit-transform: scale(0.9);\n  transform: scale(0.9);\n  -webkit-transition: all 0.4s;\n  transition: all 0.4s;\n}\n.overlay-scale.open {\n  visibility: visible;\n  opacity: 1;\n  -webkit-transform: scale(1);\n  transform: scale(1);\n  -webkit-transition: all 0.4s;\n  transition: all 0.4s;\n}\n.readonly-highlight {\n  background-color: rgba(50, 43, 168, 0.5);\n  opacity: 0.2;\n  color: darkblue;\n  position: absolute;\n}\n#canvas {\n  padding: 0px;\n  margin: 0px;\n  border: 0px;\n  position: absolute;\n  top: 60px;\n  right: 200px;\n  left: 220px;\n  bottom: 0px;\n  overflow: scroll;\n  background-color: #FFFFFF;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 220px;\n  background-color: transparent;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #C21B7A !important;\n}\n#canvas_config {\n  position: fixed;\n  font-size: 25px;\n  top: 65px;\n  left: 225px;\n  cursor: pointer;\n}\n#canvas_config:hover {\n  color: #C21B7A;\n}\n#canvas_config_items {\n  position: fixed;\n  top: 90px;\n  left: 225px;\n  cursor: pointer;\n  padding: 10px;\n  white-space: nowrap;\n  min-width: 250px;\n}\n#tool_shape_caret {\n  color: black;\n}\n#toolbar {\n  margin: 0;\n  padding-top: 0;\n  padding-right: 10px;\n  top: 0;\n  left: 220px;\n  height: 60px;\n  right: 0;\n  overflow: visible;\n  z-index: 1000 !important;\n  position: absolute;\n  background-color: #B2E2F2;\n  border: none !important;\n}\n#toolbar * {\n  outline: none;\n}\n#toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: middle;\n}\n#toolbar .group .icon {\n  width: 50px;\n  height: 50px;\n  margin: 5px;\n  padding: 0;\n  cursor: pointer;\n  border: 1px solid transparent;\n  color: #777;\n  font-size: 45px;\n}\n#toolbar .group .icon:hover {\n  border: 1px solid #C21B7A;\n}\n#toolbar .group .icon.disabled {\n  opacity: 0.2;\n  border: 1px solid transparent;\n}\n.toolbar_delimiter {\n  margin-left: 10px;\n}\n.layer-name-prompt .modal-title {\n  font-weight: 100;\n}\n.layer-name-prompt .modal-footer {\n  border: 0;\n}\n.layer-name-prompt .modal-header {\n  border-bottom: 3px solid #C21B7A;\n}\n.layer-name-prompt input {\n  outline: none !important;\n  -webkit-box-shadow: inset !important;\n  box-shadow: inset !important;\n  background-color: rgba(0, 0, 0, 0.02) !important;\n  border-radius: 1px !important;\n}\n.layer-name-prompt input:focus {\n  border: 1px solid #C21B7A;\n}\n.layer-name-prompt .btn-primary {\n  background-color: #C21B7A;\n  border: 0;\n}\n.layer-name-prompt .btn-primary:hover {\n  background-color: #95155e;\n}\n#layer {\n  padding: 0;\n  margin: 0;\n  border: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  bottom: 0;\n  width: 220px;\n  background-color: #282a30;\n  text-align: center;\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3);\n  z-index: 10000;\n}\n#layer .panetitle {\n  position: fixed;\n  height: 30px;\n  width: 220px;\n  top: 0;\n  border-bottom: 1px solid #222222;\n  border-top: 1px solid #111111;\n  font-weight: 500;\n  font-size: 12px;\n  padding-top: 5px;\n  letter-spacing: 5px;\n  text-align: center;\n  color: #C21B7A;\n}\n#layer_elements {\n  padding: 0px;\n  margin: 0px;\n  border: 0px;\n  position: fixed;\n  top: 30px;\n  left: 0px;\n  bottom: 0px;\n  width: 220px;\n  overflow: auto;\n}\n.layerElement {\n  color: #dddddd;\n  cursor: move;\n  font-weight: 200;\n  font-size: 12px;\n  letter-spacing: 1px;\n  padding: 4px 4px 4px 20px;\n  text-align: left;\n  border-bottom: 1px solid #222222;\n}\n.layerElement .icon {\n  cursor: pointer;\n  padding-right: 4px;\n  width: 20px;\n  height: 20px;\n}\n.layerElement .icon * {\n  stroke: white !important;\n}\n.layerElement .icon:hover * {\n  stroke: #C21B7A !important;\n}\n.layerSelectedElement {\n  color: white;\n  padding: 4px;\n  padding-left: 20px;\n  background: rgba(255, 255, 255, 0.1);\n}\n#code_overlay {\n  position: absolute;\n  top: 0px;\n  left: 0px;\n  width: 100%;\n  height: 100%;\n  background-color: white;\n  z-index: 10000;\n}\n#code_close {\n  position: fixed;\n  right: 40px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#code_close:hover {\n  color: #C21B7A;\n}\n#test_run {\n  position: fixed;\n  right: 90px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#test_run:hover {\n  color: #C21B7A;\n}\n#export_overlay {\n  position: absolute;\n  top: 0px;\n  left: 0px;\n  width: 100%;\n  height: 100%;\n  background-color: white;\n}\n#export_close {\n  position: fixed;\n  right: 40px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#export_close:hover {\n  color: #C21B7A;\n}\n#export_clipboard {\n  position: fixed;\n  right: 100px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#export_clipboard:hover {\n  color: #C21B7A;\n}\n#test_info {\n  position: absolute;\n  color: black;\n  z-index: 20000;\n  top: 20px;\n  left: 20px;\n  border: 1px solid lightgray;\n  padding: 7px;\n  background-color: white;\n  border-radius: 2px;\n}\n#test_canvas {\n  position: absolute;\n  top: 0px;\n  left: 0px;\n  width: 100%;\n  height: 100%;\n  background-color: white;\n  z-index: 10000;\n}\n#test_close {\n  position: fixed;\n  right: 40px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#test_close:hover {\n  color: #C21B7A;\n}\n#test_clipboard {\n  position: fixed;\n  right: 100px;\n  top: 10px;\n  width: 32px;\n  height: 32px;\n  z-index: 10000;\n  cursor: pointer;\n  font-size: 50px;\n}\n#test_clipboard:hover {\n  color: #C21B7A;\n}\n.portDirectionOption {\n  height: 60px;\n  text-align: center;\n}\n.portDirectionOption label > input {\n  /* HIDE RADIO */\n  display: none;\n}\n.portDirectionOption label > input + span {\n  /* IMAGE STYLES */\n  cursor: pointer;\n  color: gray !important;\n  padding-right: 5px;\n}\n.portDirectionOption label > input:checked + span {\n  /* (CHECKED) IMAGE STYLES */\n  color: #C21B7A !important;\n}\n.portTypeOption {\n  height: 65px;\n  padding-left: 60px;\n}\n.portTypeOption label > input {\n  /* HIDE RADIO */\n  display: none;\n}\n.portTypeOption label > input + span {\n  /* IMAGE STYLES */\n  cursor: pointer;\n  color: gray !important;\n  padding-right: 5px;\n  font-weight: 100;\n  font-size: 14px;\n}\n.portTypeOption label > input + span:before {\n  padding-right: 10px;\n}\n.portTypeOption label > input:checked + span {\n  /* (CHECKED) IMAGE STYLES */\n  color: #C21B7A !important;\n}\n#filter {\n  position: absolute;\n  top: 60px;\n  right: 0;\n  bottom: 0;\n  width: 200px;\n  padding: 0;\n  margin: 0;\n  border-radius: 0;\n  border: 0;\n  background-color: #282a30;\n}\n#filter .form-control {\n  height: 25px;\n}\n#filter .btn {\n  padding-left: 5px;\n  padding-right: 5px;\n  padding-top: 1px;\n  padding-bottom: 2px;\n}\n#filter .input-group-addon {\n  padding: 0;\n  padding-left: 5px;\n  padding-right: 5px;\n  color: rgba(0, 0, 0, 0.3);\n  background-color: white;\n  border-left: 0;\n  border-radius: 0;\n  font-weight: 100;\n  text-transform: lowercase;\n  font-size: 12px;\n}\n#filter .panel-default {\n  margin: 0;\n  border-radius: 0;\n  background-color: rgba(194, 27, 122, 0.02);\n  border: 0;\n  border-top: 1px solid #303030;\n  border-bottom: 1px solid #202525;\n  margin-top: 3px;\n}\n#filter .panetitle {\n  position: fixed;\n  height: 30px;\n  width: 200px;\n  top: 60px;\n  border-bottom: 1px solid #222222;\n  border-top: 1px solid #111111;\n  font-weight: 500;\n  font-size: 12px;\n  padding-top: 5px;\n  letter-spacing: 5px;\n  text-align: center;\n  color: #C21B7A;\n}\n#filter_toolbar {\n  overflow: visible;\n  border: 0;\n  padding: 3px;\n  padding-left: 10px;\n  position: absolute;\n  bottom: 0;\n  right: 0;\n  width: 200px;\n  height: 30px;\n}\n#filter_actions {\n  position: fixed;\n  top: 90px;\n  bottom: 30px;\n  width: 200px;\n  border: 0;\n  padding: 0;\n  overflow-y: auto;\n}\n#filter_actions .panel-body {\n  padding: 7px;\n  padding-top: 0;\n}\n#filter_actions .form-group {\n  margin-bottom: 2px !important;\n}\n#filter_actions .form-group > .input-group {\n  margin-bottom: 10px;\n}\n#filter_actions .form-group > .input-group:last-child {\n  margin-bottom: 0px;\n}\n#filter_actions .icon {\n  color: #26B4A8;\n  padding: 0;\n  top: -4px;\n  color: rgba(255, 255, 255, 0.25);\n}\n#filter_actions .icon:hover {\n  color: #C21B7A;\n}\n#filter_actions .filter-heading {\n  color: #DDDDDD !important;\n  font-size: 12px;\n  padding-right: 10px !important;\n  padding-top: 1px !important;\n  padding-bottom: 0 !important;\n  background-color: transparent !important;\n  background-image: none !important;\n  border: 0 !important;\n  margin-top: 4px;\n  cursor: pointer;\n  font-weight: 300;\n}\n#filter_actions .filter-heading .icon {\n  width: 15px;\n}\n#filter_actions .filter-heading .icon * {\n  stroke: white !important;\n}\n#FigureMarkdownEdit .header {\n  width: 100%;\n  position: absolute;\n  top: 0px;\n  left: 0px;\n  display: inline-block;\n  height: 60px;\n  background-color: white;\n  overflow: hidden;\n}\n#FigureMarkdownEdit .header .left {\n  width: 50%;\n  display: inline-block;\n  height: 60px;\n  font-size: 20px;\n  padding: 6px;\n  color: #CC4F5A;\n  background-color: rgba(0, 0, 0, 0.1);\n  vertical-align: top;\n}\n#FigureMarkdownEdit .header .left small {\n  font-size: 16px;\n}\n#FigureMarkdownEdit .header .right {\n  width: 50%;\n  display: inline-block;\n  height: 60px;\n  font-size: 20px;\n  padding: 6px;\n  color: #CC4F5A;\n  background-color: rgba(0, 0, 0, 0.05);\n  vertical-align: top;\n}\n#FigureMarkdownEdit .source {\n  width: 50%;\n  display: inline-block;\n  font-family: Menlo, Monaco, Consolas, \"Courier New\", monospace;\n  font-size: 13px;\n  padding: 2px;\n  top: 60px;\n  bottom: 0px;\n  position: absolute;\n}\n#FigureMarkdownEdit .preview {\n  width: 50%;\n  display: inline-block;\n  top: 0px;\n  left: 50%;\n  position: absolute;\n  background-color: white;\n  padding: 30px;\n  overflow: auto;\n  top: 60px;\n  bottom: 0px;\n}\n#FigureMarkdownEdit .preview img {\n  max-width: 35%;\n}\n#FigureMarkdownEdit .preview table {\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  margin: 20px;\n  margin-left: 0;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n#FigureMarkdownEdit .preview table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n#FigureMarkdownEdit .preview table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n#FigureMarkdownEdit .preview table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n#FigureMarkdownEdit .preview table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n#FigureMarkdownEdit .preview table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n#FigureMarkdownEdit .preview table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n#FigureMarkdownEdit .preview table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n#FigureMarkdownEdit .preview tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n#FigureMarkdownEdit .preview tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n#FigureMarkdownEdit .preview table tr:last-child td {\n  border-bottom: 0;\n}\n#FigureMarkdownEdit .preview table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n#FigureMarkdownEdit .preview table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.btn-primary {\n  background-color: #C21B7A;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #C21B7A;\n}\n.githubFileDialog .githubNavigation .glyphicon,\n.githubFileDialog .githubNavigation .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #C21B7A;\n}\n.githubFileDialog .githubNavigation a.list-group-item:hover {\n  text-decoration: underline;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n#githubFileSelectDialog .githubNavigation {\n  height: 300px;\n  overflow: scroll;\n}\n#githubSaveFileDialog .githubFilePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .githubFilePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .githubNavigation {\n  height: 250px;\n  overflow: scroll;\n}\n#breadcrumb {\n  position: absolute;\n  right: 0px;\n  padding: 5px;\n  font-size: 15px;\n  color: rgba(0, 0, 0, 0.2);\n  padding-right: 25px;\n}\n#breadcrumb .separator {\n  padding: 5px;\n}\n#breadcrumb .filename {\n  font-weight: 500;\n}\n#breadcrumb .icon {\n  font-size: 22px;\n  padding-left: 10px;\n  top: 4px;\n  position: relative;\n  color: black;\n  cursor: pointer;\n}\n#breadcrumb .icon:hover {\n  color: #C21B7A;\n}\n.ui-anglepicker {\n  width: 52px;\n  height: 52px;\n  background: #dbdbdb;\n  background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2RiZGJkYiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjIwJSIgc3RvcC1jb2xvcj0iI2UxZTFkZSIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNmOGY4ZjMiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);\n  background: -moz-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #dbdbdb), color-stop(20%, #e1e1de), color-stop(100%, #f8f8f3));\n  background: -webkit-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -o-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: -ms-linear-gradient(top, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  background: linear-gradient(to bottom, #dbdbdb 0%, #e1e1de 20%, #f8f8f3 100%);\n  border: 2px solid #666;\n  -moz-box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  -webkit-box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  box-shadow: inset 0 2px 3px white, inset 0 -1px 2px #fffef8;\n  -moz-border-radius: 50%;\n  -webkit-border-radius: 50%;\n  border-radius: 50%;\n  position: relative;\n  display: inline-block;\n}\n.ui-anglepicker-pointer {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  width: 50%;\n  margin: -2px 0 0 -2px;\n  -moz-transform-origin: 2px 2px;\n  -webkit-transform-origin: 2px 2px;\n  -ms-transform-origin: 2px 2px;\n  -o-transform-origin: 2px 2px;\n  transform-origin: 2px 2px;\n}\n.ui-anglepicker:hover,\n.ui-anglepicker.ui-anglepicker-dragging {\n  border-color: #494949;\n}\n.ui-anglepicker-dragging .ui-anglepicker-dot,\n.ui-anglepicker-dragging .ui-anglepicker-line,\n.ui-anglepicker:hover .ui-anglepicker-dot,\n.ui-anglepicker:hover .ui-anglepicker-line {\n  background: #494949;\n}\n.ui-anglepicker-dot {\n  height: 4px;\n  width: 4px;\n  position: absolute;\n  background: #838383;\n  -moz-border-radius: 50%;\n  -webkit-border-radius: 50%;\n  border-radius: 50%;\n}\n.ui-anglepicker-line {\n  margin-top: 1.5px;\n  margin-right: -2px;\n  height: 1px;\n  background: #838383;\n}\n", ""]);
 
 // exports
 

@@ -121,14 +121,14 @@ export default class Toolbar {
     })
 
     this.shapeButton = $(
-      '<label id="tool_shape" class="dropdown">' +
-      '    <img data-toggle="dropdown"  id="tool_shape_image" class="icon"  data-toggle="tooltip" title="Add a new object to your document"  src="./images/toolbar_insert.svg">' +
+      '<label id="tool_shape" class="dropdown" >' +
+      '    <img data-toggle="dropdown"  id="tool_shape_image" class="icon" src="./images/toolbar_insert.svg">' +
       '    <ul class="dropdown-menu" role="menu" >' +
       '       <li class="tool_shape_entry policyRectangleToolPolicy" data-toggle="tooltip" title="Rectangle <span class=\'highlight\'> [ R ]</span>"><a href="#"><img  src="./images/toolbar_rectangle.svg">Rectangle</a></li>' +
-      '       <li class="tool_shape_entry policyCircleToolPolicy"     data-toggle="tooltip" title="Circle <span class=\'highlight\'> [ C ]</span>">   <a href="#"><img  src="./images/toolbar_circle.svg">Circle</a></li>' +
-      '       <li class="tool_shape_entry policyLineToolPolicy"       data-toggle="tooltip" title="Line <span class=\'highlight\'> [ L ]</span>">     <a href="#"><img  src="./images/toolbar_line.svg">Line</a></li>' +
-      '       <li class="tool_shape_entry policyTextToolPolicy"       data-toggle="tooltip" title="Text <span class=\'highlight\'> [ T ]</span>">     <a href="#"><img  src="./images/toolbar_text.svg">Text</a></li>' +
-      '       <li class="tool_shape_entry policyPortToolPolicy"       data-toggle="tooltip" title="Port <span class=\'highlight\'> [ P ]</span>">     <a href="#"><img  src="./images/toolbar_rectangle.svg">Port</a></li>' +
+      '       <li class="tool_shape_entry policyCircleToolPolicy"    data-toggle="tooltip" title="Circle <span class=\'highlight\'> [ C ]</span>">   <a href="#"><img  src="./images/toolbar_circle.svg">Circle</a></li>' +
+      '       <li class="tool_shape_entry policyLineToolPolicy"      data-toggle="tooltip" title="Line <span class=\'highlight\'> [ L ]</span>">     <a href="#"><img  src="./images/toolbar_line.svg">Line</a></li>' +
+      '       <li class="tool_shape_entry policyTextToolPolicy"      data-toggle="tooltip" title="Text <span class=\'highlight\'> [ T ]</span>">     <a href="#"><img  src="./images/toolbar_text.svg">Text</a></li>' +
+      '       <li class="tool_shape_entry policyPortToolPolicy"      data-toggle="tooltip" title="Port <span class=\'highlight\'> [ P ]</span>">     <a href="#"><img  src="./images/toolbar_rectangle.svg">Port</a></li>' +
       '    </ul>' +
       '</label>'
     )
@@ -181,7 +181,7 @@ export default class Toolbar {
       return false
     })
 
-    this.unionButton = $('<span data-toggle="tooltip" title="Polygon Union <span class=\'highlight\'> [ U ]</span>"><img src="./images/toolbar_union.png"></span>')
+    this.unionButton = $('<img data-toggle="tooltip" class="icon" title="Polygon Union <span class=\'highlight\'> [ U ]</span>" src="./images/toolbar_geo_union.svg"/>')
     buttonGroup.append(this.unionButton)
     this.unionButton.on("click", () => {
       let selection = this.view.getSelection().getAll()
@@ -195,7 +195,7 @@ export default class Toolbar {
       return false
     })
 
-    this.differenceButton = $('<span data-toggle="tooltip" title="Polygon Difference <span class=\'highlight\'> [ D ]</span>"  ><img src="./images/toolbar_difference.png"></span>')
+    this.differenceButton = $('<img data-toggle="tooltip" class="icon" title="Polygon Difference <span class=\'highlight\'> [ D ]</span>" src="./images/toolbar_geo_subtract.svg"/>')
     buttonGroup.append(this.differenceButton)
     this.differenceButton.on("click", () => {
       this.view.installEditPolicy(new GeoDifferenceToolPolicy())
@@ -205,7 +205,7 @@ export default class Toolbar {
       return false
     })
 
-    this.intersectionButton = $('<span data-toggle="tooltip" title="Polygon Intersection <span class=\'highlight\'> [ I ]</span>" ><img src="./images/toolbar_intersect.png"></span>')
+    this.intersectionButton = $('<img data-toggle="tooltip" class="icon" title="Polygon Intersection <span class=\'highlight\'> [ I ]</span>" src="./images/toolbar_geo_intersect.svg"/>')
     buttonGroup.append(this.intersectionButton)
     this.intersectionButton.on("click", () => {
       this.view.installEditPolicy(new GeoIntersectionToolPolicy())
@@ -216,9 +216,9 @@ export default class Toolbar {
     })
 
 
-    buttonGroup = $('<div class="group"></div>')
+    buttonGroup = $('<div class="group" style="float:right"></div>')
     this.html.append(buttonGroup)
-    this.testButton = $('<span  data-toggle="tooltip" title="Test</span>" class="ion-easel icon"></span>')
+    this.testButton = $('<img  data-toggle="tooltip" title="Test your shape" class="icon"  src="./images/toolbar_element_test.svg"/>')
     buttonGroup.append(this.testButton)
     this.testButton.on("click", () => {
       // if any error happens during the shape code create/execute -> goto the the JS editor
@@ -231,13 +231,13 @@ export default class Toolbar {
       }
     })
 
-    this.codeButton = $('<span data-toggle="tooltip" title="Edit JavaScript code</span>" class="ion-code icon"></span>')
+    this.codeButton = $('<img data-toggle="tooltip" title="Edit JavaScript code</span>" class="icon"  src="./images/toolbar_element_js.svg"/>')
     buttonGroup.append(this.codeButton)
     this.codeButton.on("click", () => {
       new FigureCodeEdit().show()
     })
 
-    this.markdownButton = $('<span data-toggle="tooltip" title="Helpfile for this shape</span>"><img src="./images/toolbar_markdown.png"></span>')
+    this.markdownButton = $('<img class="icon" data-toggle="tooltip" title="Write documentation for your shape</span>" src="./images/toolbar_element_doc.svg"/>')
     buttonGroup.append(this.markdownButton)
     this.markdownButton.on("click", () => {
       new FigureMarkdownEdit().show()

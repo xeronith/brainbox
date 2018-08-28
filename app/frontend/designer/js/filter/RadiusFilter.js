@@ -5,14 +5,15 @@ export default shape_designer.filter.RadiusFilter = class RadiusFilter extends F
   constructor() {
     super()
     this.NAME = "shape_designer.filter.RadiusFilter"
+    this.cssScope = this.NAME.replace(/[.]/g, "_")
   }
 
   insertPane(figure, $parent) {
 
-    $parent.append('<div id="radius_container" class="panel panel-default">' +
+    $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' +
       ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#radius_panel">' +
       '    Corner Radius' +
-      '    <span id="button_remove_RadiusFilter" class="btn btn-mini icon ion-ios-close-outline pull-right" ></span>' +
+      '    <span id="button_remove_RadiusFilter"><img class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' +
       '</div>' +
       ' <div class="panel-body collapse in" id="radius_panel">' +
       '   <div class="form-group">' +
@@ -23,6 +24,7 @@ export default shape_designer.filter.RadiusFilter = class RadiusFilter extends F
       '   </div>' +
       ' </div>' +
       '</div>')
+    inlineSVG.init({svgSelector:"#"+this.cssScope + "_container img.svg"})
 
     $("#filter_radius").TouchSpin({
       min: 0,

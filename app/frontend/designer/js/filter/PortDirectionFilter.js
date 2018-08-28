@@ -55,6 +55,7 @@ export default shape_designer.filter.PortDirectionFilter = class PortDirectionFi
       '   </div>' +
       ' </div>' +
       '</div>')
+    inlineSVG.init({svgSelector:"#"+this.cssScope + "_container img.svg"})
 
     $("#" + _this.cssScope + "_panel .portDirectionOption input").on("change", (event) => {
       figure.setConnectionDirection($(event.currentTarget).data("dir"))

@@ -17,7 +17,7 @@ export default class FigureCodeExport {
         '<div class="overlay-scale"><pre id="export_overlay" class="prettyprint">' +
         js +
         '</pre>' +
-        ' <div title="Close" id="export_close"><i class="icon ion-ios-close-outline"></i></div>' +
+        ' <img title="Close" id="export_close" class="icon" src="./images/dialog_close.svg"/>' +
         ' <div title="Copy to Clipboard" id="export_clipboard"><i class="icon ion-clipboard"></i></div></div>'
       )
       $("body").append(splash)

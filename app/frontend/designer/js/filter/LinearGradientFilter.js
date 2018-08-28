@@ -22,7 +22,7 @@ export default shape_designer.filter.LinearGradientFilter = class LinearGradient
     $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' +
       ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_panel">' +
       '     Linear Gradient' +
-      '    <span id="button_remove_' + this.cssScope + '" class="btn btn-mini icon ion-ios-close-outline pull-right" ></span>' +
+      '    <span id="button_remove_' + this.cssScope + '"><img  class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' +
       '</div>' +
 
       ' <div class="panel-body collapse in" id="' + this.cssScope + '_panel">' +
@@ -42,6 +42,7 @@ export default shape_designer.filter.LinearGradientFilter = class LinearGradient
       '   </div>' +
       ' </div>' +
       '</div>')
+    inlineSVG.init({svgSelector:"#"+this.cssScope + "_container img.svg"})
 
     $('#' + this.cssScope + '_angle').anglepicker({
       start: function (e, ui) {

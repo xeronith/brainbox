@@ -39,6 +39,7 @@ export default shape_designer.filter.PortTypeFilter = class PortTypeFilter exten
       '   </div>' +
       ' </div>' +
       '</div>')
+    inlineSVG.init({svgSelector:"#"+this.cssScope + "_container img.svg"})
 
     $("#" + _this.cssScope + "_panel .portTypeOption input").on("change", (event) => {
       figure.setInputType($(event.currentTarget).data("type"))

@@ -5,14 +5,15 @@ export default shape_designer.filter.OpacityFilter = class OpacityFilter extends
   constructor() {
     super()
     this.NAME = "shape_designer.filter.OpacityFilter"
+    this.cssScope = this.NAME.replace(/[.]/g, "_")
   }
 
   insertPane(figure, $parent) {
 
-    $parent.append('<div id="opacity_container" class="panel panel-default">' +
+    $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' +
       ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#opacity_panel">' +
       '    Opacity' +
-      '    <span id="button_remove_OpacityFilter" class="btn btn-mini glyphicon icon ion-ios-close-outline pull-right" ></span>' +
+      '    <span id="button_remove_OpacityFilter"><img  class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' +
       '</div>' +
       ' <div class="panel-body collapse in" id="opacity_panel">' +
       '   <div class="form-group">' +
@@ -23,6 +24,7 @@ export default shape_designer.filter.OpacityFilter = class OpacityFilter extends
       '   </div>' +
       ' </div>' +
       '</div>')
+    inlineSVG.init({svgSelector:"#"+this.cssScope + "_container img.svg"})
 
     $("#filter_opacity").TouchSpin({
       min: 0,

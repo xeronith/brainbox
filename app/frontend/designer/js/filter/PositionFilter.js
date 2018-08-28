@@ -6,11 +6,12 @@ export default shape_designer.filter.PositionFilter = class PositionFilter exten
     super()
     this.NAME = "shape_designer.filter.PositionFilter"
     this.block = false
+    this.cssScope = this.NAME.replace(/[.]/g, "_")
   }
 
   insertPane(figure, $parent) {
 
-    $parent.append('<div id="position_filter_container" class="panel panel-default">' +
+    $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' +
       ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#position_width_panel">' +
       '     Position' +
       '</div>' +
@@ -22,6 +23,7 @@ export default shape_designer.filter.PositionFilter = class PositionFilter exten
       '   </div>' +
       ' </div>' +
       '</div>')
+    inlineSVG.init({svgSelector:"#"+this.cssScope + "_container img.svg"})
 
     $("#filter_position_x").TouchSpin({
       min: 0,

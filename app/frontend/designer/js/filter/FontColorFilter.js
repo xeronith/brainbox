@@ -8,14 +8,15 @@ export default shape_designer.filter.FontColorFilter = class FontColorFilter ext
     super()
     this.NAME = "shape_designer.filter.FontColorFilter"
     this.colorPicker = null
+    this.cssScope = this.NAME.replace(/[.]/g, "_")
   }
 
   insertPane(figure, $parent) {
 
-    $parent.append('<div id="fill_color_container" class="panel panel-default">' +
+    $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' +
       ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#color_fill_panel">' +
       '    Font Color' +
-      '    <span id="button_remove_FillColorFilter" class="btn btn-mini icon ion-ios-close-outline pull-right" ></span>' +
+      '    <span id="button_remove_FillColorFilter"><img class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' +
       ' </div>' +
 
       ' <div class="panel-body collapse in" id="color_fill_panel">' +
@@ -28,6 +29,7 @@ export default shape_designer.filter.FontColorFilter = class FontColorFilter ext
       '    </div>' +
       ' </div>' +
       '</div>')
+    inlineSVG.init({svgSelector:"#"+this.cssScope + "_container img.svg"})
 
     var picker = this.colorPicker = new jscolor.color(document.getElementById('filter_color_fill'), {})
     this.colorPicker.fromString(figure.getFontColor().hash())

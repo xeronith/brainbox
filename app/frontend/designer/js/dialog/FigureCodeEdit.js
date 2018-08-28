@@ -9,8 +9,8 @@ export default class FigureCodeEdit {
       '<pre id="code_overlay">' +
       code +
       '</pre>' +
-      '<div title="Run"   id="test_run"  ><i class="icon ion-android-arrow-dropright-circle"></i></div>' +
-      '<div title="Close" id="code_close"><i class="icon ion-ios-close-outline"></i></div>'
+      '<img title="Run"   id="test_run"   class="icon" src="./images/dialog_run.svg"/>' +
+      '<img title="Close" id="code_close" class="icon" src="./images/dialog_close.svg"/>'
     )
     splash.hide()
     $("body").append(splash)

@@ -81,15 +81,20 @@
   padding: 4px 4px 4px 20px;
   text-align: left;
   border-bottom:1px solid #222222;
-}
 
-.layerElement .icon{
-  cursor:pointer;
-  padding-top:4px;
-  padding-right:4px;
-  padding-left: 6px;
-  &:hover{
-    color:@tintColor;
+  .icon {
+    cursor: pointer;
+    padding-right: 4px;
+    width:20px;
+    height:20px;
+    * {
+      stroke: white !important;
+    }
+    &:hover {
+      * {
+        stroke: @tintColor !important;
+      }
+    }
   }
 }
 
