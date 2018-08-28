@@ -29,79 +29,112 @@
   }
 }
 
-#layer{
-  padding:0;
-  margin:0;
-  border:0;
-  position:absolute;
-  top:0;
-  left:0;
-  bottom:0;
-  width:@layerPaneWidth;
-  background-color: #282a30;
+#layer {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: @layerPaneWidth;
+  background-color: @layerPaneBgColor;
   text-align: center;
   box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3);
-  z-index:10000;
-  .panetitle {
-    position: fixed;
-    height: @paneTitleHeight;
-    width: @layerPaneWidth;
-    top:0;
-    border-bottom: 1px solid #222222;
-    border-top: 1px solid #111111;
-    font-weight: 500;
-    font-size: 12px;
-    padding-top: 5px;
-    letter-spacing: 5px;
-    text-align: center;
-    color:@tintColor;
-  }
+  z-index: 10000;
 
-}
-
-#layer_elements{
-  padding:0px;
-  margin:0px;
-  border:0px;
-  position:fixed;
-  top:@paneTitleHeight;
-  left:0px;
-  bottom:0px;
-  width:@layerPaneWidth;
-  overflow:auto;
-}
-
-
-.layerElement{
-  color: #dddddd;
-  cursor: move;
-  font-weight: 200;
-  font-size:12px;
-  letter-spacing: 1px;
-  padding: 4px 4px 4px 20px;
-  text-align: left;
-  border-bottom:1px solid #222222;
-
-  .icon {
-    cursor: pointer;
-    padding-right: 4px;
-    width:20px;
-    height:20px;
-    * {
-      stroke: white !important;
+  .title {
+    left: 10px;
+    right:0px;
+    top: 10px;
+    position: absolute;
+    img {
+      padding-right:20px;
+      position: absolute;
+      left:10px;
     }
-    &:hover {
-      * {
-        stroke: @tintColor !important;
+    div{
+      position: absolute;
+      left:90px;
+      h1{
+        font-size: 25px;
+        font-weight:200;
+        line-height: 45px;
+        margin:0;
+        padding:0;
+        text-align: left;
+      }
+      h2{
+        font-size: 15px;
+        font-weight:200;
+        margin:0;
+        padding:0;
+        text-align: left;
       }
     }
   }
-}
 
+  .panetitle {
+    position: fixed;
+    height: @layerPaneTitleHeight;
+    width: @layerPaneWidth;
+    top: @layerTitleHeight;
+    border-bottom: 1px solid #222222;
+    font-weight: 500;
+    font-size: 12px;
+    padding: 4px 4px 4px 20px;
+    letter-spacing: 5px;
+    text-align: left;
+    color: @tintColor;
+    box-shadow: 0 4px 2px -2px rgba(31, 73, 125, 0.3);
+  }
 
-.layerSelectedElement{
-  color:white;
-  padding:4px;
-  padding-left:20px;
-  background: rgba(255,255,255,0.1);
+  #layer_elements {
+    padding: 0;
+    margin: 0;
+    border: 0;
+    position: fixed;
+    top: @layerPaneTitleHeight + @layerTitleHeight;
+    left: 0;
+    bottom: 0;
+    width: @layerPaneWidth;
+    overflow: auto;
+
+    .layerElement {
+      background-color:darken(@layerPaneBgColor, 2%);
+      color: @layerPaneColor;
+      cursor: move;
+      font-weight: 400;
+      font-size: 12px;
+      letter-spacing: 1px;
+      padding: 4px 4px 4px 20px;
+      text-align: left;
+      border: 1px solid transparent;
+      border-bottom: 1px solid #222222;
+
+      .icon {
+        cursor: pointer;
+        padding-right: 4px;
+        width: 20px;
+        height: 20px;
+        * {
+          stroke: @layerPaneColor !important;
+        }
+        &:hover {
+          * {
+            stroke: @tintColor !important;
+          }
+        }
+      }
+    }
+
+    .layerSelectedElement {
+      background-color: darken(@layerPaneBgColor, 4%);
+      color: @layerPaneColor;
+      border-style: dotted;
+      border-width: 1px;
+      border-color: @tintColor;
+      font-weight: 600;
+    }
+  }
 }
