@@ -44,7 +44,7 @@ export default class Layer {
       this.html.append(
         '<div class="layerElement" data-figure="' + figure.id + '" id="layerElement_' + figure.id + '" >' +
         figure.getUserData().name +
-        '<span data-figure="' + figure.id + '" class="layer_visibility pull-right"><img class="icon svg" src="'+ (figure.isVisible() ? './images/layer_visible.svg' : './images/layer_hidden.svg') + '"/></span>' +
+        '<span data-figure="' + figure.id + '"  data-toggle="tooltip" title="Toggle Visibility of the Layer"  class="layer_visibility pull-right"><img class="icon svg" src="'+ (figure.isVisible() ? './images/layer_visible.svg' : './images/layer_hidden.svg') + '"/></span>' +
         '<span data-figure="' + figure.id + '"  data-toggle="tooltip" title="Edit Name of Layer" class="layer_edit pull-right" ><img class="icon svg" src="./images/layer_edit.svg"/></span>' +
         '</div>')
     }, true)
@@ -95,6 +95,7 @@ export default class Layer {
       this.view.setCurrentSelection(null)
       $(event.currentTarget).html('<img class="icon svg" src="'+ (figure.isVisible() ? './images/layer_visible.svg' : './images/layer_hidden.svg') + '"/>')
       inlineSVG.init()
+      this.ripple(figure)
       return false
     }, this))
 
@@ -102,6 +103,7 @@ export default class Layer {
       let figure = this.view.getExtFigure($(event.currentTarget).data("figure"))
       if (figure.isVisible()) {
         this.view.setCurrentSelection(figure)
+        this.ripple(figure)
       }
     }, this))
 
@@ -114,5 +116,22 @@ export default class Layer {
     selection.each(function (i, e) {
       $("#layerElement_" + e.id).addClass("layerSelectedElement")
     })
+  }
+
+  ripple(figure){
+    let rect = figure.getBoundingBox()
+    let p = rect.getCenter()
+        var circle = this.view.paper.circle(p.x, p.y, Math.max(3,rect.w/4), Math.max(3,rect.h/4)).attr({fill: null, stroke:"#d0d0ff"});
+        var anim = Raphael.animation(
+          {
+            transform: "s6",
+            opacity:0.0,
+            "stroke-width":5
+          },
+          500,
+          "linear",
+          function(){circle.remove()}
+        );
+        circle.animate(anim);
   }
 }

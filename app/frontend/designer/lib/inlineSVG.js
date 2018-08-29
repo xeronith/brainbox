@@ -121,6 +121,9 @@
                         result = parser.parseFromString(request.responseText, 'text/xml'),
                         inlinedSVG = result.getElementsByTagName('svg')[0];
 
+                    let titles = document.getElementsByTagName('title')
+                    while (titles[0]) titles[0].parentNode.removeChild(titles[0])
+
                     // Remove some of the attributes that aren't needed
                     inlinedSVG.removeAttribute('xmlns:a');
                     inlinedSVG.removeAttribute('width');

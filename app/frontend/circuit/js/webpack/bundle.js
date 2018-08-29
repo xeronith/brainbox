@@ -487,7 +487,7 @@ module.exports = exports["default"];
 
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _ProbeFigure = __webpack_require__(/*! ./figures/ProbeFigure */ "./app/frontend/circuit/js/figures/ProbeFigure.js");
@@ -498,98 +498,99 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = draw2d.policy.line.OrthogonalSelectionFeedbackPolicy.extend({
 
-    NAME: "ConnectionSelectionFeedbackPolicy",
+  NAME: "ConnectionSelectionFeedbackPolicy",
 
-    /**
-     * @constructor
-     * Creates a new Router object.
-     *
-     */
-    init: function init() {
-        this._super();
-    },
+  /**
+   * @constructor
+   * Creates a new Router object.
+   *
+   */
+  init: function init() {
+    this._super();
+  },
 
-    onRightMouseDown: function onRightMouseDown(conn, x, y, shiftKey, ctrlKey) {
-        var segment = conn.hitSegment(x, y);
+  onRightMouseDown: function onRightMouseDown(conn, x, y, shiftKey, ctrlKey) {
+    var segment = conn.hitSegment(x, y);
 
-        if (segment === null) {
-            return;
-        }
-
-        // standard menu entry "split". It is always possible to split a connection
-        //
-        var items = {};
-
-        // add/remove of connection segments is only possible in the edit mode
-        //
-        if (conn.getCanvas().isSimulationRunning() === false) {
-            items.split = { name: draw2d.Configuration.i18n.menu.addSegment };
-
-            // "remove" a segment isn't always possible. depends from the router algorithm
-            //
-            if (conn.getRouter().canRemoveSegmentAt(conn, segment.index)) {
-                items.remove = { name: draw2d.Configuration.i18n.menu.deleteSegment };
-            }
-        }
-
-        // add a probe label is always possible
-        //
-        var probeFigure = conn.getProbeFigure();
-        if (probeFigure === null) {
-            items.probe = { name: "Add Probe" };
-        } else {
-            items.unprobe = { name: "Remove Probe" };
-        }
-
-        $.contextMenu({
-            selector: 'body',
-            events: {
-                hide: function hide() {
-                    $.contextMenu('destroy');
-                }
-            },
-            callback: $.proxy(function (key, options) {
-                var originalVertices, newVertices;
-
-                switch (key) {
-                    case "remove":
-                        // deep copy of the vertices of the connection for the command stack to avoid side effects
-                        originalVertices = conn.getVertices().clone(true);
-                        this.removeSegment(conn, segment.index);
-                        newVertices = conn.getVertices().clone(true);
-                        conn.getCanvas().getCommandStack().execute(new draw2d.command.CommandReplaceVertices(conn, originalVertices, newVertices));
-                        break;
-
-                    case "split":
-                        // deep copy of the vertices of the connection for the command stack to avoid side effects
-                        originalVertices = conn.getVertices().clone(true);
-                        this.splitSegment(conn, segment.index, x, y);
-                        newVertices = conn.getVertices().clone(true);
-                        conn.getCanvas().getCommandStack().execute(new draw2d.command.CommandReplaceVertices(conn, originalVertices, newVertices));
-                        break;
-
-                    case "probe":
-                        var text = prompt("Probe Signal Label");
-                        if (text) {
-                            var label = new _ProbeFigure2.default({ text: text, stroke: 0, x: -20, y: -40 });
-                            var locator = new draw2d.layout.locator.ManhattanMidpointLocator();
-                            label.installEditor(new draw2d.ui.LabelInplaceEditor());
-                            conn.add(label, locator);
-                        }
-                        break;
-
-                    case "unprobe":
-                        conn.remove(conn.getProbeFigure());
-                        break;
-                    default:
-                        break;
-                }
-            }, this),
-            x: x,
-            y: y,
-            items: items
-        });
+    if (segment === null) {
+      return;
     }
+
+    // standard menu entry "split". It is always possible to split a connection
+    //
+    var items = {};
+
+    // add/remove of connection segments is only possible in the edit mode
+    //
+    if (conn.getCanvas().isSimulationRunning() === false) {
+      items.split = { name: draw2d.Configuration.i18n.menu.addSegment
+
+        // "remove" a segment isn't always possible. depends from the router algorithm
+        //
+      };if (conn.getRouter().canRemoveSegmentAt(conn, segment.index)) {
+        items.remove = { name: draw2d.Configuration.i18n.menu.deleteSegment };
+      }
+    }
+
+    // add a probe label is always possible
+    //
+    var probeFigure = conn.getProbeFigure();
+    if (probeFigure === null) {
+      items.probe = { name: "Add Probe" };
+    } else {
+      items.unprobe = { name: "Remove Probe" };
+    }
+
+    $.contextMenu({
+      selector: 'body',
+      events: {
+        hide: function hide() {
+          $.contextMenu('destroy');
+        }
+      },
+      callback: $.proxy(function (key, options) {
+        var originalVertices = void 0,
+            newVertices = void 0;
+
+        switch (key) {
+          case "remove":
+            // deep copy of the vertices of the connection for the command stack to avoid side effects
+            originalVertices = conn.getVertices().clone(true);
+            this.removeSegment(conn, segment.index);
+            newVertices = conn.getVertices().clone(true);
+            conn.getCanvas().getCommandStack().execute(new draw2d.command.CommandReplaceVertices(conn, originalVertices, newVertices));
+            break;
+
+          case "split":
+            // deep copy of the vertices of the connection for the command stack to avoid side effects
+            originalVertices = conn.getVertices().clone(true);
+            this.splitSegment(conn, segment.index, x, y);
+            newVertices = conn.getVertices().clone(true);
+            conn.getCanvas().getCommandStack().execute(new draw2d.command.CommandReplaceVertices(conn, originalVertices, newVertices));
+            break;
+
+          case "probe":
+            var text = prompt("Probe Signal Label");
+            if (text) {
+              var label = new _ProbeFigure2.default({ text: text, stroke: 0, x: -20, y: -40 });
+              var locator = new draw2d.layout.locator.ManhattanMidpointLocator();
+              label.installEditor(new draw2d.ui.LabelInplaceEditor());
+              conn.add(label, locator);
+            }
+            break;
+
+          case "unprobe":
+            conn.remove(conn.getProbeFigure());
+            break;
+          default:
+            break;
+        }
+      }, this),
+      x: x,
+      y: y,
+      items: items
+    });
+  }
 });
 module.exports = exports["default"];
 
@@ -699,7 +700,7 @@ module.exports = exports["default"];
 
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _MarkerFigure = __webpack_require__(/*! ./figures/MarkerFigure */ "./app/frontend/circuit/js/figures/MarkerFigure.js");
@@ -714,120 +715,121 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = draw2d.policy.canvas.BoundingboxSelectionPolicy.extend({
 
-    init: function init() {
-        this._super();
-        this.mouseMoveProxy = $.proxy(this._onMouseMoveCallback, this);
-        this.configIcon = null;
-    },
+  init: function init() {
+    this._super();
+    this.mouseMoveProxy = $.proxy(this._onMouseMoveCallback, this);
+    this.configIcon = null;
+  },
 
-    /**
-     * @method
-     * Called by the canvas if the user click on a figure.
-     *
-     * @param {draw2d.Figure} the figure under the click event. Can be null
-     * @param {Number} mouseX the x coordinate of the mouse during the click event
-     * @param {Number} mouseY the y coordinate of the mouse during the click event
-     * @param {Boolean} shiftKey true if the shift key has been pressed during this event
-     * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
-     *
-     * @since 3.0.0
-     */
-    onClick: function onClick(figure, mouseX, mouseY, shiftKey, ctrlKey) {
-        // we only foreward the click-event to the MarkerFigure hich the user can show hide per
-        // default
-        // lt in the edit mode as well.
-        if (figure instanceof _MarkerFigure2.default) {
-            this._super(figure, mouseX, mouseY, shiftKey, ctrlKey);
-        }
-    },
-
-    onInstall: function onInstall(canvas) {
-        this._super(canvas);
-        // provide configuration menu if the mouse is close to a shape
-        //
-        canvas.on("mousemove", this.mouseMoveProxy);
-    },
-
-    onUninstall: function onUninstall(canvas) {
-        this._super(canvas);
-
-        canvas.off(this.mouseMoveProxy);
-    },
-
-    onMouseUp: function onMouseUp(canvas, x, y, shiftKey, ctrlKey) {
-        if (shiftKey === true && this.mouseDownElement === null) {
-            var rx = Math.min(x, this.x);
-            var ry = Math.min(y, this.y);
-            var rh = Math.abs(y - this.y);
-            var rw = Math.abs(x - this.x);
-            var raftFigure = new Raft();
-            raftFigure.attr({
-                x: rx,
-                y: ry,
-                width: rw,
-                height: rh,
-                color: "#1c9bab"
-            });
-            canvas.add(raftFigure);
-            this.boundingBoxFigure1.setCanvas(null);
-            this.boundingBoxFigure1 = null;
-            this.boundingBoxFigure2.setCanvas(null);
-            this.boundingBoxFigure2 = null;
-        } else {
-            this._super(canvas, x, y, shiftKey, ctrlKey);
-        }
-    },
-
-    _onMouseMoveCallback: function _onMouseMoveCallback(emitter, event) {
-        // there is no benefit to show decorations during Drag&Drop of an shape
-        //
-        if (this.mouseMovedDuringMouseDown === true) {
-            if (this.configIcon !== null) {
-                this.configIcon.remove();
-                this.configIcon = null;
-            }
-            return;
-        }
-
-        var hit = null;
-        var _this = this;
-
-        emitter.getFigures().each(function (index, figure) {
-            if (figure.hitTest(event.x, event.y, 30)) {
-                hit = figure;
-                return false;
-            }
-        });
-
-        if (hit !== null && hit.getParameterSettings().length > 0) {
-            var pos = hit.getBoundingBox().getTopLeft();
-            pos = emitter.fromCanvasToDocumentCoordinate(pos.x, pos.y);
-            pos.y -= 30;
-
-            if (_this.configIcon === null) {
-                _this.configIcon = $("<div class='ion-gear-a' id='configMenuIcon'></div>");
-                $("body").append(_this.configIcon);
-                //  FigureConfigDialog.hide();
-                _this.configIcon.on("click", function () {
-                    _FigureConfigDialog2.default.show(hit, pos);
-                    _this.configFigure = hit;
-                    if (_this.configIcon !== null) {
-                        _this.configIcon.remove();
-                        _this.configIcon = null;
-                    }
-                });
-            }
-            _this.configIcon.css({ top: pos.y, left: pos.x, position: 'absolute' });
-        } else {
-            if (_this.configIcon !== null) {
-                var x = _this.configIcon;
-                _this.configIcon = null;
-                x.fadeOut(500, function () {
-                    x.remove();
-                });
-            }
-        }
+  /**
+   * @method
+   * Called by the canvas if the user click on a figure.
+   *
+   * @param {draw2d.Figure} the figure under the click event. Can be null
+   * @param {Number} mouseX the x coordinate of the mouse during the click event
+   * @param {Number} mouseY the y coordinate of the mouse during the click event
+   * @param {Boolean} shiftKey true if the shift key has been pressed during this event
+   * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
+   *
+   * @since 3.0.0
+   */
+  onClick: function onClick(figure, mouseX, mouseY, shiftKey, ctrlKey) {
+    // we only forward the click-event to the MarkerFigure which the user can show hide per
+    // default
+    // lt in the edit mode as well.
+    if (figure instanceof _MarkerFigure2.default) {
+      this._super(figure, mouseX, mouseY, shiftKey, ctrlKey);
     }
+  },
+
+  onInstall: function onInstall(canvas) {
+    this._super(canvas);
+
+    // provide configuration menu if the mouse is close to a shape
+    //
+    canvas.on("mousemove", this.mouseMoveProxy);
+  },
+
+  onUninstall: function onUninstall(canvas) {
+    this._super(canvas);
+
+    canvas.off(this.mouseMoveProxy);
+  },
+
+  onMouseUp: function onMouseUp(canvas, x, y, shiftKey, ctrlKey) {
+    if (shiftKey === true && this.mouseDownElement === null) {
+      var rx = Math.min(x, this.x);
+      var ry = Math.min(y, this.y);
+      var rh = Math.abs(y - this.y);
+      var rw = Math.abs(x - this.x);
+      var raftFigure = new Raft();
+      raftFigure.attr({
+        x: rx,
+        y: ry,
+        width: rw,
+        height: rh,
+        color: "#1c9bab"
+      });
+      canvas.add(raftFigure);
+      this.boundingBoxFigure1.setCanvas(null);
+      this.boundingBoxFigure1 = null;
+      this.boundingBoxFigure2.setCanvas(null);
+      this.boundingBoxFigure2 = null;
+    } else {
+      this._super(canvas, x, y, shiftKey, ctrlKey);
+    }
+  },
+
+  _onMouseMoveCallback: function _onMouseMoveCallback(emitter, event) {
+    // there is no benefit to show decorations during Drag&Drop of an shape
+    //
+    if (this.mouseMovedDuringMouseDown === true) {
+      if (this.configIcon !== null) {
+        this.configIcon.remove();
+        this.configIcon = null;
+      }
+      return;
+    }
+
+    var hit = null;
+    var _this = this;
+
+    emitter.getFigures().each(function (index, figure) {
+      if (figure.hitTest(event.x, event.y, 30)) {
+        hit = figure;
+        return false;
+      }
+    });
+
+    if (hit !== null && hit.getParameterSettings().length > 0) {
+      var pos = hit.getBoundingBox().getTopLeft();
+      pos = emitter.fromCanvasToDocumentCoordinate(pos.x, pos.y);
+      pos.y -= 30;
+
+      if (_this.configIcon === null) {
+        _this.configIcon = $("<div class='ion-gear-a' id='configMenuIcon'></div>");
+        $("body").append(_this.configIcon);
+        //  FigureConfigDialog.hide();
+        _this.configIcon.on("click", function () {
+          _FigureConfigDialog2.default.show(hit, pos);
+          _this.configFigure = hit;
+          if (_this.configIcon !== null) {
+            _this.configIcon.remove();
+            _this.configIcon = null;
+          }
+        });
+      }
+      _this.configIcon.css({ top: pos.y, left: pos.x, position: 'absolute' });
+    } else {
+      if (_this.configIcon !== null) {
+        var x = _this.configIcon;
+        _this.configIcon = null;
+        x.fadeOut(500, function () {
+          x.remove();
+        });
+      }
+    }
+  }
 });
 module.exports = exports["default"];
 
