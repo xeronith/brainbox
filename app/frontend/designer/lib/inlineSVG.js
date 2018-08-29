@@ -121,8 +121,11 @@
                         result = parser.parseFromString(request.responseText, 'text/xml'),
                         inlinedSVG = result.getElementsByTagName('svg')[0];
 
-                    let titles = document.getElementsByTagName('title')
+                    let titles = inlinedSVG.getElementsByTagName('title')
                     while (titles[0]) titles[0].parentNode.removeChild(titles[0])
+
+                    let descs = inlinedSVG.getElementsByTagName('desc')
+                    while (descs[0]) descs[0].parentNode.removeChild(descs[0])
 
                     // Remove some of the attributes that aren't needed
                     inlinedSVG.removeAttribute('xmlns:a');
@@ -212,10 +215,6 @@
 
         // Kick-off the inliner
         inliner(callback || function(){});
-
-        // Once inlined and a class to the HTML
-        document.documentElement.className += ' ' + settings.initClass;
-
     };
 
     return inlineSVG;

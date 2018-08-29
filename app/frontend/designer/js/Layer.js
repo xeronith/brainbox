@@ -42,7 +42,7 @@ export default class Layer {
     let figures = this.view.getExtFigures()
     figures.each((i, figure) => {
       this.html.append(
-        '<div class="layerElement" data-figure="' + figure.id + '" id="layerElement_' + figure.id + '" >' +
+        '<div class="layerElement" data-figure="' + figure.id + '"  data-visibility="' + figure.isVisible() + '" id="layerElement_' + figure.id + '" >' +
         figure.getUserData().name +
         '<span data-figure="' + figure.id + '"  data-toggle="tooltip" title="Toggle Visibility of the Layer"  class="layer_visibility pull-right"><img class="icon svg" src="'+ (figure.isVisible() ? './images/layer_visible.svg' : './images/layer_hidden.svg') + '"/></span>' +
         '<span data-figure="' + figure.id + '"  data-toggle="tooltip" title="Edit Name of Layer" class="layer_edit pull-right" ><img class="icon svg" src="./images/layer_edit.svg"/></span>' +
@@ -95,6 +95,11 @@ export default class Layer {
       this.view.setCurrentSelection(null)
       $(event.currentTarget).html('<img class="icon svg" src="'+ (figure.isVisible() ? './images/layer_visible.svg' : './images/layer_hidden.svg') + '"/>')
       inlineSVG.init()
+
+      // set the "data" with attr and not with "data()". Otherwise the css selector won't work
+      //
+      $(event.currentTarget).parent().attr({"data-visibility":figure.isVisible()})
+
       this.ripple(figure)
       return false
     }, this))
