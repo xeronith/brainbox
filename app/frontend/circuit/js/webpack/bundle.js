@@ -637,6 +637,14 @@ exports.default = draw2d.policy.canvas.DropInterceptorPolicy.extend({
      * @return {draw2d.Figure} the calculated connect intent or <b>null</b> if the interceptor uses the veto right
      */
     delegateTarget: function delegateTarget(connectInquirer, connectIntent) {
+        // we allow that a figure with a special class is droppable to a connection
+        //
+        if (connectInquirer instanceof draw2d.shape.node.Node && connectIntent instanceof draw2d.Connection) {
+            if (connectInquirer.getInputPorts().getSize() > 0 && connectInquirer.getOutputPorts().getSize() > 0) {
+                return connectIntent;
+            }
+        }
+
         // a composite accept any kind of figures exceptional ports
         //
         if (!(connectInquirer instanceof draw2d.Port) && connectIntent instanceof draw2d.shape.composite.StrongComposite) {
@@ -1638,7 +1646,7 @@ exports.default = draw2d.Canvas.extend({
 
     var router = new _ConnectionRouter2.default();
     router.abortRoutingOnFirstVertexNode = false;
-    var createConnection = function createConnection(sourcePort, targetPort) {
+    var createConnection = this.createConnection = function (sourcePort, targetPort) {
       var c = new _Connection2.default({
         color: "#000000",
         router: router,
@@ -2779,7 +2787,7 @@ $.fn.extend({
 
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _ProbeFigure = __webpack_require__(/*! ./ProbeFigure */ "./app/frontend/circuit/js/figures/ProbeFigure.js");
@@ -2790,121 +2798,132 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 exports.default = draw2d.Connection.extend({
 
-    NAME: "Connection",
+  NAME: "Connection",
 
-    init: function init(attr, setter, getter) {
-        this._super(attr, setter, getter);
-    },
+  init: function init(attr, setter, getter) {
+    var _this = this;
 
-    setCanvas: function setCanvas(canvas) {
-        this._super(canvas);
+    this._super(attr, setter, getter);
 
-        // remove any decoration if exists
-        if (canvas === null) {}
-    },
+    // since version 3.5.6
+    //
+    this.on("dragEnter", function (emitter, event) {
+      console.log("dragEnter");
+      _this.attr({
+        outlineStroke: 2,
+        outlineColor: "#30ff30"
+      });
+    });
+    this.on("dragLeave", function (emitter, event) {
+      _this.attr({
+        outlineStroke: 0,
+        outlineColor: "#303030"
+      });
+    });
+  },
 
-    getValue: function getValue() {
-        return this.getSource().getValue();
-    },
+  getValue: function getValue() {
+    return this.getSource().getValue();
+  },
 
-    /**
-     * Return the ProbeFigure if the connection has any or NULL
-     *
-     * @return {ProbeFigure}
-     */
-    getProbeFigure: function getProbeFigure() {
-        var entry = this.children.find(function (entry) {
-            return entry.figure instanceof _ProbeFigure2.default;
-        });
-        return entry !== null ? entry.figure : null;
-    },
+  /**
+   * Return the ProbeFigure if the connection has any or NULL
+   *
+   * @return {ProbeFigure}
+   */
+  getProbeFigure: function getProbeFigure() {
+    var entry = this.children.find(function (entry) {
+      return entry.figure instanceof _ProbeFigure2.default;
+    });
+    return entry !== null ? entry.figure : null;
+  },
 
-    disconnect: function disconnect() {
-        this._super();
+  disconnect: function disconnect() {
+    this._super();
 
-        // remove some decorations of the router.
-        // This is a design flaw. the router creates the decoration and the connection must remove them :-/
-        // Unfortunately the Router didn't have a callback when a connection is removed from the canvas.
-        //
-        if (typeof this.vertexNodes !== "undefined" && this.vertexNodes !== null) {
-            this.vertexNodes.remove();
-            delete this.vertexNodes;
-        }
-    },
-
-    add: function add(figure) {
-        this._super.apply(this, arguments);
-
-        if (figure instanceof _ProbeFigure2.default && this.canvas !== null) {
-            this.canvas.fireEvent("probe:add", { figure: figure });
-        }
-    },
-
-    remove: function remove(figure) {
-        this._super.apply(this, arguments);
-
-        if (figure instanceof _ProbeFigure2.default && this.canvas !== null) {
-            this.canvas.fireEvent("probe:remove", { figure: figure });
-        }
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes: function getPersistentAttributes() {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function (i, e) {
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator = e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes: function setPersistentAttributes(memento) {
-        // patch the router from some legacy data
-        //
-        memento.router = "ConnectionRouter";
-
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        if (memento.labels) {
-            $.each(memento.labels, $.proxy(function (i, json) {
-                // create the figure stored in the JSON
-                var figure = eval("new " + json.type + "()");
-
-                // apply all attributes
-                figure.setPersistentAttributes(json);
-
-                // instantiate the locator
-                var locator = eval("new " + json.locator + "()");
-
-                // add the new figure as child to this figure
-                this.add(figure, locator);
-            }, this));
-        }
+    // remove some decorations of the router.
+    // This is a design flaw. the router creates the decoration and the connection must remove them :-/
+    // Unfortunately the Router didn't have a callback when a connection is removed from the canvas.
+    //
+    if (typeof this.vertexNodes !== "undefined" && this.vertexNodes !== null) {
+      this.vertexNodes.remove();
+      delete this.vertexNodes;
     }
+  },
+
+  add: function add(figure) {
+    this._super.apply(this, arguments);
+
+    if (figure instanceof _ProbeFigure2.default && this.canvas !== null) {
+      this.canvas.fireEvent("probe:add", { figure: figure });
+    }
+  },
+
+  remove: function remove(figure) {
+    this._super.apply(this, arguments);
+
+    if (figure instanceof _ProbeFigure2.default && this.canvas !== null) {
+      this.canvas.fireEvent("probe:remove", { figure: figure });
+    }
+  },
+
+  /**
+   * @method
+   * Return an objects with all important attributes for XML or JSON serialization
+   *
+   * @returns {Object}
+   */
+  getPersistentAttributes: function getPersistentAttributes() {
+    var memento = this._super();
+
+    // add all decorations to the memento
+    //
+    memento.labels = [];
+    this.children.each(function (i, e) {
+      var labelJSON = e.figure.getPersistentAttributes();
+      labelJSON.locator = e.locator.NAME;
+      memento.labels.push(labelJSON);
+    });
+
+    return memento;
+  },
+
+  /**
+   * @method
+   * Read all attributes from the serialized properties and transfer them into the shape.
+   *
+   * @param {Object} memento
+   * @returns
+   */
+  setPersistentAttributes: function setPersistentAttributes(memento) {
+    // patch the router from some legacy data
+    //
+    memento.router = "ConnectionRouter";
+
+    this._super(memento);
+
+    // remove all decorations created in the constructor of this element
+    //
+    this.resetChildren();
+
+    // and add all children of the JSON document.
+    //
+    if (memento.labels) {
+      $.each(memento.labels, $.proxy(function (i, json) {
+        // create the figure stored in the JSON
+        var figure = eval("new " + json.type + "()");
+
+        // apply all attributes
+        figure.setPersistentAttributes(json);
+
+        // instantiate the locator
+        var locator = eval("new " + json.locator + "()");
+
+        // add the new figure as child to this figure
+        this.add(figure, locator);
+      }, this));
+    }
+  }
 
 }); /*jshint evil:true */
 

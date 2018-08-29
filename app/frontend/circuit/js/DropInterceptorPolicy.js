@@ -29,6 +29,14 @@ export default draw2d.policy.canvas.DropInterceptorPolicy.extend({
      */
     delegateTarget: function(connectInquirer, connectIntent)
     {
+        // we allow that a figure with a special class is droppable to a connection
+        //
+        if(connectInquirer instanceof draw2d.shape.node.Node && connectIntent instanceof draw2d.Connection){
+          if(connectInquirer.getInputPorts().getSize()>0 && connectInquirer.getOutputPorts().getSize()>0) {
+            return connectIntent;
+          }
+        }
+
         // a composite accept any kind of figures exceptional ports
         //
         if(!(connectInquirer instanceof draw2d.Port) && connectIntent instanceof draw2d.shape.composite.StrongComposite){

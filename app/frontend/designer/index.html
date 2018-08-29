@@ -1,6 +1,6 @@
 ﻿<html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
-<title>Draw2D Shape Designer</title>
+<title>Brainbox Shape Designer</title>
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="viewport" content="width=device-width, minimum-scale=1.0" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -43,7 +43,6 @@
   <script src="./lib/bootbox/bootbox.min.js"></script>
   <script src="./lib/bootstrap-touchspin/jquery.bootstrap-touchspin.min.js"></script>
 
-  <script src="./lib/inlineSVG.js"></script>
   <script src="./lib/draw2d.js"></script>
   <script src="./lib/ace-noconflict/ace.js"></script>
   <SCRIPT src="./js/webpack/bundle.js"></SCRIPT>
@@ -567,14 +566,30 @@ var {{{className}}} = {{{baseClass}}}.extend({
         return [];
     },
 
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
+    onDrop:function(dropTarget, x, y, shiftKey, ctrlKey)
     {
-        this._super(port, locator);
-        return port;
+    	// Activate a "smart insert" If the user drop this figure on connection
+    	//
+    	if(dropTarget instanceof draw2d.Connection){
+    		var additionalConnection = dropTarget.getCanvas().createConnection();
+        var oldSource = dropTarget.getSource();
+        var oldTarget = dropTarget.getTarget();
+        if(oldSource instanceof draw2d.InputPort){
+          oldSource = dropTarget.getTarget();
+          oldTarget = dropTarget.getSource();
+        }
+
+        var stack = this.getCanvas().getCommandStack();
+        var cmd = new draw2d.command.CommandReconnect(dropTarget);
+        cmd.setNewPorts(oldSource, this.getInputPort(0));
+        stack.execute(cmd);
+
+        cmd = new draw2d.command.CommandConnect(oldTarget,this.getOutputPort(0));
+        cmd.setConnection(additionalConnection);
+        stack.execute(cmd);
+    	}
     },
+
 
     /**
      * @method

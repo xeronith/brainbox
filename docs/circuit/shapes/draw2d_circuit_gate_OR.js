@@ -1,43 +1,121 @@
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_gate_OR = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_gate_OR = draw2d.SetFigure.extend({
 
    NAME: "draw2d_circuit_gate_OR",
 
    init:function(attr, setter, getter)
    {
-     this._super( $.extend({stroke:0, bgColor:null, width:31,height:40},attr), setter, getter);
+     var _this = this;
+     this.tooltip = null;
+     this.tooltipTimer = -1;
+
+     this._super( $.extend({stroke:0, bgColor:null, width:30.78125,height:40},attr), setter, getter);
      var port;
      // input01
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-3.225806451612903, 22.5));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-3.248730964467005, 22.5));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#1C9BAB");
      port.setName("input01");
      port.setMaxFanOut(20);
      // input02
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-3.225806451612903, 78.75));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-3.248730964467005, 78.75));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#1C9BAB");
      port.setName("input02");
      port.setMaxFanOut(20);
      // output
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(116.12903225806451, 50));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(116.95431472081218, 50));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#1C9BAB");
      port.setName("output");
      port.setMaxFanOut(20);
      this.persistPorts=false;
+     this.zoomCallback = $.proxy(this.positionTooltip,this);
+
+     this.on("dragstart", function() {
+      _this.hideTooltip(true)
+    })
+
+    this.on("mouseenter", function() {
+      _this.tooltipTimer = window.setTimeout(function() {
+        _this.tooltipTimer = -1
+        _this.showTooltip()
+      }, 500)
+    })
+
+    this.on("mouseleave", function(){
+      _this.hideTooltip()
+    })
+
+    this.on("move", function(){
+      _this.positionTooltip()
+    })
+
    },
+
+    setCanvas: function(canvas)
+    {
+        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
+        this._super(canvas);
+        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
+    },
+
+    hideTooltip: function (fast) {
+      if (this.tooltipTimer !== -1) {
+        window.clearTimeout(this.tooltipTimer)
+        this.tooltipTimer = -1
+      }
+      else if(this.tooltip!==null){
+        if(fast) {
+          this.tooltip.remove()
+        }
+        else{
+          this.tooltip.fadeOut(500, function () {
+            $(this).remove()
+          })
+        }
+        this.tooltip = null
+      }
+    },
+
+    showTooltip:function()
+    {
+        this.tooltip= $('<div class="draw2d_tooltip">OR</div>')
+            .appendTo('body')
+            .hide()
+            .fadeIn(1000);
+        this.positionTooltip();
+    },
+
+
+    positionTooltip: function()
+    {
+        if( this.tooltip===null){
+            return;
+        }
+
+        var width =  this.tooltip.outerWidth(true);
+        var pos = this.canvas.fromCanvasToDocumentCoordinate(
+                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
+                this.getAbsoluteY()+this.getHeight() + 10);
+
+        // remove the scrolling part from the tooltip because the tooltip is placed
+        // inside the scrolling container
+        pos.x +=this.canvas.getScrollLeft();
+        pos.y +=this.canvas.getScrollTop();
+
+        this.tooltip.css({'top': pos.y, 'left': pos.x});
+    },
 
    createShapeElement : function()
    {
       var shape = this._super();
-      this.originalWidth = 31;
+      this.originalWidth = 30.78125;
       this.originalHeight= 40;
       return shape;
    },
@@ -45,24 +123,24 @@ var draw2d_circuit_gate_OR = draw2d.SetFigure.extend({
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L30.78125,0 L30.78125,40 L0,40");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M0,3Q0,0 3, 0L27,0Q30,0 30, 3L30,37Q30,40 27, 40L3,40Q0,40 0, 37L0,3');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'>1');
+       shape.attr({"x":4,"y":19.671875,"text-anchor":"start","text":">1","font-family":"\"Arial\"","font-size":20,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L31,0 L31,40 L0,40");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M0,3Q0,0 3, 0L27,0Q30,0 30, 3L30,37Q30,40 27, 40L3,40Q0,40 0, 37L0,3');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'>1');
-        shape.attr({"x":4,"y":20.5,"text-anchor":"start","text":">1","font-family":"\"Arial\"","font-size":20,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-
-        return this.canvas.paper.setFinish();
+       return this.canvas.paper.setFinish();
    },
 
    applyAlpha: function()
@@ -147,6 +225,30 @@ var draw2d_circuit_gate_OR = draw2d.SetFigure.extend({
         return port;
     },
 
+
+    onDrop:function(dropTarget, x, y, shiftKey, ctrlKey)
+    {
+    	// Activate a "smart insert" If the user drop this figure on connection
+    	//
+    	if(dropTarget instanceof draw2d.Connection){
+    		var additionalConnection = dropTarget.getCanvas().createConnection();
+        var oldSource = dropTarget.getSource();
+        var oldTarget = dropTarget.getTarget();
+
+        var stack = this.getCanvas().getCommandStack();
+        stack.startTransaction();
+        var cmd = new draw2d.command.CommandReconnect(dropTarget);
+        cmd.setNewPorts(oldSource, this.getInputPort(0));
+        stack.execute(cmd);
+
+        cmd = new draw2d.command.CommandConnect(oldTarget,this.getOutputPort(0));
+        cmd.setConnection(additionalConnection);
+        stack.execute(cmd);
+        stack.commitTransaction();
+    	}
+    },
+
+
     /**
      * @method
      * Return an objects with all important attributes for XML or JSON serialization
@@ -229,4 +331,3 @@ draw2d_circuit_gate_OR = draw2d_circuit_gate_OR.extend({
         o1.setValue(i1.getValue() || i2.getValue());
     }
 });
-draw2d_circuit_gate_OR.github="./shapes/org/draw2d/circuit/gate/OR.shape";

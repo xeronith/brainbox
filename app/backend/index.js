@@ -15,6 +15,9 @@ const io = require('./src/comm/websocket').connect(http, { path: '/circuit/socke
 const mqtt = require('./src/comm/hive-mqtt').connect(io, "freegroup/brainbox");
 const gpio = require("./src/comm/gpio").connect(io);
 
+// Tell the bodyparser middleware to accept more data
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 // application specific configuration settings
 //

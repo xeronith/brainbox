@@ -42,7 +42,7 @@ export default draw2d.Canvas.extend({
 
     let router = new ConnectionRouter()
     router.abortRoutingOnFirstVertexNode = false
-    let createConnection = function (sourcePort, targetPort) {
+    let createConnection = this.createConnection = function (sourcePort, targetPort) {
       let c = new Connection({
         color: "#000000",
         router: router,

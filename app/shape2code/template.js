@@ -1,4 +1,3 @@
-
 app.fileNew();
 
 var reader = new draw2d.io.json.Reader();

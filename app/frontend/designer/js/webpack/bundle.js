@@ -5317,12 +5317,17 @@ var _Hardware = __webpack_require__(/*! ./Hardware */ "./app/frontend/designer/j
 
 var _Hardware2 = _interopRequireDefault(_Hardware);
 
+var _inlineSVG = __webpack_require__(/*! ../lib/inlineSVG */ "./app/frontend/designer/lib/inlineSVG.js");
+
+var _inlineSVG2 = _interopRequireDefault(_inlineSVG);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
   hardware: _Hardware2.default,
   DecoratedInputPort: _DecoratedInputPort2.default,
-  Mousetrap: _mousetrap2.default
+  Mousetrap: _mousetrap2.default,
+  inlineSVG: _inlineSVG2.default
 };
 module.exports = exports["default"];
 
@@ -8285,6 +8290,234 @@ var update = __webpack_require__(/*! ../../../../node_modules/style-loader/lib/a
 if(content.locals) module.exports = content.locals;
 
 if(false) {}
+
+/***/ }),
+
+/***/ "./app/frontend/designer/lib/inlineSVG.js":
+/*!************************************************!*\
+  !*** ./app/frontend/designer/lib/inlineSVG.js ***!
+  \************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+(function (root, factory) {
+
+    if (true) {
+        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory(root)),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+    } else {}
+})(typeof global !== "undefined" ? global : undefined.window || undefined.global, function (root) {
+
+    // Variables
+    var inlineSVG = {},
+        supports = !!document.querySelector && !!root.addEventListener,
+        settings;
+
+    // Defaults
+    var defaults = {
+        initClass: 'js-inlinesvg',
+        svgSelector: 'img.svg'
+    };
+
+    /**
+     * Stolen from underscore.js
+     * @private
+     * @param {Int} times
+     * @param {Function} func
+     */
+
+    var after = function after(times, func) {
+        return function () {
+            if (--times < 1) {
+                return func.apply(this, arguments);
+            }
+        };
+    };
+
+    /**
+     * Merge two objects together
+     * @private
+     * @param {Function} fn
+     */
+    var extend = function extend() {
+
+        // Variables
+        var extended = {};
+        var deep = false;
+        var i = 0;
+        var length = arguments.length;
+
+        // Check if a deep merge
+        if (Object.prototype.toString.call(arguments[0]) === '[object Boolean]') {
+            deep = arguments[0];
+            i++;
+        }
+
+        // Merge the object into the extended object
+        var merge = function merge(obj) {
+            for (var prop in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, prop)) {
+                    // If deep merge and property is an object, merge properties
+                    if (deep && Object.prototype.toString.call(obj[prop]) === '[object Object]') {
+                        extended[prop] = extend(true, extended[prop], obj[prop]);
+                    } else {
+                        extended[prop] = obj[prop];
+                    }
+                }
+            }
+        };
+
+        // Loop through each object and conduct a merge
+        for (; i < length; i++) {
+            var obj = arguments[i];
+            merge(obj);
+        }
+
+        return extended;
+    };
+
+    // Methods
+
+    /**
+     * Grab all the SVGs that match the selector
+     * @public
+     */
+    var getAll = function getAll() {
+
+        var svgs = document.querySelectorAll(settings.svgSelector);
+        return svgs;
+    };
+
+    /**
+     * Inline all the SVGs in the array
+     * @public
+     */
+    var inliner = function inliner(cb) {
+
+        var svgs = getAll();
+        var callback = after(svgs.length, cb);
+
+        Array.prototype.forEach.call(svgs, function (svg, i) {
+
+            // Store some attributes of the image
+            var src = svg.src || svg.getAttribute('data-src'),
+                attributes = svg.attributes;
+
+            // Get the contents of the SVG
+            var request = new XMLHttpRequest();
+            request.open('GET', src, true);
+
+            request.onload = function () {
+
+                if (request.status >= 200 && request.status < 400) {
+
+                    // Setup a parser to convert the response to text/xml in order for it
+                    // to be manipulated and changed
+                    var parser = new DOMParser(),
+                        result = parser.parseFromString(request.responseText, 'text/xml'),
+                        inlinedSVG = result.getElementsByTagName('svg')[0];
+
+                    var titles = inlinedSVG.getElementsByTagName('title');
+                    while (titles[0]) {
+                        titles[0].parentNode.removeChild(titles[0]);
+                    }var descs = inlinedSVG.getElementsByTagName('desc');
+                    while (descs[0]) {
+                        descs[0].parentNode.removeChild(descs[0]);
+                    } // Remove some of the attributes that aren't needed
+                    inlinedSVG.removeAttribute('xmlns:a');
+                    inlinedSVG.removeAttribute('width');
+                    inlinedSVG.removeAttribute('height');
+                    inlinedSVG.removeAttribute('x');
+                    inlinedSVG.removeAttribute('y');
+                    inlinedSVG.removeAttribute('enable-background');
+                    inlinedSVG.removeAttribute('xmlns:xlink');
+                    inlinedSVG.removeAttribute('xml:space');
+                    inlinedSVG.removeAttribute('version');
+
+                    // Add in the attributes from the original <img> except `src` or
+                    // `alt`, we don't need either
+                    Array.prototype.slice.call(attributes).forEach(function (attribute) {
+                        if (attribute.name !== 'src' && attribute.name !== 'alt') {
+                            inlinedSVG.setAttribute(attribute.name, attribute.value);
+                        }
+                    });
+
+                    // Add an additional class to the inlined SVG to imply it was
+                    // infact inlined, might be useful to know
+                    if (inlinedSVG.classList) {
+                        inlinedSVG.classList.add('inlined-svg');
+                    } else {
+                        inlinedSVG.className += ' ' + 'inlined-svg';
+                    }
+
+                    // Add in some accessibility quick wins
+                    inlinedSVG.setAttribute('role', 'img');
+
+                    // Use the `longdesc` attribute if one exists
+                    if (attributes.longdesc) {
+                        var description = document.createElementNS('http://www.w3.org/2000/svg', 'desc'),
+                            descriptionText = document.createTextNode(attributes.longdesc.value);
+
+                        description.appendChild(descriptionText);
+                        inlinedSVG.insertBefore(description, inlinedSVG.firstChild);
+                    }
+
+                    // Use the `alt` attribute if one exists
+                    if (attributes.alt) {
+                        inlinedSVG.setAttribute('aria-labelledby', 'title');
+
+                        var title = document.createElementNS('http://www.w3.org/2000/svg', 'title'),
+                            titleText = document.createTextNode(attributes.alt.value);
+
+                        title.appendChild(titleText);
+                        inlinedSVG.insertBefore(title, inlinedSVG.firstChild);
+                    }
+
+                    // Replace the image with the SVG
+                    svg.parentNode.replaceChild(inlinedSVG, svg);
+
+                    // Fire the callback
+                    callback(settings.svgSelector);
+                } else {
+
+                    console.error('There was an error retrieving the source of the SVG.');
+                }
+            };
+
+            request.onerror = function () {
+                console.error('There was an error connecting to the origin server.');
+            };
+
+            request.send();
+        });
+    };
+
+    /**
+     * Initialise the inliner
+     * @public
+     */
+    inlineSVG.init = function (options, callback) {
+
+        // Test for support
+        if (!supports) return;
+
+        // Merge users option with defaults
+        settings = extend(defaults, options || {});
+
+        // Kick-off the inliner
+        inliner(callback || function () {});
+    };
+
+    return inlineSVG;
+});
+/* WEBPACK VAR INJECTION */}.call(this, __webpack_require__(/*! ./../../../../node_modules/webpack/buildin/global.js */ "./node_modules/webpack/buildin/global.js")))
 
 /***/ }),
 
@@ -49830,6 +50063,37 @@ module.exports = function (css) {
 	// send back the fixed css
 	return fixedCss;
 };
+
+
+/***/ }),
+
+/***/ "./node_modules/webpack/buildin/global.js":
+/*!***********************************!*\
+  !*** (webpack)/buildin/global.js ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1, eval)("this");
+} catch (e) {
+	// This works if the window reference is available
+	if (typeof window === "object") g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
 
 
 /***/ })
