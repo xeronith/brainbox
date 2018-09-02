@@ -10,6 +10,7 @@ import Mousetrap from "mousetrap"
 import LabelInplaceEditor from "./LabelInplaceEditor"
 import "./util/mousetrap-global"
 import "./util/mousetrap-pause"
+import inlineSVG from "../lib/inlineSVG"
 
 export default {
   ConnectionSelectionFeedbackPolicy,
@@ -19,6 +20,7 @@ export default {
   Raft,
   ProbeFigure,
   Mousetrap,
+  inlineSVG,
   LabelInplaceEditor,
   ConnectionRouter
 }

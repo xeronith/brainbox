@@ -73,4 +73,6 @@ $(window).load(function () {
     app = require("./Application")
     hardware.init(socket)
   });
+
+  global.inlineSVG.init()
 });
