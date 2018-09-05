@@ -46,7 +46,6 @@
     "imports-loader": "^0.8.0",
     "jshint-stylish": "latest",
     "less-loader": "^4.1.0",
-    "locstor": "^1.0.7",
     "mocha": "^4.0.1",
     "octicons": "4.3.0",
     "remarkable": "^1.7.1",
