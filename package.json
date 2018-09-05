@@ -75,7 +75,7 @@
     "prettify": "0.1.7",
     "prompt": "1.0.0",
     "serialport": "6.2.2",
-    "socket.io": "1.4.6",
+    "socket.io": "2.1.1",
     "system": "2.0.1",
     "webpage": "0.3.0"
   },

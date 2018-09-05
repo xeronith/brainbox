@@ -63,6 +63,7 @@ $(window).load(function () {
     $("#files_tab").remove();
   });
 
+
   // we must load the "shape/index.js" in the global scope.
   $.getScript(conf.shapes.url+"index.js",function(){
 

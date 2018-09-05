@@ -7,18 +7,18 @@
  */
 import conf from "./Configuration"
 
-var eventSubscriptions = {}; // event listener to the registry
+let eventSubscriptions = {}; // event listener to the registry
 
-var values = {};
-var blocs = [];
-var socket = null;
-var fireEvent = function (event, args) {
+let values = {};
+let blocs = [];
+let socket = null;
+let fireEvent = function (event, args) {
   if (typeof eventSubscriptions[event] === 'undefined') {
     return;
   }
 
-  var subscribers = eventSubscriptions[event];
-  for (var i = 0; i < subscribers.length; i++) {
+  let subscribers = eventSubscriptions[event];
+  for (let i = 0; i < subscribers.length; i++) {
     try {
       subscribers[i](args);
     }
@@ -73,6 +73,7 @@ export default {
       }
     });
   },
+
   gpio: {
     set: function (pin, value) {
       socket.emit('gpi:set', {
@@ -84,6 +85,7 @@ export default {
       return values[pin];
     }
   },
+
   bloc: {
     set: function (blocId, value) {
       socket.emit('bloc:set', {
@@ -120,8 +122,8 @@ export default {
      * @since 5.0.0
      */
     on: function (event, callback) {
-      var events = event.split(" ");
-      for (var i = 0; i < events.length; i++) {
+      let events = event.split(" ");
+      for (let i = 0; i < events.length; i++) {
         if (typeof eventSubscriptions[events[i]] === 'undefined') {
           eventSubscriptions[events[i]] = [];
         }
@@ -146,10 +148,10 @@ export default {
         eventSubscriptions[eventOrFunction] = [];
       }
       else {
-        var check = function (callback) {
+        let check = function (callback) {
           return callback !== eventOrFunction;
         };
-        for (var event in this.eventSubscriptions) {
+        for (let event in this.eventSubscriptions) {
           eventSubscriptions[event] = $.grep(eventSubscriptions[event], check);
         }
       }

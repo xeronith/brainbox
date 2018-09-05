@@ -342,6 +342,9 @@ export default draw2d.Canvas.extend({
       $(".raspiConnection").fadeIn()
     })
 
+    if(socket.connected){
+      $(".raspiConnection").fadeOut()
+    }
     socket.on('connect', function () {
       $(".raspiConnection").fadeOut()
     })
