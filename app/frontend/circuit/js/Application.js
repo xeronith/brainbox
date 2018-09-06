@@ -134,7 +134,7 @@ class Application {
     if (shapeTemplate) {
       new Reader().unmarshal(this.view, shapeTemplate)
     }
-    
+
     if (fileName) {
       storage.currentFile = storage.sanitize(fileName)
     }

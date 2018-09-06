@@ -60,7 +60,10 @@ $(window).load(function () {
     $("#leftTabStrip .editor").click()
     $("#fileOpen, #editorFileOpen").remove();
     $("#fileSave, #editorFileSave").remove();
-    $("#files_tab").remove();
+   // $("#files_tab").remove();
+    conf.backend.file.list = path => `../brain/index.json`
+    conf.backend.file.get = file => `../brain/${file}`
+    conf.backend.file.image =  ()=> `../brain/img`
   });
 
 

@@ -1,9 +1,10 @@
 import EventEmitter from "../util/EventEmitter"
 import conf from '../Configuration'
-let sanitize = require("sanitize-filename");
+
+let sanitize = require("sanitize-filename")
 
 
-class BackendStorage extends EventEmitter{
+class BackendStorage extends EventEmitter {
 
   /**
    * @constructor
@@ -12,63 +13,60 @@ class BackendStorage extends EventEmitter{
   constructor() {
     super()
     this.fileName = ""
-    Object.preventExtensions(this);
+    Object.preventExtensions(this)
   }
 
-  get currentDir(){
+  get currentDir() {
     return this.dirname(this.dirname())
   }
 
-  get currentFile(){
+  get currentFile() {
     return this.basename(this.fileName)
   }
 
-  set currentFile(name){
-    this.fileName=name;
+  set currentFile(name) {
+    this.fileName = name
     history.pushState({
       id: 'editor',
       file: name
-    }, 'Brainbox Simulator | '+name , window.location.href.split('?')[0]+'?file='+name);
-    this.emit("changed", {fileName:this.fileName})
+    }, 'Brainbox Simulator | ' + name, window.location.href.split('?')[0] + '?file=' + name)
+    this.emit("changed", {fileName: this.fileName})
   }
 
-  getFiles(path){
-      return $.ajax({
-        url: conf.backend.file.list,
-        xhrFields: {
-          withCredentials: true
-        },
-        data: {
-          path
-        }
-      }).then( (response)=>{
-        // happens in "serverless" mode on the gh-pages/docs installation
-        //
-        if(typeof response ==="string")
-          response =JSON.parse(response)
+  getFiles(path) {
+    return $.ajax({
+      url: conf.backend.file.list(path),
+      xhrFields: {
+        withCredentials: true
+      }
+    }).then((response) => {
+      // happens in "serverless" mode on the gh-pages/docs installation
+      //
+      if (typeof response === "string")
+        response = JSON.parse(response)
 
-        let files = response.files
-        // sort the result
-        // Directories are always on top
-        //
-        files.sort(function (a, b) {
-          if (a.type === b.type) {
-            if (a.name.toLowerCase() < b.name.toLowerCase())
-              return -1
-            if (a.name.toLowerCase() > b.name.toLowerCase())
-              return 1
-            return 0
-          }
-          if (a.type === "dir") {
+      let files = response.files
+      // sort the result
+      // Directories are always on top
+      //
+      files.sort(function (a, b) {
+        if (a.type === b.type) {
+          if (a.name.toLowerCase() < b.name.toLowerCase())
             return -1
-          }
-          return 1
-        })
-        return files;
+          if (a.name.toLowerCase() > b.name.toLowerCase())
+            return 1
+          return 0
+        }
+        if (a.type === "dir") {
+          return -1
+        }
+        return 1
       })
+      return files
+    })
   }
 
-  saveFile(json, imageDataUrl, fileName){
+  saveFile(json, imageDataUrl, fileName) {
     return $.ajax({
         url: conf.backend.file.save,
         method: "POST",
@@ -89,24 +87,25 @@ class BackendStorage extends EventEmitter{
    * @param fileName
    * @returns {*}
    */
-  loadFile(fileName){
+  loadFile(fileName) {
     return $.ajax({
-      url: conf.backend.file.get,
+      url: conf.backend.file.get(fileName),
       xhrFields: {
         withCredentials: true
-      },
-      data: {
-        filePath: fileName
       }
     })
-      .then((content)=>{
-        if(content.draw2d)
+      .then((content) => {
+        // happens in the serverless mode
+        if(typeof content === "string")
+          content = JSON.parse(content)
+
+        if (content.draw2d)
           return content.draw2d
         return content
       })
   }
 
-  deleteFile(fileName){
+  deleteFile(fileName) {
     return $.ajax({
         url: conf.backend.file.del,
         method: "POST",
@@ -121,7 +120,7 @@ class BackendStorage extends EventEmitter{
   }
 
   dirname(path) {
-    if (path===undefined || path===null || path.length === 0)
+    if (path === undefined || path === null || path.length === 0)
       return null
 
     let segments = path.split("/")
@@ -133,23 +132,23 @@ class BackendStorage extends EventEmitter{
     return (path === "") ? null : path + "/"
 
   }
-  
-  sanitize(file){
-    file = sanitize(file,"_")
-    file = file.replace(conf.fileSuffix,"")
+
+  sanitize(file) {
+    file = sanitize(file, "_")
+    file = file.replace(conf.fileSuffix, "")
     // I don't like dots in the name to
-    file = file.replace(RegExp("[.]","g"),"_")
-    file = file+conf.fileSuffix
+    file = file.replace(RegExp("[.]", "g"), "_")
+    file = file + conf.fileSuffix
     return file
   }
 
   basename(path) {
-    if(path === null || path==="" || path === undefined){
-      return null;
+    if (path === null || path === "" || path === undefined) {
+      return null
     }
     return path.split(/[\\/]/).pop()
   }
 }
 
 let storage = new BackendStorage()
-export default storage;
+export default storage

@@ -34,7 +34,7 @@ export default class Files {
         '<div class="col-lg-3 col-md-4 col-xs-6 thumb">' +
         '  <img class="deleteIcon svg"  data-toggle="confirmation"  data-name="{{name}}" src="./images/toolbar_delete.svg"/>' +
         '  <a class="thumbnail" data-name="{{name}}">' +
-        '    <img class="img-responsive" src="' + conf.backend.file.image + '?filePath={{name}}" data-name="{{name}}">' +
+        '    <img class="img-responsive" src="' + conf.backend.file.image() + '{{name}}" data-name="{{name}}">' +
         '    <h4>{{title}}</h4>' +
         '  </a>' +
         '</div>' +

@@ -323,12 +323,18 @@ exports.default = {
   fileSuffix: ".brain",
   backend: {
     file: {
-      list: "../backend/brain/list",
-      get: "../backend/brain/get",
+      list: function list(path) {
+        return "../backend/brain/list?path=" + path;
+      },
+      get: function get(file) {
+        return "../backend/brain/get?filePath=" + file;
+      },
+      image: function image() {
+        return "../backend/brain/image?filePath=";
+      },
       del: "../backend/brain/delete",
       rename: "../backend/brain/rename",
-      save: "../backend/brain/save",
-      image: "../backend/brain/image"
+      save: "../backend/brain/save"
     },
     // registry of RF24 registered devices. Only available if we use
     // a node.js server and a connected RF24 receiver (e.g. Raspi or arduino with a RF24 receiver)
@@ -940,7 +946,7 @@ var Files = function () {
           return _extends({}, file, { title: file.name.replace(_Configuration2.default.fileSuffix, "") });
         });
 
-        var compiled = _hogan2.default.compile('<div class="col-lg-3 col-md-4 col-xs-6 thumbAdd">' + '    <div class="img-responsive ion-ios-plus-outline"></div>' + '    <h4>New</h4>' + '</div>' + '{{#files}}' + '<div class="col-lg-3 col-md-4 col-xs-6 thumb">' + '  <img class="deleteIcon svg"  data-toggle="confirmation"  data-name="{{name}}" src="./images/toolbar_delete.svg"/>' + '  <a class="thumbnail" data-name="{{name}}">' + '    <img class="img-responsive" src="' + _Configuration2.default.backend.file.image + '?filePath={{name}}" data-name="{{name}}">' + '    <h4>{{title}}</h4>' + '  </a>' + '</div>' + '{{/files}}');
+        var compiled = _hogan2.default.compile('<div class="col-lg-3 col-md-4 col-xs-6 thumbAdd">' + '    <div class="img-responsive ion-ios-plus-outline"></div>' + '    <h4>New</h4>' + '</div>' + '{{#files}}' + '<div class="col-lg-3 col-md-4 col-xs-6 thumb">' + '  <img class="deleteIcon svg"  data-toggle="confirmation"  data-name="{{name}}" src="./images/toolbar_delete.svg"/>' + '  <a class="thumbnail" data-name="{{name}}">' + '    <img class="img-responsive" src="' + _Configuration2.default.backend.file.image() + '{{name}}" data-name="{{name}}">' + '    <h4>{{title}}</h4>' + '  </a>' + '</div>' + '{{/files}}');
 
         var output = compiled.render({
           files: files
@@ -4085,7 +4091,16 @@ $(window).load(function () {
     $("#leftTabStrip .editor").click();
     $("#fileOpen, #editorFileOpen").remove();
     $("#fileSave, #editorFileSave").remove();
-    $("#files_tab").remove();
+    // $("#files_tab").remove();
+    _Configuration2.default.backend.file.list = function (path) {
+      return "../brain/index.json";
+    };
+    _Configuration2.default.backend.file.get = function (file) {
+      return "../brain/" + file;
+    };
+    _Configuration2.default.backend.file.image = function () {
+      return "../brain/img";
+    };
   });
 
   // we must load the "shape/index.js" in the global scope.
@@ -4160,12 +4175,9 @@ var BackendStorage = function (_EventEmitter) {
     key: "getFiles",
     value: function getFiles(path) {
       return $.ajax({
-        url: _Configuration2.default.backend.file.list,
+        url: _Configuration2.default.backend.file.list(path),
         xhrFields: {
           withCredentials: true
-        },
-        data: {
-          path: path
         }
       }).then(function (response) {
         // happens in "serverless" mode on the gh-pages/docs installation
@@ -4217,14 +4229,14 @@ var BackendStorage = function (_EventEmitter) {
     key: "loadFile",
     value: function loadFile(fileName) {
       return $.ajax({
-        url: _Configuration2.default.backend.file.get,
+        url: _Configuration2.default.backend.file.get(fileName),
         xhrFields: {
           withCredentials: true
-        },
-        data: {
-          filePath: fileName
         }
       }).then(function (content) {
+        // happens in the serverless mode
+        if (typeof content === "string") content = JSON.parse(content);
+
         if (content.draw2d) return content.draw2d;
         return content;
       });
