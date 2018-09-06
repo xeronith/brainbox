@@ -18,7 +18,6 @@ export default class FileNew {
    * @since 4.0.0
    */
   show() {
-    var _this = this
     $("#githubNewFileDialog .githubFileName").val("NewDocument")
     $('#githubNewFileDialog').on('shown.bs.modal', function () {
       $(this).find('input:first').focus()
@@ -28,8 +27,7 @@ export default class FileNew {
     $("#githubNewFileDialog .okButton").on("click", function () {
       var name = $("#githubNewFileDialog .githubFileName").val()
       $('#githubNewFileDialog').modal('hide')
-      app.fileNew()
-      app.currentFileHandle.title = name
+      app.fileNew(undefined, name)
     })
   }
 }

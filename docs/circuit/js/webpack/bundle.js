@@ -138,6 +138,10 @@ var _FileSave = __webpack_require__(/*! ./dialog/FileSave */ "../../app/frontend
 
 var _FileSave2 = _interopRequireDefault(_FileSave);
 
+var _BackendStorage = __webpack_require__(/*! ./io/BackendStorage */ "../../app/frontend/circuit/js/io/BackendStorage.js");
+
+var _BackendStorage2 = _interopRequireDefault(_BackendStorage);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -201,9 +205,41 @@ var Application = function () {
         $img.replaceWith($svg);
       }, 'xml');
     });
+
+    // check if the user has added a "file" parameter. In this case we load the shape from
+    // the draw2d.shape github repository
+    //
+    var file = this.getParam("file");
+    if (file) {
+      $("#leftTabStrip .editor").click();
+      this._load(file);
+    }
+
+    // listen on the history object to load files
+    //
+    window.onpopstate = function (event) {
+      if (history.state && history.state.id === 'editor') {
+        // Render new content for the hompage
+        $("#leftTabStrip .editor").click();
+        _this._load(history.state.file);
+      }
+    };
   }
 
   _createClass(Application, [{
+    key: "_load",
+    value: function _load(file) {
+      var _this2 = this;
+
+      _BackendStorage2.default.loadFile(file).then(function (content) {
+        _BackendStorage2.default.currentFile = file;
+        _this2.view.clear();
+        new draw2d.io.json.Reader().unmarshal(_this2.view, content);
+        _this2.view.getCommandStack().markSaveLocation();
+        _this2.view.centerDocument();
+      });
+    }
+  }, {
     key: "dump",
     value: function dump() {
       var writer = new draw2d.io.json.Writer();
@@ -218,7 +254,6 @@ var Application = function () {
       var regexS = "[\\?&]" + name + "=([^&#]*)";
       var regex = new RegExp(regexS);
       var results = regex.exec(window.location.href);
-
       // the param isn't part of the normal URL pattern...
       //
       if (results === null) {
@@ -231,17 +266,22 @@ var Application = function () {
           return null;
         }
       }
-
       return results[1];
     }
   }, {
     key: "fileNew",
-    value: function fileNew(shapeTemplate) {
+    value: function fileNew(shapeTemplate, fileName) {
       $("#leftTabStrip .editor").click();
 
       this.view.clear();
       if (shapeTemplate) {
         new Reader().unmarshal(this.view, shapeTemplate);
+      }
+
+      if (fileName) {
+        _BackendStorage2.default.currentFile = _BackendStorage2.default.sanitize(fileName);
+      } else {
+        _BackendStorage2.default.currentFile = "CircuitDiagram.brain";
       }
       this.view.centerDocument();
     }
@@ -846,6 +886,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _Configuration = __webpack_require__(/*! ./Configuration */ "../../app/frontend/circuit/js/Configuration.js");
@@ -894,7 +936,11 @@ var Files = function () {
       var _this = this;
 
       _BackendStorage2.default.getFiles("").then(function (files) {
-        var compiled = _hogan2.default.compile('<div class="col-lg-3 col-md-4 col-xs-6 thumbAdd">' + '    <div class="img-responsive ion-ios-plus-outline"></div>' + '    <h4>New</h4>' + '</div>' + '{{#files}}' + '<div class="col-lg-3 col-md-4 col-xs-6 thumb">' + '  <span class="ion-ios-close-outline deleteIcon"  data-toggle="confirmation"  data-name="{{name}}"></span>' + '  <a class="thumbnail" data-name="{{name}}">' + '    <img class="img-responsive" src="' + _Configuration2.default.backend.file.image + '?filePath={{name}}" data-name="{{name}}">' + '    <h4 data-name="{{name}}">{{name}}</h4>' + '  </a>' + '</div>' + '{{/files}}');
+        files = files.map(function (file) {
+          return _extends({}, file, { title: file.name.replace(_Configuration2.default.fileSuffix, "") });
+        });
+
+        var compiled = _hogan2.default.compile('<div class="col-lg-3 col-md-4 col-xs-6 thumbAdd">' + '    <div class="img-responsive ion-ios-plus-outline"></div>' + '    <h4>New</h4>' + '</div>' + '{{#files}}' + '<div class="col-lg-3 col-md-4 col-xs-6 thumb">' + '  <img class="deleteIcon svg"  data-toggle="confirmation"  data-name="{{name}}" src="./images/toolbar_delete.svg"/>' + '  <a class="thumbnail" data-name="{{name}}">' + '    <img class="img-responsive" src="' + _Configuration2.default.backend.file.image + '?filePath={{name}}" data-name="{{name}}">' + '    <h4>{{title}}</h4>' + '  </a>' + '</div>' + '{{/files}}');
 
         var output = compiled.render({
           files: files
@@ -920,17 +966,20 @@ var Files = function () {
         });
 
         $("#files .container .thumbnail h4").on("click", function (event) {
+          Mousetrap.pause();
           var $el = $(event.currentTarget);
-          var name = $el.data("name");
-          var $replaceWith = $('<input type="input" class="filenameInplaceEdit" value="' + name + '" />');
+          var name = $el.parent().data("name");
+          var $replaceWith = $('<input type="input" class="filenameInplaceEdit" value="' + name.replace(_Configuration2.default.fileSuffix, "") + '" />');
           $el.hide();
           $el.after($replaceWith);
           $replaceWith.focus();
 
           var fire = function fire() {
+            Mousetrap.unpause();
             var newName = $replaceWith.val();
             if (newName !== "") {
               // get the value and post them here
+              newName = _BackendStorage2.default.sanitize(newName);
               $.ajax({
                 url: _Configuration2.default.backend.file.rename,
                 method: "POST",
@@ -941,10 +990,9 @@ var Files = function () {
                 }
               }).then(function () {
                 $replaceWith.remove();
-                $el.html(newName);
+                $el.html(newName.replace(_Configuration2.default.fileSuffix, ""));
                 $el.show();
-                $el.data("name", newName);
-                $(".thumb [data-id='" + name + _Configuration2.default.fileSuffix + "']").data("id", newName + _Configuration2.default.fileSuffix);
+                $el.parent().parent().find("[data-name='" + name + "']").data("name", newName);
               });
             } else {
               // get the value and post them here
@@ -962,7 +1010,7 @@ var Files = function () {
 
         $("#files .container .thumbnail img").on("click", function (event) {
           var $el = $(event.currentTarget);
-          var name = $el.data("name");
+          var name = $el.parent().data("name");
           _BackendStorage2.default.loadFile(name).then(function (content) {
             $("#leftTabStrip .editor").click();
             _BackendStorage2.default.currentFile = name;
@@ -2336,7 +2384,6 @@ var FileNew = function () {
   _createClass(FileNew, [{
     key: "show",
     value: function show() {
-      var _this = this;
       $("#githubNewFileDialog .githubFileName").val("NewDocument");
       $('#githubNewFileDialog').on('shown.bs.modal', function () {
         $(this).find('input:first').focus();
@@ -2346,8 +2393,7 @@ var FileNew = function () {
       $("#githubNewFileDialog .okButton").on("click", function () {
         var name = $("#githubNewFileDialog .githubFileName").val();
         $('#githubNewFileDialog').modal('hide');
-        app.fileNew();
-        app.currentFileHandle.title = name;
+        app.fileNew(undefined, name);
       });
     }
   }]);
@@ -2541,6 +2587,7 @@ var FileSave = function () {
           var writer = new draw2d.io.json.Writer();
           writer.marshal(canvas, function (json) {
             var name = $("#githubSaveFileDialog .githubFileName").val();
+            name = _BackendStorage2.default.sanitize(name);
             _BackendStorage2.default.saveFile(json, imageDataUrl, name).then(function () {
               Mousetrap.unpause();
               _BackendStorage2.default.currentFile = name;
@@ -4090,6 +4137,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var _sanitize = __webpack_require__(/*! sanitize-filename */ "../../node_modules/sanitize-filename/index.js");
+
 var BackendStorage = function (_EventEmitter) {
   _inherits(BackendStorage, _EventEmitter);
 
@@ -4203,10 +4252,20 @@ var BackendStorage = function (_EventEmitter) {
       if (segments.length <= 1) return null;
 
       segments = segments.filter(function (n) {
-        return n != "";
+        return n !== "";
       });
       path = segments.slice(0, -1).join("/");
       return path === "" ? null : path + "/";
+    }
+  }, {
+    key: "sanitize",
+    value: function sanitize(file) {
+      file = _sanitize(file, "_");
+      file = file.replace(_Configuration2.default.fileSuffix, "");
+      // I don't like dots in the name to
+      file = file.replace(RegExp("[.]", "g"), "_");
+      file = file + _Configuration2.default.fileSuffix;
+      return file;
     }
   }, {
     key: "basename",
@@ -4228,6 +4287,10 @@ var BackendStorage = function (_EventEmitter) {
     },
     set: function set(name) {
       this.fileName = name;
+      history.pushState({
+        id: 'editor',
+        file: name
+      }, 'Brainbox Simulator | ' + name, window.location.href.split('?')[0] + '?file=' + name);
       this.emit("changed", { fileName: this.fileName });
     }
   }]);
@@ -7221,7 +7284,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "body {\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\nbody #layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\nbody #layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\nbody #layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\nbody #layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\nbody #layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\nbody #layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\nbody #layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\nbody #layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\nbody #layout .tab-content .tab-pane .workspace .palette {\n  position: absolute;\n  height: 100%;\n  width: 250px;\n  padding: 0;\n  z-index: 1000;\n}\nbody #layout .tab-content .tab-pane .workspace .palette #filter {\n  top: 90px;\n  position: absolute;\n  font-size: 20px;\n  width: 245px;\n  left: 2px;\n}\nbody #layout .tab-content .tab-pane .workspace .palette #paletteElementsScroll {\n  position: absolute;\n  width: 248px;\n  margin: 0;\n  padding: 0;\n  top: 150px;\n  bottom: 0px;\n  overflow: auto;\n}\nbody #layout .tab-content .tab-pane .workspace .palette #paletteElementsScroll #paletteElements {\n  position: absolute;\n  width: 100%;\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\nbody #layout .tab-content .tab-pane .workspace .palette #paletteElementsScroll #paletteElements .mix {\n  height: 125px;\n  border: 1px solid #f0f0f0;\n  /* to avoid doubling the border of the grid */\n  margin: -1px 0 0 -1px;\n}\nbody #layout .tab-content .tab-pane .workspace .toolbar {\n  position: absolute;\n  height: 60px;\n  right: 0;\n  top: 0;\n  left: 250px;\n}\nbody #layout .tab-content .tab-pane .workspace .toolbar .icon {\n  width: 50px;\n  height: 50px;\n  margin: 5px;\n  padding: 0px;\n}\nbody #layout .tab-content .tab-pane .workspace .content {\n  position: absolute;\n  right: 0px;\n  top: 60px;\n  bottom: 0px;\n  left: 250px;\n  overflow: scroll;\n}\nbody #layout .tab-content .tab-pane .workspace .content .canvas {\n  width: 6000px;\n  height: 6000px;\n}\nbody #layout .tab-content .active {\n  display: block;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n/* CSS from the cool website: http://cssarrowplease.com/ */\n.draw2d_tooltip {\n  position: absolute;\n  background: #88b7d5;\n  /* with border\n  border: 2px solid #c2e1f5;\n */\n  padding: 10px;\n  border-radius: 6px;\n}\n.draw2d_tooltip:after,\n.draw2d_tooltip:before {\n  bottom: 100%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none;\n}\n.draw2d_tooltip:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-bottom-color: #88b7d5;\n  border-width: 4px;\n  left: 50%;\n  margin-left: -4px;\n}\n/* with border\n.draw2d_tooltip:before {\n  border-color: rgba(194, 225, 245, 0);\n  border-bottom-color: #c2e1f5;\n  border-width: 8px;\n  left: 50%;\n  margin-left: -8px;\n}\n*/\n#codePreviewDialog .modal-content {\n  border-radius: 0;\n}\n#codePreviewDialog .btn-primary {\n  background-color: #B2E2F2;\n  border: 0;\n}\n#codePreviewDialog .prettyprint {\n  max-height: 450px;\n  max-height: 250px;\n  overflow: scroll;\n  border-radius: 0;\n}\n.modal-content {\n  border-radius: 2px;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n}\n.modal-backdrop.in {\n  opacity: 0.3;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #282a30;\n}\n.githubFileDialog .githubNavigation .glyphicon,\n.githubFileDialog .githubNavigation .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #282a30;\n}\n.githubFileDialog .githubNavigation a.list-group-item:hover {\n  text-decoration: underline;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n#githubNewFileDialog .githubFilePreview {\n  font-size: 115px;\n  color: #282a30;\n}\n#githubFileSelectDialog .githubNavigation {\n  height: 300px;\n  overflow: scroll;\n}\n#githubSaveFileDialog .githubFilePreview {\n  font-size: 100px;\n}\n#githubFileSaveAsDialog .githubFilePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .githubNavigation {\n  height: 250px;\n  overflow: scroll;\n}\n#markdownDialog .modal-body {\n  max-height: calc(100vh - 200px);\n  overflow-y: auto;\n}\n#markdownDialog .modal-dialog {\n  width: 70%;\n}\n#markdownDialog .modal-content {\n  border-radius: 0;\n}\n#markdownDialog .btn-primary {\n  background-color: #B2E2F2;\n  border: 0;\n}\n#markdownDialog .html table {\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  margin: 20px;\n  margin-left: 0;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n#markdownDialog .html table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n#markdownDialog .html table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n#markdownDialog .html table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n#markdownDialog .html table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n#markdownDialog .html table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n#markdownDialog .html table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n#markdownDialog .html table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n#markdownDialog .html tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n#markdownDialog .html tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n#markdownDialog .html table tr:last-child td {\n  border-bottom: 0;\n}\n#markdownDialog .html table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n#markdownDialog .html table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.confirm-dialog-btn-confirm {\n  background-color: #C71D3D;\n}\n.context-menu-list {\n  margin: 0;\n  padding: 0;\n  min-width: 120px;\n  max-width: 250px;\n  display: inline-block;\n  position: absolute;\n  list-style-type: none;\n  border: 1px solid #DDD;\n  background: white;\n  border-left: 2px solid #B2E2F2;\n  -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -moz-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -ms-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -o-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  font-size: 15px;\n  white-space: nowrap;\n}\n.context-menu-item {\n  padding: 5px 5px 5px 24px;\n  position: relative;\n  -webkit-user-select: none;\n  -moz-user-select: -moz-none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.context-menu-separator {\n  padding-bottom: 0;\n  border-bottom: 1px solid #DDD;\n}\n.context-menu-item > label > input,\n.context-menu-item > label > textarea {\n  -webkit-user-select: text;\n  -moz-user-select: text;\n  -ms-user-select: text;\n  user-select: text;\n}\n.context-menu-item.hover {\n  cursor: pointer;\n  background-color: #B2E2F2;\n  color: white;\n}\n.context-menu-item.disabled {\n  color: #666;\n}\n.context-menu-input.hover,\n.context-menu-item.disabled.hover {\n  cursor: default;\n  background-color: #EEE;\n}\n.context-menu-submenu:after {\n  content: \">\";\n  color: #666;\n  position: absolute;\n  top: 0;\n  right: 3px;\n  z-index: 1;\n}\n/* icons\n    #protip:\n    In case you want to use sprites for icons (which I would suggest you do) have a look at\n    http://css-tricks.com/13224-pseudo-spriting/ to get an idea of how to implement\n    .context-menu-item.icon:before {}\n */\n.context-menu-item.icon {\n  min-height: 18px;\n}\n.context-menu-item.icon:before {\n  position: relative;\n  left: -15px;\n  font-size: 19px;\n}\n/* vertically align inside labels */\n.context-menu-input > label > * {\n  vertical-align: top;\n}\n/* position checkboxes and radios as icons */\n.context-menu-input > label > input[type=\"checkbox\"],\n.context-menu-input > label > input[type=\"radio\"] {\n  margin-left: -17px;\n}\n.context-menu-input > label > span {\n  margin-left: 5px;\n}\n.context-menu-input > label,\n.context-menu-input > label > input[type=\"text\"],\n.context-menu-input > label > textarea,\n.context-menu-input > label > select {\n  display: block;\n  width: 100%;\n  -webkit-box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  -ms-box-sizing: border-box;\n  -o-box-sizing: border-box;\n  box-sizing: border-box;\n}\n.context-menu-input > label > textarea {\n  height: 100px;\n}\n.context-menu-item > .context-menu-list {\n  display: none;\n  /* re-positioned by js */\n  right: -5px;\n  top: 5px;\n}\n.context-menu-item.hover > .context-menu-list {\n  display: block;\n}\n.context-menu-accesskey {\n  text-decoration: underline;\n}\n#probe_hint {\n  display: block;\n  padding: 30px;\n  color: white;\n  font-size: 20px;\n  font-weight: 100;\n}\n#probe_window {\n  background: #009DAC;\n  bottom: 0;\n  height: 0;\n  display: none;\n  color: white;\n  position: absolute;\n  right: 0;\n  left: 250px;\n}\n#probe_window span {\n  font-size: 45px;\n  vertical-align: middle;\n  padding-right: 10px;\n}\n#probe_window_stick {\n  font-size: 34px;\n  position: absolute;\n  right: 10px;\n  top: -5px;\n  cursor: pointer;\n}\n#probeSortable {\n  padding-left: 0;\n}\n#probeSortable li {\n  list-style-type: none;\n  padding-top: 10px;\n  padding-left: 0;\n}\n#probeSortable li path {\n  stroke: white;\n}\n#probeSortable li div {\n  cursor: pointer;\n  display: inline-block;\n  padding-left: 10px;\n  padding-right: 10px;\n  position: absolute;\n  background: rgba(0, 157, 172, 0.8);\n}\n#probeSortable li:nth-child(even) {\n  background: #04A9B9;\n}\n#probeSortable li:nth-child(even) div {\n  background: rgba(4, 169, 185, 0.5);\n}\n#probeSortable .inplaceEdit {\n  background: rgba(255, 255, 255, 0.1);\n}\nellipse.draw2d_shape_basic_LineStartResizeHandle,\nellipse.draw2d_shape_basic_LineEndResizeHandle,\nrect.draw2d_policy_line_OrthogonalSelectionFeedbackPolicy_ResizeHandle {\n  fill: #B2E2F2;\n}\nellipse.draw2d_InputPort,\nellipse.DecoratedInputPort,\nellipse.draw2d_OutputPort {\n  fill: #C71D3D;\n}\n.vertical-text {\n  transform: rotate(-90deg);\n  white-space: nowrap;\n  top: 200px;\n  left: 20px;\n  font-size: 50px;\n  color: white;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"BrainBox\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -60px);\n  -moz-transform: rotate(-90deg) translate(-90px, -60px);\n  -ms-transform: rotate(-90deg) translate(-90px, -60px);\n  transform: rotate(-90deg) translate(-90px, -60px);\n  font-size: 50px;\n  color: white;\n  white-space: nowrap;\n  opacity: 0.4;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #B2E2F2;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n.ui-draggable-dragging {\n  z-index: 10000;\n}\ntext.highlightOnHover:hover {\n  cursor: pointer;\n  font-weight: bold;\n}\nellipse.highlightOnHover:hover {\n  cursor: pointer;\n}\nrect.Raft {\n  fill: rgba(28, 155, 171, 0.1);\n}\n#configMenuIcon {\n  font-size: 25px;\n  cursor: pointer;\n  opacity: 0.3;\n}\n#configMenuIcon:hover {\n  opacity: 1;\n  color: #B2E2F2;\n}\n#paletteElementsOverlay {\n  bottom: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  background-color: rgba(255, 255, 255, 0.7);\n  display: none;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 20px;\n  background-color: rgba(28, 155, 171, 0.05);\n  border-radius: 8px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #B2E2F2 !important;\n}\n#figureConfigDialog {\n  display: none;\n  background-color: white;\n  border: 1px solid rgba(0, 0, 0, 0.2);\n  padding: 10px;\n  margin-left: 30px;\n  border-left: 3px solid #B2E2F2;\n  border-radius: 4px;\n}\n#figureConfigDialog .header {\n  font-size: 16px;\n  font-weight: 600;\n  padding-bottom: 15px;\n}\n#figureConfigDialog .figureAddLabel {\n  font-size: 12px;\n  font-weight: 200;\n  cursor: pointer;\n}\n#figureConfigDialog .figureAddLabel:hover {\n  color: #B2E2F2;\n}\n#figureConfigDialog:after {\n  content: '';\n  display: block;\n  position: absolute;\n  left: -20px;\n  top: 10px;\n  width: 0;\n  height: 0;\n  border-right: 10px solid #B2E2F2;\n  border-top: 10px solid transparent;\n  border-left: 10px solid transparent;\n  border-bottom: 10px solid transparent;\n}\n.pallette_item {\n  text-align: center;\n}\n/*\n@keyframes spinner {\n  to {transform: rotate(360deg);}\n}\n\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  width: 20px;\n  height: 20px;\n  margin-top: -10px;\n  margin-left: -10px;\n  border-radius: 50%;\n  border: 2px solid transparent;\n  border-top-color: #07d;\n  border-bottom-color: #07d;\n  animation: spinner .8s ease infinite;\n}\n*/\n@keyframes spinner {\n  to {\n    transform: rotate(360deg);\n  }\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .palette {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .palette #filter {\n  outline: none;\n}\n.workspace .palette .title {\n  left: 10px;\n  right: 0px;\n  top: 10px;\n  position: absolute;\n}\n.workspace .palette .title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n}\n.workspace .palette .title div {\n  position: absolute;\n  left: 90px;\n}\n.workspace .palette .title div h1 {\n  font-size: 25px;\n  font-weight: 200;\n  line-height: 45px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n}\n.workspace .palette .title div h2 {\n  font-size: 15px;\n  font-weight: 200;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n}\n.workspace .palette .pallette_item {\n  padding: 0px;\n}\n.workspace .palette .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .palette .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .palette .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.workspace .palette .pallette_item .glowBorder {\n  border: 1px solid #B2E2F2;\n}\n.workspace .palette .draw2d_droppable {\n  cursor: move;\n  max-height: 80px;\n}\n.workspace .palette .request {\n  font-size: 10px;\n  color: #B2E2F2;\n}\n.workspace .palette .request .icon {\n  cursor: pointer;\n  font-size: 75px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\n.workspace .content .canvas {\n  -webkit-touch-callout: none;\n  -webkit-user-select: none;\n  -khtml-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  font-size: 24px;\n  color: #282a30;\n  top: 8px;\n  cursor: pointer;\n}\n#files .thumb .thumbnail img {\n  cursor: pointer;\n}\n#files .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #282a30;\n  margin-top: 5px;\n}\n#files .thumb h4 {\n  font-size: 18px;\n  color: #282a30;\n}\n#files .thumbAdd {\n  color: #282a30;\n  color: #0078f2;\n  border: 1px solid rgba(0, 120, 242, 0.33);\n  border-radius: 6px;\n  cursor: pointer;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .thumbAdd div {\n  font-size: 160px;\n  text-align: center;\n}\n#files .thumbAdd h4 {\n  text-align: center;\n}\n#files .thumbAdd:hover {\n  border: 1px solid #0078f2;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#home {\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  padding: 40px !important;\n  overflow: auto;\n  background-size: cover;\n}\n#home .branding {\n  color: #282a30;\n}\n#home .hacksterProjectCard {\n  border: 1px solid black;\n}\n#home .paragraph h3 {\n  color: #282a30;\n  padding-top: 45px;\n}\n#home .paragraph .block {\n  padding-bottom: 30px;\n}\n#home .teaser {\n  margin-bottom: 30px;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#home .teaser .title {\n  color: #282a30;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#home .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#home .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#home .introText {\n  font-size: 20px;\n  font-weight: 200;\n  color: #34495e;\n}\n#home footer {\n  text-align: center;\n  margin-top: 100px;\n  color: #282a30;\n}\n#home footer a {\n  color: #282a30;\n  text-decoration: underline;\n}\n.raspiConnection {\n  color: red !important;\n  border: 1px solid red;\n  padding: 10px;\n  border-radius: 5px;\n}\n.morph_btn {\n  display: inline-block;\n  width: 4em;\n  height: 4em;\n  background-color: #FFF;\n  color: #9e9e9e;\n  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);\n  border-radius: 2em;\n  overflow: hidden;\n  -webkit-transform: translateZ(0);\n  transform: translateZ(0);\n  -webkit-transition: all 500ms ease;\n  -moz-transition: all 500ms ease;\n  -ms-transition: all 500ms ease;\n  -o-transition: all 500ms ease;\n  transition: all 500ms ease;\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\n}\n.morph_btn:hover {\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);\n}\n.morph_btn:active {\n  -webkit-transform: scale(1.1, 1.1);\n  transform: scale(1.1, 1.1);\n}\n.morph_btn:focus {\n  outline: 0;\n  border: none;\n  color: rgba(0, 0, 0, 0);\n}\n.morph_btn > span {\n  display: block;\n  position: relative;\n  width: 2em;\n  height: 2em;\n  -webkit-transition: all 500ms ease;\n  -moz-transition: all 500ms ease;\n  -ms-transition: all 500ms ease;\n  -o-transition: all 500ms ease;\n  transition: all 500ms ease;\n  overflow: hidden;\n  margin: 1em;\n}\n.morph_btn > span > span {\n  display: block;\n  background-color: #C71D3D;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 2em;\n  height: 2em;\n  -webkit-transition: all 500ms ease;\n  -moz-transition: all 500ms ease;\n  -ms-transition: all 500ms ease;\n  -o-transition: all 500ms ease;\n  transition: all 500ms ease;\n  border: 1px solid transparent;\n}\n.morph_btn.play > span {\n  -webkit-transform: translate(1em, 0) scale(1.6, 1);\n  transform: translate(1em, 0) scale(1.6, 1);\n}\n.morph_btn.play > span > span {\n  -webkit-transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  background-color: #B2E2F2;\n}\n.morph_btn.pause > span > span {\n  -webkit-transform: scale(0.4, 1) translate(-1.6em, 0);\n  transform: scale(0.4, 1) translate(-1.6em, 0);\n}\n.morph_btn.pause > span > span.s3 {\n  -webkit-transform: scale(0.4, 1) translate(1.6em, 0);\n  transform: scale(0.4, 1) translate(1.6em, 0);\n}\n.drop {\n  display: block;\n  position: absolute;\n  background: #CCC;\n  border-radius: 100%;\n  -webkit-transform: scale(0);\n  transform: scale(0);\n  pointer-events: none;\n  width: 100%;\n  height: 100%;\n}\n.drop:before {\n  display: block;\n  position: absolute;\n  content: \"\";\n  background-color: #EEE;\n  border-radius: 100%;\n  width: 100%;\n  height: 100%;\n  top: 0;\n  left: 0;\n  -webkit-transform: scale(0);\n  transform: scale(0);\n}\n.slider-handle {\n  border-radius: 50%;\n  background-color: #B2E2F2;\n}\n#simulationStartStop {\n  position: absolute;\n  right: 30px;\n  top: 30px;\n  z-index: 30000;\n}\n#simulationBaseTimer {\n  width: 200px;\n}\n.simulationBase label {\n  display: block;\n  opacity: 0.5;\n  font-size: 10px;\n}\n.workspace .toolbar {\n  background-color: #B2E2F2;\n  min-width: 700px;\n}\n.workspace .toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: middle;\n}\n.workspace .toolbar label {\n  color: #777;\n  font-weight: 200;\n}\n.workspace .toolbar .icon {\n  cursor: pointer;\n  border: 1px solid transparent;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n}\n.workspace .toolbar .icon:hover {\n  border: 1px solid #B2E2F2;\n}\n.workspace .toolbar .icon.disabled {\n  opacity: 0.2;\n  border: 1px solid transparent;\n}\n", ""]);
+exports.push([module.i, "body {\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\nbody #layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\nbody #layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\nbody #layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\nbody #layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\nbody #layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\nbody #layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\nbody #layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\nbody #layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\nbody #layout .tab-content .tab-pane .workspace .palette {\n  position: absolute;\n  height: 100%;\n  width: 250px;\n  padding: 0;\n  z-index: 1000;\n}\nbody #layout .tab-content .tab-pane .workspace .palette #filter {\n  top: 90px;\n  position: absolute;\n  font-size: 20px;\n  width: 245px;\n  left: 2px;\n}\nbody #layout .tab-content .tab-pane .workspace .palette #paletteElementsScroll {\n  position: absolute;\n  width: 248px;\n  margin: 0;\n  padding: 0;\n  top: 150px;\n  bottom: 0px;\n  overflow: auto;\n}\nbody #layout .tab-content .tab-pane .workspace .palette #paletteElementsScroll #paletteElements {\n  position: absolute;\n  width: 100%;\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\nbody #layout .tab-content .tab-pane .workspace .palette #paletteElementsScroll #paletteElements .mix {\n  height: 125px;\n  border: 1px solid #f0f0f0;\n  /* to avoid doubling the border of the grid */\n  margin: -1px 0 0 -1px;\n}\nbody #layout .tab-content .tab-pane .workspace .toolbar {\n  position: absolute;\n  height: 60px;\n  right: 0;\n  top: 0;\n  left: 250px;\n}\nbody #layout .tab-content .tab-pane .workspace .toolbar .icon {\n  width: 50px;\n  height: 50px;\n  margin: 5px;\n  padding: 0px;\n}\nbody #layout .tab-content .tab-pane .workspace .content {\n  position: absolute;\n  right: 0px;\n  top: 60px;\n  bottom: 0px;\n  left: 250px;\n  overflow: scroll;\n}\nbody #layout .tab-content .tab-pane .workspace .content .canvas {\n  width: 6000px;\n  height: 6000px;\n}\nbody #layout .tab-content .active {\n  display: block;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n/* CSS from the cool website: http://cssarrowplease.com/ */\n.draw2d_tooltip {\n  position: absolute;\n  background: #88b7d5;\n  /* with border\n  border: 2px solid #c2e1f5;\n */\n  padding: 10px;\n  border-radius: 6px;\n}\n.draw2d_tooltip:after,\n.draw2d_tooltip:before {\n  bottom: 100%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none;\n}\n.draw2d_tooltip:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-bottom-color: #88b7d5;\n  border-width: 4px;\n  left: 50%;\n  margin-left: -4px;\n}\n/* with border\n.draw2d_tooltip:before {\n  border-color: rgba(194, 225, 245, 0);\n  border-bottom-color: #c2e1f5;\n  border-width: 8px;\n  left: 50%;\n  margin-left: -8px;\n}\n*/\n#codePreviewDialog .modal-content {\n  border-radius: 0;\n}\n#codePreviewDialog .btn-primary {\n  background-color: #B2E2F2;\n  border: 0;\n}\n#codePreviewDialog .prettyprint {\n  max-height: 450px;\n  max-height: 250px;\n  overflow: scroll;\n  border-radius: 0;\n}\n.modal-content {\n  border-radius: 2px;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n}\n.modal-backdrop.in {\n  opacity: 0.3;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #282a30;\n}\n.githubFileDialog .githubNavigation .glyphicon,\n.githubFileDialog .githubNavigation .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #282a30;\n}\n.githubFileDialog .githubNavigation a.list-group-item:hover {\n  text-decoration: underline;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n#githubNewFileDialog .githubFilePreview {\n  font-size: 115px;\n  color: #282a30;\n}\n#githubFileSelectDialog .githubNavigation {\n  height: 300px;\n  overflow: scroll;\n}\n#githubSaveFileDialog .githubFilePreview {\n  font-size: 100px;\n}\n#githubFileSaveAsDialog .githubFilePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .githubNavigation {\n  height: 250px;\n  overflow: scroll;\n}\n#markdownDialog .modal-body {\n  max-height: calc(100vh - 200px);\n  overflow-y: auto;\n}\n#markdownDialog .modal-dialog {\n  width: 70%;\n}\n#markdownDialog .modal-content {\n  border-radius: 0;\n}\n#markdownDialog .btn-primary {\n  background-color: #B2E2F2;\n  border: 0;\n}\n#markdownDialog .html table {\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  margin: 20px;\n  margin-left: 0;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n#markdownDialog .html table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n#markdownDialog .html table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n#markdownDialog .html table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n#markdownDialog .html table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n#markdownDialog .html table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n#markdownDialog .html table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n#markdownDialog .html table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n#markdownDialog .html tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n#markdownDialog .html tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n#markdownDialog .html table tr:last-child td {\n  border-bottom: 0;\n}\n#markdownDialog .html table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n#markdownDialog .html table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.confirm-dialog-btn-confirm {\n  background-color: #C71D3D;\n}\n.context-menu-list {\n  margin: 0;\n  padding: 0;\n  min-width: 120px;\n  max-width: 250px;\n  display: inline-block;\n  position: absolute;\n  list-style-type: none;\n  border: 1px solid #DDD;\n  background: white;\n  border-left: 2px solid #B2E2F2;\n  -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -moz-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -ms-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -o-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  font-size: 15px;\n  white-space: nowrap;\n}\n.context-menu-item {\n  padding: 5px 5px 5px 24px;\n  position: relative;\n  -webkit-user-select: none;\n  -moz-user-select: -moz-none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.context-menu-separator {\n  padding-bottom: 0;\n  border-bottom: 1px solid #DDD;\n}\n.context-menu-item > label > input,\n.context-menu-item > label > textarea {\n  -webkit-user-select: text;\n  -moz-user-select: text;\n  -ms-user-select: text;\n  user-select: text;\n}\n.context-menu-item.hover {\n  cursor: pointer;\n  background-color: #B2E2F2;\n  color: white;\n}\n.context-menu-item.disabled {\n  color: #666;\n}\n.context-menu-input.hover,\n.context-menu-item.disabled.hover {\n  cursor: default;\n  background-color: #EEE;\n}\n.context-menu-submenu:after {\n  content: \">\";\n  color: #666;\n  position: absolute;\n  top: 0;\n  right: 3px;\n  z-index: 1;\n}\n/* icons\n    #protip:\n    In case you want to use sprites for icons (which I would suggest you do) have a look at\n    http://css-tricks.com/13224-pseudo-spriting/ to get an idea of how to implement\n    .context-menu-item.icon:before {}\n */\n.context-menu-item.icon {\n  min-height: 18px;\n}\n.context-menu-item.icon:before {\n  position: relative;\n  left: -15px;\n  font-size: 19px;\n}\n/* vertically align inside labels */\n.context-menu-input > label > * {\n  vertical-align: top;\n}\n/* position checkboxes and radios as icons */\n.context-menu-input > label > input[type=\"checkbox\"],\n.context-menu-input > label > input[type=\"radio\"] {\n  margin-left: -17px;\n}\n.context-menu-input > label > span {\n  margin-left: 5px;\n}\n.context-menu-input > label,\n.context-menu-input > label > input[type=\"text\"],\n.context-menu-input > label > textarea,\n.context-menu-input > label > select {\n  display: block;\n  width: 100%;\n  -webkit-box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  -ms-box-sizing: border-box;\n  -o-box-sizing: border-box;\n  box-sizing: border-box;\n}\n.context-menu-input > label > textarea {\n  height: 100px;\n}\n.context-menu-item > .context-menu-list {\n  display: none;\n  /* re-positioned by js */\n  right: -5px;\n  top: 5px;\n}\n.context-menu-item.hover > .context-menu-list {\n  display: block;\n}\n.context-menu-accesskey {\n  text-decoration: underline;\n}\n#probe_hint {\n  display: block;\n  padding: 30px;\n  color: white;\n  font-size: 20px;\n  font-weight: 100;\n}\n#probe_window {\n  background: #009DAC;\n  bottom: 0;\n  height: 0;\n  display: none;\n  color: white;\n  position: absolute;\n  right: 0;\n  left: 250px;\n}\n#probe_window span {\n  font-size: 45px;\n  vertical-align: middle;\n  padding-right: 10px;\n}\n#probe_window_stick {\n  font-size: 34px;\n  position: absolute;\n  right: 10px;\n  top: -5px;\n  cursor: pointer;\n}\n#probeSortable {\n  padding-left: 0;\n}\n#probeSortable li {\n  list-style-type: none;\n  padding-top: 10px;\n  padding-left: 0;\n}\n#probeSortable li path {\n  stroke: white;\n}\n#probeSortable li div {\n  cursor: pointer;\n  display: inline-block;\n  padding-left: 10px;\n  padding-right: 10px;\n  position: absolute;\n  background: rgba(0, 157, 172, 0.8);\n}\n#probeSortable li:nth-child(even) {\n  background: #04A9B9;\n}\n#probeSortable li:nth-child(even) div {\n  background: rgba(4, 169, 185, 0.5);\n}\n#probeSortable .inplaceEdit {\n  background: rgba(255, 255, 255, 0.1);\n}\nellipse.draw2d_shape_basic_LineStartResizeHandle,\nellipse.draw2d_shape_basic_LineEndResizeHandle,\nrect.draw2d_policy_line_OrthogonalSelectionFeedbackPolicy_ResizeHandle {\n  fill: #B2E2F2;\n}\nellipse.draw2d_InputPort,\nellipse.DecoratedInputPort,\nellipse.draw2d_OutputPort {\n  fill: #C71D3D;\n}\n.vertical-text {\n  transform: rotate(-90deg);\n  white-space: nowrap;\n  top: 200px;\n  left: 20px;\n  font-size: 50px;\n  color: white;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"BrainBox\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -60px);\n  -moz-transform: rotate(-90deg) translate(-90px, -60px);\n  -ms-transform: rotate(-90deg) translate(-90px, -60px);\n  transform: rotate(-90deg) translate(-90px, -60px);\n  font-size: 50px;\n  color: white;\n  white-space: nowrap;\n  opacity: 0.4;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #B2E2F2;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n.ui-draggable-dragging {\n  z-index: 10000;\n}\ntext.highlightOnHover:hover {\n  cursor: pointer;\n  font-weight: bold;\n}\nellipse.highlightOnHover:hover {\n  cursor: pointer;\n}\nrect.Raft {\n  fill: rgba(28, 155, 171, 0.1);\n}\n#configMenuIcon {\n  font-size: 25px;\n  cursor: pointer;\n  opacity: 0.3;\n}\n#configMenuIcon:hover {\n  opacity: 1;\n  color: #B2E2F2;\n}\n#paletteElementsOverlay {\n  bottom: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  background-color: rgba(255, 255, 255, 0.7);\n  display: none;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 20px;\n  background-color: rgba(28, 155, 171, 0.05);\n  border-radius: 8px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #B2E2F2 !important;\n}\n#figureConfigDialog {\n  display: none;\n  background-color: white;\n  border: 1px solid rgba(0, 0, 0, 0.2);\n  padding: 10px;\n  margin-left: 30px;\n  border-left: 3px solid #B2E2F2;\n  border-radius: 4px;\n}\n#figureConfigDialog .header {\n  font-size: 16px;\n  font-weight: 600;\n  padding-bottom: 15px;\n}\n#figureConfigDialog .figureAddLabel {\n  font-size: 12px;\n  font-weight: 200;\n  cursor: pointer;\n}\n#figureConfigDialog .figureAddLabel:hover {\n  color: #B2E2F2;\n}\n#figureConfigDialog:after {\n  content: '';\n  display: block;\n  position: absolute;\n  left: -20px;\n  top: 10px;\n  width: 0;\n  height: 0;\n  border-right: 10px solid #B2E2F2;\n  border-top: 10px solid transparent;\n  border-left: 10px solid transparent;\n  border-bottom: 10px solid transparent;\n}\n.pallette_item {\n  text-align: center;\n}\n/*\n@keyframes spinner {\n  to {transform: rotate(360deg);}\n}\n\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  width: 20px;\n  height: 20px;\n  margin-top: -10px;\n  margin-left: -10px;\n  border-radius: 50%;\n  border: 2px solid transparent;\n  border-top-color: #07d;\n  border-bottom-color: #07d;\n  animation: spinner .8s ease infinite;\n}\n*/\n@keyframes spinner {\n  to {\n    transform: rotate(360deg);\n  }\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .palette {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .palette #filter {\n  outline: none;\n}\n.workspace .palette .title {\n  left: 10px;\n  right: 0px;\n  top: 10px;\n  position: absolute;\n}\n.workspace .palette .title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n}\n.workspace .palette .title div {\n  position: absolute;\n  left: 90px;\n}\n.workspace .palette .title div h1 {\n  font-size: 25px;\n  font-weight: 200;\n  line-height: 45px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n}\n.workspace .palette .title div h2 {\n  font-size: 15px;\n  font-weight: 200;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n}\n.workspace .palette .pallette_item {\n  padding: 0px;\n}\n.workspace .palette .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .palette .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .palette .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.workspace .palette .pallette_item .glowBorder {\n  border: 1px solid #B2E2F2;\n}\n.workspace .palette .draw2d_droppable {\n  cursor: move;\n  max-height: 80px;\n}\n.workspace .palette .request {\n  font-size: 10px;\n  color: #B2E2F2;\n}\n.workspace .palette .request .icon {\n  cursor: pointer;\n  font-size: 75px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\n.workspace .content .canvas {\n  -webkit-touch-callout: none;\n  -webkit-user-select: none;\n  -khtml-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  width: 24px;\n  color: #282a30;\n  top: 8px;\n  cursor: pointer;\n  border: 1px solid black;\n  border-radius: 50%;\n  background-color: rgba(255, 0, 0, 0.5);\n}\n#files .deleteIcon:hover {\n  background-color: rgba(255, 0, 0, 0.9);\n}\n#files .thumb .thumbnail img {\n  cursor: pointer;\n}\n#files .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #282a30;\n  margin-top: 5px;\n}\n#files .thumb h4 {\n  font-size: 18px;\n  color: #282a30;\n}\n#files .thumbAdd {\n  color: #282a30;\n  color: #0078f2;\n  border: 1px solid rgba(0, 120, 242, 0.33);\n  border-radius: 6px;\n  cursor: pointer;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .thumbAdd div {\n  font-size: 160px;\n  text-align: center;\n}\n#files .thumbAdd h4 {\n  text-align: center;\n}\n#files .thumbAdd:hover {\n  border: 1px solid #0078f2;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#home {\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  padding: 40px !important;\n  overflow: auto;\n  background-size: cover;\n}\n#home .branding {\n  color: #282a30;\n}\n#home .hacksterProjectCard {\n  border: 1px solid black;\n}\n#home .paragraph h3 {\n  color: #282a30;\n  padding-top: 45px;\n}\n#home .paragraph .block {\n  padding-bottom: 30px;\n}\n#home .teaser {\n  margin-bottom: 30px;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#home .teaser .title {\n  color: #282a30;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#home .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#home .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#home .introText {\n  font-size: 20px;\n  font-weight: 200;\n  color: #34495e;\n}\n#home footer {\n  text-align: center;\n  margin-top: 100px;\n  color: #282a30;\n}\n#home footer a {\n  color: #282a30;\n  text-decoration: underline;\n}\n.raspiConnection {\n  color: red !important;\n  border: 1px solid red;\n  padding: 10px;\n  border-radius: 5px;\n}\n.morph_btn {\n  display: inline-block;\n  width: 4em;\n  height: 4em;\n  background-color: #FFF;\n  color: #9e9e9e;\n  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);\n  border-radius: 2em;\n  overflow: hidden;\n  -webkit-transform: translateZ(0);\n  transform: translateZ(0);\n  -webkit-transition: all 500ms ease;\n  -moz-transition: all 500ms ease;\n  -ms-transition: all 500ms ease;\n  -o-transition: all 500ms ease;\n  transition: all 500ms ease;\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\n}\n.morph_btn:hover {\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);\n}\n.morph_btn:active {\n  -webkit-transform: scale(1.1, 1.1);\n  transform: scale(1.1, 1.1);\n}\n.morph_btn:focus {\n  outline: 0;\n  border: none;\n  color: rgba(0, 0, 0, 0);\n}\n.morph_btn > span {\n  display: block;\n  position: relative;\n  width: 2em;\n  height: 2em;\n  -webkit-transition: all 500ms ease;\n  -moz-transition: all 500ms ease;\n  -ms-transition: all 500ms ease;\n  -o-transition: all 500ms ease;\n  transition: all 500ms ease;\n  overflow: hidden;\n  margin: 1em;\n}\n.morph_btn > span > span {\n  display: block;\n  background-color: #C71D3D;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 2em;\n  height: 2em;\n  -webkit-transition: all 500ms ease;\n  -moz-transition: all 500ms ease;\n  -ms-transition: all 500ms ease;\n  -o-transition: all 500ms ease;\n  transition: all 500ms ease;\n  border: 1px solid transparent;\n}\n.morph_btn.play > span {\n  -webkit-transform: translate(1em, 0) scale(1.6, 1);\n  transform: translate(1em, 0) scale(1.6, 1);\n}\n.morph_btn.play > span > span {\n  -webkit-transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  background-color: #B2E2F2;\n}\n.morph_btn.pause > span > span {\n  -webkit-transform: scale(0.4, 1) translate(-1.6em, 0);\n  transform: scale(0.4, 1) translate(-1.6em, 0);\n}\n.morph_btn.pause > span > span.s3 {\n  -webkit-transform: scale(0.4, 1) translate(1.6em, 0);\n  transform: scale(0.4, 1) translate(1.6em, 0);\n}\n.drop {\n  display: block;\n  position: absolute;\n  background: #CCC;\n  border-radius: 100%;\n  -webkit-transform: scale(0);\n  transform: scale(0);\n  pointer-events: none;\n  width: 100%;\n  height: 100%;\n}\n.drop:before {\n  display: block;\n  position: absolute;\n  content: \"\";\n  background-color: #EEE;\n  border-radius: 100%;\n  width: 100%;\n  height: 100%;\n  top: 0;\n  left: 0;\n  -webkit-transform: scale(0);\n  transform: scale(0);\n}\n.slider-handle {\n  border-radius: 50%;\n  background-color: #B2E2F2;\n}\n#simulationStartStop {\n  position: absolute;\n  right: 30px;\n  top: 30px;\n  z-index: 30000;\n}\n#simulationBaseTimer {\n  width: 200px;\n}\n.simulationBase label {\n  display: block;\n  opacity: 0.5;\n  font-size: 10px;\n}\n.workspace .toolbar {\n  background-color: #B2E2F2;\n  min-width: 700px;\n}\n.workspace .toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: middle;\n}\n.workspace .toolbar label {\n  color: #777;\n  font-weight: 200;\n}\n.workspace .toolbar .icon {\n  cursor: pointer;\n  border: 1px solid transparent;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n}\n.workspace .toolbar .icon:hover {\n  border: 1px solid #B2E2F2;\n}\n.workspace .toolbar .icon.disabled {\n  opacity: 0.2;\n  border: 1px solid transparent;\n}\n", ""]);
 
 // exports
 
@@ -46298,6 +46361,74 @@ module.exports = function text(state, silent) {
 
 /***/ }),
 
+/***/ "../../node_modules/sanitize-filename/index.js":
+/*!*******************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/sanitize-filename/index.js ***!
+  \*******************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*jshint node:true*/
+
+
+/**
+ * Replaces characters in strings that are illegal/unsafe for filenames.
+ * Unsafe characters are either removed or replaced by a substitute set
+ * in the optional `options` object.
+ *
+ * Illegal Characters on Various Operating Systems
+ * / ? < > \ : * | "
+ * https://kb.acronis.com/content/39790
+ *
+ * Unicode Control codes
+ * C0 0x00-0x1f & C1 (0x80-0x9f)
+ * http://en.wikipedia.org/wiki/C0_and_C1_control_codes
+ *
+ * Reserved filenames on Unix-based systems (".", "..")
+ * Reserved filenames in Windows ("CON", "PRN", "AUX", "NUL", "COM1",
+ * "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+ * "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", and
+ * "LPT9") case-insesitively and with or without filename extensions.
+ *
+ * Capped at 255 characters in length.
+ * http://unix.stackexchange.com/questions/32795/what-is-the-maximum-allowed-filename-and-folder-size-with-ecryptfs
+ *
+ * @param  {String} input   Original filename
+ * @param  {Object} options {replacement: String}
+ * @return {String}         Sanitized filename
+ */
+
+var truncate = __webpack_require__(/*! truncate-utf8-bytes */ "../../node_modules/truncate-utf8-bytes/browser.js");
+
+var illegalRe = /[\/\?<>\\:\*\|":]/g;
+var controlRe = /[\x00-\x1f\x80-\x9f]/g;
+var reservedRe = /^\.+$/;
+var windowsReservedRe = /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i;
+var windowsTrailingRe = /[\. ]+$/;
+
+function sanitize(input, replacement) {
+  var sanitized = input
+    .replace(illegalRe, replacement)
+    .replace(controlRe, replacement)
+    .replace(reservedRe, replacement)
+    .replace(windowsReservedRe, replacement)
+    .replace(windowsTrailingRe, replacement);
+  return truncate(sanitized, 255);
+}
+
+module.exports = function (input, options) {
+  var replacement = (options && options.replacement) || '';
+  var output = sanitize(input, replacement);
+  if (replacement === '') {
+    return output;
+  }
+  return sanitize(output, '');
+};
+
+
+/***/ }),
+
 /***/ "../../node_modules/storage-helper/dist/storage-helper.common.js":
 /*!*************************************************************************************************************!*\
   !*** /Users/d023280/Documents/workspace/brainbox/node_modules/storage-helper/dist/storage-helper.common.js ***!
@@ -47119,6 +47250,137 @@ module.exports = function (css) {
 
 	// send back the fixed css
 	return fixedCss;
+};
+
+
+/***/ }),
+
+/***/ "../../node_modules/truncate-utf8-bytes/browser.js":
+/*!***********************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/truncate-utf8-bytes/browser.js ***!
+  \***********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var truncate = __webpack_require__(/*! ./lib/truncate */ "../../node_modules/truncate-utf8-bytes/lib/truncate.js");
+var getLength = __webpack_require__(/*! utf8-byte-length/browser */ "../../node_modules/utf8-byte-length/browser.js");
+module.exports = truncate.bind(null, getLength);
+
+
+/***/ }),
+
+/***/ "../../node_modules/truncate-utf8-bytes/lib/truncate.js":
+/*!****************************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/truncate-utf8-bytes/lib/truncate.js ***!
+  \****************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function isHighSurrogate(codePoint) {
+  return codePoint >= 0xd800 && codePoint <= 0xdbff;
+}
+
+function isLowSurrogate(codePoint) {
+  return codePoint >= 0xdc00 && codePoint <= 0xdfff;
+}
+
+// Truncate string by size in bytes
+module.exports = function truncate(getLength, string, byteLength) {
+  if (typeof string !== "string") {
+    throw new Error("Input must be string");
+  }
+
+  var charLength = string.length;
+  var curByteLength = 0;
+  var codePoint;
+  var segment;
+
+  for (var i = 0; i < charLength; i += 1) {
+    codePoint = string.charCodeAt(i);
+    segment = string[i];
+
+    if (isHighSurrogate(codePoint) && isLowSurrogate(string.charCodeAt(i + 1))) {
+      i += 1;
+      segment += string[i];
+    }
+
+    curByteLength += getLength(segment);
+
+    if (curByteLength === byteLength) {
+      return string.slice(0, i + 1);
+    }
+    else if (curByteLength > byteLength) {
+      return string.slice(0, i - segment.length + 1);
+    }
+  }
+
+  return string;
+};
+
+
+
+/***/ }),
+
+/***/ "../../node_modules/utf8-byte-length/browser.js":
+/*!********************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/utf8-byte-length/browser.js ***!
+  \********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function isHighSurrogate(codePoint) {
+  return codePoint >= 0xd800 && codePoint <= 0xdbff;
+}
+
+function isLowSurrogate(codePoint) {
+  return codePoint >= 0xdc00 && codePoint <= 0xdfff;
+}
+
+// Truncate string by size in bytes
+module.exports = function getByteLength(string) {
+  if (typeof string !== "string") {
+    throw new Error("Input must be string");
+  }
+
+  var charLength = string.length;
+  var byteLength = 0;
+  var codePoint = null;
+  var prevCodePoint = null;
+  for (var i = 0; i < charLength; i++) {
+    codePoint = string.charCodeAt(i);
+    // handle 4-byte non-BMP chars
+    // low surrogate
+    if (isLowSurrogate(codePoint)) {
+      // when parsing previous hi-surrogate, 3 is added to byteLength
+      if (prevCodePoint != null && isHighSurrogate(prevCodePoint)) {
+        byteLength += 1;
+      }
+      else {
+        byteLength += 3;
+      }
+    }
+    else if (codePoint <= 0x7f ) {
+      byteLength += 1;
+    }
+    else if (codePoint >= 0x80 && codePoint <= 0x7ff) {
+      byteLength += 2;
+    }
+    else if (codePoint >= 0x800 && codePoint <= 0xffff) {
+      byteLength += 3;
+    }
+    prevCodePoint = codePoint;
+  }
+
+  return byteLength;
 };
 
 

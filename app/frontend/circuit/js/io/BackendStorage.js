@@ -1,5 +1,6 @@
 import EventEmitter from "../util/EventEmitter"
 import conf from '../Configuration'
+let sanitize = require("sanitize-filename");
 
 
 class BackendStorage extends EventEmitter{
@@ -24,6 +25,10 @@ class BackendStorage extends EventEmitter{
 
   set currentFile(name){
     this.fileName=name;
+    history.pushState({
+      id: 'editor',
+      file: name
+    }, 'Brainbox Simulator | '+name , window.location.href.split('?')[0]+'?file='+name);
     this.emit("changed", {fileName:this.fileName})
   }
 
@@ -119,14 +124,23 @@ class BackendStorage extends EventEmitter{
     if (path===undefined || path===null || path.length === 0)
       return null
 
-    var segments = path.split("/")
+    let segments = path.split("/")
     if (segments.length <= 1)
       return null
 
-    segments = segments.filter(n => n != "")
+    segments = segments.filter(n => n !== "")
     path = segments.slice(0, -1).join("/")
     return (path === "") ? null : path + "/"
 
+  }
+  
+  sanitize(file){
+    file = sanitize(file,"_")
+    file = file.replace(conf.fileSuffix,"")
+    // I don't like dots in the name to
+    file = file.replace(RegExp("[.]","g"),"_")
+    file = file+conf.fileSuffix
+    return file
   }
 
   basename(path) {
@@ -137,5 +151,5 @@ class BackendStorage extends EventEmitter{
   }
 }
 
-var storage = new BackendStorage()
+let storage = new BackendStorage()
 export default storage;

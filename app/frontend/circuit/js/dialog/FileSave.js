@@ -37,6 +37,7 @@ export default class FileSave {
         let writer = new draw2d.io.json.Writer()
         writer.marshal(canvas, json => {
           let name = $("#githubSaveFileDialog .githubFileName").val()
+          name = storage.sanitize(name)
           storage.saveFile(json, imageDataUrl, name)
             .then(function () {
               Mousetrap.unpause()

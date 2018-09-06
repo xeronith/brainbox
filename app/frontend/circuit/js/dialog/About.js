@@ -18,7 +18,8 @@ export default class About {
   }
 
   hide() {
-    this.splash.delay(2500)
-      .fadeOut("slow",  () => this.splash.remove()  )
+    this.splash
+      .delay(2500)
+      .fadeOut("slow", () => this.splash.remove())
   }
 }

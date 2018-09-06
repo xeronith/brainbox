@@ -244,7 +244,6 @@ var Application = function () {
         this.localStorage = localStorage;
       }
     } catch (e) {}
-    //  debugger
 
     // automatic add the configuration to the very first shape
     // in the document as userData

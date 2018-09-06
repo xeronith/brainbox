@@ -40,7 +40,6 @@ export default class Application {
     } catch (e) {
 
     }
-  //  debugger
 
     // automatic add the configuration to the very first shape
     // in the document as userData

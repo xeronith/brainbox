@@ -9,6 +9,7 @@ import View from "./View"
 import Files from "./Files"
 import FileOpen from "./dialog/FileOpen"
 import FileSave from "./dialog/FileSave"
+import storage from './io/BackendStorage'
 
 class Application {
 
@@ -66,8 +67,37 @@ class Application {
         $img.replaceWith($svg)
       }, 'xml')
     })
+
+    // check if the user has added a "file" parameter. In this case we load the shape from
+    // the draw2d.shape github repository
+    //
+    let file = this.getParam("file")
+    if (file) {
+      $("#leftTabStrip .editor").click()
+      this._load(file)
+    }
+
+    // listen on the history object to load files
+    //
+    window.onpopstate = (event) => {
+      if (history.state && history.state.id === 'editor') {
+        // Render new content for the hompage
+        $("#leftTabStrip .editor").click()
+        this._load(history.state.file)
+      }
+    }
   }
 
+  _load(file) {
+    storage.loadFile(file)
+      .then((content) => {
+        storage.currentFile = file
+        this.view.clear()
+        new draw2d.io.json.Reader().unmarshal(this.view, content)
+        this.view.getCommandStack().markSaveLocation()
+        this.view.centerDocument()
+      })
+  }
 
   dump() {
     let writer = new draw2d.io.json.Writer()
@@ -81,7 +111,6 @@ class Application {
     let regexS = "[\\?&]" + name + "=([^&#]*)"
     let regex = new RegExp(regexS)
     let results = regex.exec(window.location.href)
-
     // the param isn't part of the normal URL pattern...
     //
     if (results === null) {
@@ -94,19 +123,27 @@ class Application {
         return null
       }
     }
-
     return results[1]
   }
 
-  fileNew(shapeTemplate) {
+
+  fileNew(shapeTemplate, fileName) {
     $("#leftTabStrip .editor").click()
 
     this.view.clear()
     if (shapeTemplate) {
       new Reader().unmarshal(this.view, shapeTemplate)
     }
+    
+    if (fileName) {
+      storage.currentFile = storage.sanitize(fileName)
+    }
+    else {
+      storage.currentFile = "CircuitDiagram.brain"
+    }
     this.view.centerDocument()
   }
 }
+
 let app = new Application()
 export default app

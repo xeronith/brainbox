@@ -23,6 +23,8 @@ export default class Files {
 
   render() {
     storage.getFiles("").then((files) => {
+      files = files.map(file => { return { ...file, title: file.name.replace(conf.fileSuffix,"")} });
+
       let compiled = Hogan.compile(
         '<div class="col-lg-3 col-md-4 col-xs-6 thumbAdd">' +
         '    <div class="img-responsive ion-ios-plus-outline"></div>' +
@@ -30,10 +32,10 @@ export default class Files {
         '</div>'+
         '{{#files}}' +
         '<div class="col-lg-3 col-md-4 col-xs-6 thumb">' +
-        '  <span class="ion-ios-close-outline deleteIcon"  data-toggle="confirmation"  data-name="{{name}}"></span>' +
+        '  <img class="deleteIcon svg"  data-toggle="confirmation"  data-name="{{name}}" src="./images/toolbar_delete.svg"/>' +
         '  <a class="thumbnail" data-name="{{name}}">' +
         '    <img class="img-responsive" src="' + conf.backend.file.image + '?filePath={{name}}" data-name="{{name}}">' +
-        '    <h4 data-name="{{name}}">{{name}}</h4>' +
+        '    <h4>{{title}}</h4>' +
         '  </a>' +
         '</div>' +
         '{{/files}}'
@@ -62,17 +64,20 @@ export default class Files {
 
 
       $("#files .container .thumbnail h4").on("click", (event) =>{
+        Mousetrap.pause()
         let $el = $(event.currentTarget)
-        let name = $el.data("name")
-        let $replaceWith = $('<input type="input" class="filenameInplaceEdit" value="' + name + '" />')
+        let name = $el.parent().data("name")
+        let $replaceWith = $('<input type="input" class="filenameInplaceEdit" value="' + name.replace(conf.fileSuffix,"") + '" />')
         $el.hide()
         $el.after($replaceWith)
         $replaceWith.focus()
 
         let fire = () =>{
+          Mousetrap.unpause()
           let newName = $replaceWith.val()
           if (newName !== "") {
             // get the value and post them here
+            newName = storage.sanitize(newName)
             $.ajax({
                 url: conf.backend.file.rename,
                 method: "POST",
@@ -84,12 +89,10 @@ export default class Files {
               }
             ).then( () =>{
               $replaceWith.remove()
-              $el.html(newName)
+              $el.html(newName.replace(conf.fileSuffix,""))
               $el.show()
-              $el.data("name", newName)
-              $(".thumb [data-id='" + name + conf.fileSuffix + "']").data("id", newName + conf.fileSuffix)
+              $el.parent().parent().find("[data-name='"+name+"']" ).data("name", newName)
             })
-
           }
           else {
             // get the value and post them here
@@ -107,7 +110,7 @@ export default class Files {
 
       $("#files .container .thumbnail img").on("click", (event) =>{
         let $el = $(event.currentTarget)
-        let name = $el.data("name")
+        let name = $el.parent().data("name")
         storage.loadFile(name)
           .then((content) => {
             $("#leftTabStrip .editor").click()
@@ -132,7 +135,6 @@ export default class Files {
           $("a[data-name='" + msg.filePath + "'] img").attr({src: conf.backend.file.image + "?filePath=" + msg.filePath + "&timestamp=" + new Date().getTime()})
         }
       });
-
     })
   }
 }
