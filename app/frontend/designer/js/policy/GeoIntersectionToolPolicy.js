@@ -1,6 +1,5 @@
 import AbstractGeoToolPolicy from "./AbstractGeoToolPolicy"
 
-import headerImg from "../../images/tools/SURFACE_BOOL_INTERSECT_064.png"
 
 export default AbstractGeoToolPolicy.extend({
 
@@ -11,7 +10,6 @@ export default AbstractGeoToolPolicy.extend({
 
 
   onInstall: function (canvas) {
-    this.setToolHeader("Intersect Polygon", headerImg)
     this.setToolText("Select polygon to intersect with")
   },
 

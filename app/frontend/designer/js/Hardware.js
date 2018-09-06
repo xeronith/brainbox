@@ -11,6 +11,14 @@ export default {
     }
   },
 
+  webusb: {
+    set: function (pin, value) {
+    },
+    get: function (pin) {
+      return false
+    }
+  },
+
   bloc: {
     set: function (blocId, value) {
     },

@@ -151,105 +151,6 @@ module.exports = "js/webpack/2e59ba615169ea5c7506a8094f9e1301.png";
 
 /***/ }),
 
-/***/ "./app/frontend/designer/images/tools/CIRCLE_1_064.png":
-/*!*************************************************************!*\
-  !*** ./app/frontend/designer/images/tools/CIRCLE_1_064.png ***!
-  \*************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/9161f83826dc528cd079dba534aaab25.png";
-
-/***/ }),
-
-/***/ "./app/frontend/designer/images/tools/LINE_064.png":
-/*!*********************************************************!*\
-  !*** ./app/frontend/designer/images/tools/LINE_064.png ***!
-  \*********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/94a7b7c642212541a8a87dba697d1ae2.png";
-
-/***/ }),
-
-/***/ "./app/frontend/designer/images/tools/POLYGON_DIAGONALS_064.png":
-/*!**********************************************************************!*\
-  !*** ./app/frontend/designer/images/tools/POLYGON_DIAGONALS_064.png ***!
-  \**********************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/7a0cc7443fddc2c6a6261aa4a2efdf95.png";
-
-/***/ }),
-
-/***/ "./app/frontend/designer/images/tools/PORT_064.png":
-/*!*********************************************************!*\
-  !*** ./app/frontend/designer/images/tools/PORT_064.png ***!
-  \*********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/b072248fe6ef93bb4e44d9ae21e23522.png";
-
-/***/ }),
-
-/***/ "./app/frontend/designer/images/tools/SELECT_TOOL_064.png":
-/*!****************************************************************!*\
-  !*** ./app/frontend/designer/images/tools/SELECT_TOOL_064.png ***!
-  \****************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/4a27e89b0f8c7f91691b3cba27543a71.png";
-
-/***/ }),
-
-/***/ "./app/frontend/designer/images/tools/SURFACE_BOOL_ADD_064.png":
-/*!*********************************************************************!*\
-  !*** ./app/frontend/designer/images/tools/SURFACE_BOOL_ADD_064.png ***!
-  \*********************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/61cbb49e1d04b3c339d021bdaaa6e377.png";
-
-/***/ }),
-
-/***/ "./app/frontend/designer/images/tools/SURFACE_BOOL_INTERSECT_064.png":
-/*!***************************************************************************!*\
-  !*** ./app/frontend/designer/images/tools/SURFACE_BOOL_INTERSECT_064.png ***!
-  \***************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/3b8f7368425993359eacbcb86e4c3caa.png";
-
-/***/ }),
-
-/***/ "./app/frontend/designer/images/tools/SURFACE_BOOL_SUBTRACT_064.png":
-/*!**************************************************************************!*\
-  !*** ./app/frontend/designer/images/tools/SURFACE_BOOL_SUBTRACT_064.png ***!
-  \**************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/5d48a9c86334f596e8f5eb1c29495e02.png";
-
-/***/ }),
-
-/***/ "./app/frontend/designer/images/tools/TEXT_064.png":
-/*!*********************************************************!*\
-  !*** ./app/frontend/designer/images/tools/TEXT_064.png ***!
-  \*********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/9f14849039c03682f4db45c9bdabbca5.png";
-
-/***/ }),
-
 /***/ "./app/frontend/designer/js/Application.js":
 /*!*************************************************!*\
   !*** ./app/frontend/designer/js/Application.js ***!
@@ -676,6 +577,13 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = {
 
   gpio: {
+    set: function set(pin, value) {},
+    get: function get(pin) {
+      return false;
+    }
+  },
+
+  webusb: {
     set: function set(pin, value) {},
     get: function get(pin) {
       return false;
@@ -5859,17 +5767,6 @@ exports.default = draw2d.policy.canvas.SelectionPolicy.extend({
     this._super();
   },
 
-  setToolHeader: function setToolHeader(heading, icon) {
-    $('#currentTool_image').fadeOut(200, function () {
-      $("#currentTool_image").attr({ "src": icon });
-      $('#currentTool_image').fadeIn(200);
-    });
-    $('#currentTool_heading').fadeOut(200, function () {
-      $("#currentTool_heading").html(heading);
-      $('#currentTool_heading').fadeIn(200);
-    });
-  },
-
   setToolText: function setToolText(message) {
     $('#currentTool_message').fadeOut(200, function () {
       $("#currentTool_message").html(message);
@@ -5879,7 +5776,7 @@ exports.default = draw2d.policy.canvas.SelectionPolicy.extend({
 
   executed: function executed() {}
 });
-module.exports = exports["default"];
+module.exports = exports['default'];
 
 /***/ }),
 
@@ -5905,10 +5802,6 @@ var _cursor_circle = __webpack_require__(/*! ../../images/cursors/cursor_circle.
 
 var _cursor_circle2 = _interopRequireDefault(_cursor_circle);
 
-var _CIRCLE_1_ = __webpack_require__(/*! ../../images/tools/CIRCLE_1_064.png */ "./app/frontend/designer/images/tools/CIRCLE_1_064.png");
-
-var _CIRCLE_1_2 = _interopRequireDefault(_CIRCLE_1_);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _AbstractToolPolicy2.default.extend({
@@ -5926,7 +5819,6 @@ exports.default = _AbstractToolPolicy2.default.extend({
   },
 
   onInstall: function onInstall(canvas) {
-    this.setToolHeader(this.TITLE, _CIRCLE_1_2.default);
     this.setToolText(this.MESSAGE_STEP1);
     canvas.setCursor(_cursor_circle2.default);
   },
@@ -6046,10 +5938,6 @@ var _AbstractGeoToolPolicy = __webpack_require__(/*! ./AbstractGeoToolPolicy */ 
 
 var _AbstractGeoToolPolicy2 = _interopRequireDefault(_AbstractGeoToolPolicy);
 
-var _SURFACE_BOOL_SUBTRACT_ = __webpack_require__(/*! ../../images/tools/SURFACE_BOOL_SUBTRACT_064.png */ "./app/frontend/designer/images/tools/SURFACE_BOOL_SUBTRACT_064.png");
-
-var _SURFACE_BOOL_SUBTRACT_2 = _interopRequireDefault(_SURFACE_BOOL_SUBTRACT_);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _AbstractGeoToolPolicy2.default.extend({
@@ -6060,7 +5948,6 @@ exports.default = _AbstractGeoToolPolicy2.default.extend({
   },
 
   onInstall: function onInstall(canvas) {
-    this.setToolHeader("Subtract Polygon", _SURFACE_BOOL_SUBTRACT_2.default);
     this.setToolText("Select polygon to subtract from");
   },
 
@@ -6119,10 +6006,6 @@ var _AbstractGeoToolPolicy = __webpack_require__(/*! ./AbstractGeoToolPolicy */ 
 
 var _AbstractGeoToolPolicy2 = _interopRequireDefault(_AbstractGeoToolPolicy);
 
-var _SURFACE_BOOL_INTERSECT_ = __webpack_require__(/*! ../../images/tools/SURFACE_BOOL_INTERSECT_064.png */ "./app/frontend/designer/images/tools/SURFACE_BOOL_INTERSECT_064.png");
-
-var _SURFACE_BOOL_INTERSECT_2 = _interopRequireDefault(_SURFACE_BOOL_INTERSECT_);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _AbstractGeoToolPolicy2.default.extend({
@@ -6133,7 +6016,6 @@ exports.default = _AbstractGeoToolPolicy2.default.extend({
   },
 
   onInstall: function onInstall(canvas) {
-    this.setToolHeader("Intersect Polygon", _SURFACE_BOOL_INTERSECT_2.default);
     this.setToolText("Select polygon to intersect with");
   },
 
@@ -6193,10 +6075,6 @@ var _AbstractGeoToolPolicy = __webpack_require__(/*! ./AbstractGeoToolPolicy */ 
 
 var _AbstractGeoToolPolicy2 = _interopRequireDefault(_AbstractGeoToolPolicy);
 
-var _SURFACE_BOOL_ADD_ = __webpack_require__(/*! ../../images/tools/SURFACE_BOOL_ADD_064.png */ "./app/frontend/designer/images/tools/SURFACE_BOOL_ADD_064.png");
-
-var _SURFACE_BOOL_ADD_2 = _interopRequireDefault(_SURFACE_BOOL_ADD_);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _AbstractGeoToolPolicy2.default.extend({
@@ -6207,7 +6085,6 @@ exports.default = _AbstractGeoToolPolicy2.default.extend({
   },
 
   onInstall: function onInstall(canvas) {
-    this.setToolHeader("Merge Polygons", _SURFACE_BOOL_ADD_2.default);
     this.setToolText("Select polygon to add to..");
   },
 
@@ -6270,10 +6147,6 @@ var _cursor_line = __webpack_require__(/*! ../../images/cursors/cursor_line.png 
 
 var _cursor_line2 = _interopRequireDefault(_cursor_line);
 
-var _LINE_ = __webpack_require__(/*! ../../images/tools/LINE_064.png */ "./app/frontend/designer/images/tools/LINE_064.png");
-
-var _LINE_2 = _interopRequireDefault(_LINE_);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _AbstractToolPolicy2.default.extend({
@@ -6289,7 +6162,6 @@ exports.default = _AbstractToolPolicy2.default.extend({
   },
 
   onInstall: function onInstall(canvas) {
-    this.setToolHeader("Line", _LINE_2.default);
     this.setToolText(this.MESSAGE_STEP1);
     this.canvas = canvas;
     canvas.setCursor(_cursor_line2.default);
@@ -6422,10 +6294,6 @@ var _cursor_port = __webpack_require__(/*! ../../images/cursors/cursor_port.png 
 
 var _cursor_port2 = _interopRequireDefault(_cursor_port);
 
-var _PORT_ = __webpack_require__(/*! ../../images/tools/PORT_064.png */ "./app/frontend/designer/images/tools/PORT_064.png");
-
-var _PORT_2 = _interopRequireDefault(_PORT_);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _SelectionToolPolicy2.default.extend({
@@ -6438,7 +6306,6 @@ exports.default = _SelectionToolPolicy2.default.extend({
   },
 
   onInstall: function onInstall(canvas) {
-    this.setToolHeader(this.TITLE, _PORT_2.default);
     this.setToolText(this.MESSAGE_STEP1);
     canvas.setCursor(_cursor_port2.default);
   },
@@ -6515,10 +6382,6 @@ var _cursor_rectangle = __webpack_require__(/*! ../../images/cursors/cursor_rect
 
 var _cursor_rectangle2 = _interopRequireDefault(_cursor_rectangle);
 
-var _POLYGON_DIAGONALS_ = __webpack_require__(/*! ../../images/tools/POLYGON_DIAGONALS_064.png */ "./app/frontend/designer/images/tools/POLYGON_DIAGONALS_064.png");
-
-var _POLYGON_DIAGONALS_2 = _interopRequireDefault(_POLYGON_DIAGONALS_);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _AbstractToolPolicy2.default.extend({
@@ -6532,7 +6395,6 @@ exports.default = _AbstractToolPolicy2.default.extend({
   },
 
   onInstall: function onInstall(canvas) {
-    this.setToolHeader("Diagonal Polygon", _POLYGON_DIAGONALS_2.default);
     this.setToolText("Select first corner of rectangle");
     canvas.setCursor(_cursor_rectangle2.default);
   },
@@ -6651,13 +6513,6 @@ module.exports = exports["default"];
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-
-var _SELECT_TOOL_ = __webpack_require__(/*! ../../images/tools/SELECT_TOOL_064.png */ "./app/frontend/designer/images/tools/SELECT_TOOL_064.png");
-
-var _SELECT_TOOL_2 = _interopRequireDefault(_SELECT_TOOL_);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 exports.default = draw2d.policy.canvas.BoundingboxSelectionPolicy.extend({
 
   init: function init() {
@@ -6665,7 +6520,6 @@ exports.default = draw2d.policy.canvas.BoundingboxSelectionPolicy.extend({
   },
 
   onInstall: function onInstall(canvas) {
-    this.setToolHeader("Selection", _SELECT_TOOL_2.default);
     this.setToolText("Click on shape to select<br>Double click to edit");
   },
 
@@ -6748,10 +6602,6 @@ var _cursor_text = __webpack_require__(/*! ../../images/cursors/cursor_text.png 
 
 var _cursor_text2 = _interopRequireDefault(_cursor_text);
 
-var _TEXT_ = __webpack_require__(/*! ../../images/tools/TEXT_064.png */ "./app/frontend/designer/images/tools/TEXT_064.png");
-
-var _TEXT_2 = _interopRequireDefault(_TEXT_);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = _AbstractToolPolicy2.default.extend({
@@ -6768,7 +6618,6 @@ exports.default = _AbstractToolPolicy2.default.extend({
   },
 
   onInstall: function onInstall(canvas) {
-    this.setToolHeader(this.TITLE, _TEXT_2.default);
     this.setToolText(this.MESSAGE_STEP1);
     canvas.setCursor(_cursor_text2.default);
   },

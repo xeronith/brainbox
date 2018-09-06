@@ -1,7 +1,6 @@
 import PolyRect from "../figure/PolyRect"
 import AbstractToolPolicy from "./AbstractToolPolicy"
 import cursor from "../../images/cursors/cursor_rectangle.png"
-import headerImg from "../../images/tools/POLYGON_DIAGONALS_064.png"
 
 export default AbstractToolPolicy.extend({
 
@@ -15,7 +14,6 @@ export default AbstractToolPolicy.extend({
 
 
   onInstall: function (canvas) {
-    this.setToolHeader("Diagonal Polygon", headerImg)
     this.setToolText("Select first corner of rectangle")
     canvas.setCursor(cursor)
   },

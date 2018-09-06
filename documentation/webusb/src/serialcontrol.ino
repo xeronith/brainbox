@@ -1,5 +1,29 @@
 // http://forums.trossenrobotics.com/tutorials/how-to-diy-128/complete-control-of-an-arduino-via-serial-3300/
-#include <Servo.h>
+/*
+ * 1 = Wright:
+ *     1 = analog:
+ *         "pin number"
+ *         "1 for LOW"
+ *         "2 for HIGH"
+ *     2 = digital:
+ *         "pin number"
+ *         "frequency (0-255)"
+ *  2 = Read:
+ *     1 = analog:
+ *         "pin number"
+ *     2 = digital:
+ *         "pin number"
+ *
+ *  '1/2/7/1/' will turn pin 7 on HIGH
+ *  '1/2/7/0/' would turn pin 7 off
+ *  '1/1/7/255/' would turn pin 7 on at a analog rate of 255 or full power
+ *
+ */
+
+#include <WebUSB.h>
+
+WebUSB WebUSBSerial(0, "localhost:7400/circuit/");
+#define Serial WebUSBSerial
 
 unsigned long serialdata;
 int inbyte;
@@ -11,25 +35,21 @@ int pinNumber;
 int sensorVal;
 int analogRate;
 int digitalState;
-Servo myservo[] = {};
 
-void setup()
-{
+void setup(){
+  while (!Serial) {;}
   Serial.begin(9600);
 }
 
-void loop()
-{
+void loop(){
   getSerial();
-  switch(serialdata)
-  {
-  case 1:
+  switch(serialdata){
+    case 1:
     {
       //analog digital write
       getSerial();
-      switch (serialdata)
-      {
-      case 1:
+      switch (serialdata){
+        case 1:
         {
           //analog write
           getSerial();
@@ -41,7 +61,7 @@ void loop()
           pinNumber = 0;
           break;
         }
-      case 2:
+        case 2:
         {
           //digital write
           getSerial();
@@ -49,12 +69,10 @@ void loop()
           getSerial();
           digitalState = serialdata;
           pinMode(pinNumber, OUTPUT);
-          if (digitalState == 1)
-          {
+          if (digitalState == 1){
             digitalWrite(pinNumber, LOW);
           }
-          if (digitalState == 2)
-          {
+          if (digitalState == 2){
             digitalWrite(pinNumber, HIGH);
           }
           pinNumber = 0;
@@ -69,7 +87,7 @@ void loop()
       getSerial();
       switch (serialdata)
       {
-      case 1:
+        case 1:
         {
           //analog read
           getSerial();
@@ -81,7 +99,7 @@ void loop()
           pinNumber = 0;
           break;
         }
-      case 2:
+        case 2:
         {
           //digital read
           getSerial();
@@ -96,57 +114,9 @@ void loop()
       }
       break;
     }
-    case 3:
-    {
-      getSerial();
-      switch (serialdata)
-      {
-        case 1:
-        {
-           //servo read
-           getSerial();
-           servoPin = serialdata;
-           Serial.println(servoPoses[servoPin]);
-           break;
-        }
-        case 2:
-        {
-           //servo write
-           getSerial();
-           servoPin = serialdata;
-           getSerial();
-           servoPose = serialdata;
-           if (attachedServos[servoPin] == 1)
-           {
-             myservo[servoPin].write(servoPose);
-           }
-           if (attachedServos[servoPin] == 0)
-           {
-             Servo s1;
-             myservo[servoPin] = s1;
-             myservo[servoPin].attach(servoPin);
-             myservo[servoPin].write(servoPose);
-             attachedServos[servoPin] = 1;
-           }
-           servoPoses[servoPin] = servoPose;
-           break;
-        }
-        case 3:
-        {
-          //detach
-          getSerial();
-          servoPin = serialdata;
-          if (attachedServos[servoPin] == 1)
-          {
-            myservo[servoPin].detach();
-            attachedServos[servoPin] = 0;
-          }
-        }
-      }
-    break;
-    }
   }
 }
+
 
 long getSerial()
 {
@@ -156,7 +126,6 @@ long getSerial()
     inbyte = Serial.read();
     if (inbyte > 0 && inbyte != '/')
     {
-
       serialdata = serialdata * 10 + inbyte - '0';
     }
   }

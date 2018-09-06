@@ -4,18 +4,6 @@ export default draw2d.policy.canvas.SelectionPolicy.extend({
     this._super()
   },
 
-
-  setToolHeader: function (heading, icon) {
-    $('#currentTool_image').fadeOut(200, function () {
-      $("#currentTool_image").attr({"src": icon})
-      $('#currentTool_image').fadeIn(200)
-    })
-    $('#currentTool_heading').fadeOut(200, function () {
-      $("#currentTool_heading").html(heading)
-      $('#currentTool_heading').fadeIn(200)
-    })
-  },
-
   setToolText: function (message) {
     $('#currentTool_message').fadeOut(200, function () {
       $("#currentTool_message").html(message)

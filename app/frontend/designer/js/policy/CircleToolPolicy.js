@@ -1,7 +1,6 @@
 import AbstractToolPolicy from "./AbstractToolPolicy"
 
 import cursor from "../../images/cursors/cursor_circle.png"
-import headerImg from "../../images/tools/CIRCLE_1_064.png"
 
 export default AbstractToolPolicy.extend({
 
@@ -19,7 +18,6 @@ export default AbstractToolPolicy.extend({
 
 
   onInstall: function (canvas) {
-    this.setToolHeader(this.TITLE, headerImg)
     this.setToolText(this.MESSAGE_STEP1)
     canvas.setCursor(cursor)
   },

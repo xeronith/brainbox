@@ -1,7 +1,5 @@
 import AbstractGeoToolPolicy from "./AbstractGeoToolPolicy"
 
-import headerImg from "../../images/tools/SURFACE_BOOL_ADD_064.png"
-
 export default AbstractGeoToolPolicy.extend({
 
   init: function () {
@@ -11,7 +9,6 @@ export default AbstractGeoToolPolicy.extend({
 
 
   onInstall: function (canvas) {
-    this.setToolHeader("Merge Polygons", headerImg)
     this.setToolText("Select polygon to add to..")
   },
 

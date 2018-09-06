@@ -1,4 +1,3 @@
-import headerImg from "../../images/tools/SELECT_TOOL_064.png"
 
 export default draw2d.policy.canvas.BoundingboxSelectionPolicy.extend({
 
@@ -7,7 +6,6 @@ export default draw2d.policy.canvas.BoundingboxSelectionPolicy.extend({
   },
 
   onInstall: function (canvas) {
-    this.setToolHeader("Selection", headerImg)
     this.setToolText("Click on shape to select<br>Double click to edit")
   },
 

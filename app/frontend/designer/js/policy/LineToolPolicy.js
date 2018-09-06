@@ -1,7 +1,6 @@
 import AbstractToolPolicy from "./AbstractToolPolicy"
 
 import cursor from "../../images/cursors/cursor_line.png"
-import headerImg from "../../images/tools/LINE_064.png"
 
 export default AbstractToolPolicy.extend({
 
@@ -17,7 +16,6 @@ export default AbstractToolPolicy.extend({
 
 
   onInstall: function (canvas) {
-    this.setToolHeader("Line", headerImg)
     this.setToolText(this.MESSAGE_STEP1)
     this.canvas = canvas
     canvas.setCursor(cursor)

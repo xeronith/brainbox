@@ -1,6 +1,6 @@
 import AbstractGeoToolPolicy from "./AbstractGeoToolPolicy"
 
-import headerImg from "../../images/tools/SURFACE_BOOL_SUBTRACT_064.png"
+
 
 export default AbstractGeoToolPolicy.extend({
 
@@ -11,7 +11,6 @@ export default AbstractGeoToolPolicy.extend({
 
 
   onInstall: function (canvas) {
-    this.setToolHeader("Subtract Polygon", headerImg)
     this.setToolText("Select polygon to subtract from")
   },
 

@@ -1,7 +1,6 @@
 import SelectionToolPolicy from "./SelectionToolPolicy"
 
 import cursor from "../../images/cursors/cursor_port.png"
-import headerImg from "../../images/tools/PORT_064.png"
 
 export default SelectionToolPolicy.extend({
 
@@ -14,7 +13,6 @@ export default SelectionToolPolicy.extend({
 
 
   onInstall: function (canvas) {
-    this.setToolHeader(this.TITLE, headerImg)
     this.setToolText(this.MESSAGE_STEP1)
     canvas.setCursor(cursor)
   },

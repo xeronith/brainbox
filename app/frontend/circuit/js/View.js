@@ -14,9 +14,7 @@ import Connection from "./figures/Connection"
 import SimulationEditPolicy from "./SimulationEditPolicy"
 import MarkdownDialog from "./dialog/MarkdownDialog"
 import CodeDialog from "./dialog/CodeDialog"
-
-import introJs from "intro.js"
-import "intro.js/introjs.css"
+import hardware from "./hardware"
 
 export default draw2d.Canvas.extend({
 
@@ -170,8 +168,8 @@ export default draw2d.Canvas.extend({
       setZoom(_this.getZoom() * 0.8)
     })
 
-    $("#editHelp").on("click", function () {
-      introJs().start()
+    $("#editWebUSB").on("click", function () {
+      hardware.webusb.connect()
     })
 
     this.deleteSelectionCallback = function () {

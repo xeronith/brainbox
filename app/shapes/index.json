@@ -282,5 +282,12 @@
       "rect2"
     ],
     "filePath": "rect2.shape"
+  },
+  {
+    "name": "SBLed",
+    "tags": [
+      "SBLed"
+    ],
+    "filePath": "SBLed.shape"
   }
 ]
