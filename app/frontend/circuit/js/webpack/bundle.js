@@ -1892,7 +1892,7 @@ exports.default = draw2d.Canvas.extend({
 
         var pathToMD = _Configuration2.default.shapes.url + figure.NAME + ".md";
         var pathToCustom = _Configuration2.default.shapes.url + figure.NAME + ".custom";
-        var pathToDesign = _Configuration2.default.designer.url + "?timestamp=" + new Date().getTime() + "#file=" + figure.NAME + ".shape";
+        var pathToDesign = _Configuration2.default.designer.url + "?timestamp=" + new Date().getTime() + "&file=" + figure.NAME + ".shape";
         var items = {
           "label": { name: "Attach Label", icon: "x ion-ios-pricetag-outline" },
           "delete": { name: "Delete", icon: "x ion-ios-close-outline" },

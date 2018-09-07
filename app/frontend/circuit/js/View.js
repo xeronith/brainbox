@@ -264,7 +264,7 @@ export default draw2d.Canvas.extend({
 
         let pathToMD = conf.shapes.url + figure.NAME + ".md"
         let pathToCustom = conf.shapes.url + figure.NAME + ".custom"
-        let pathToDesign = conf.designer.url + "?timestamp=" + new Date().getTime() + "#file=" + figure.NAME + ".shape"
+        let pathToDesign = conf.designer.url + "?timestamp=" + new Date().getTime() + "&file=" + figure.NAME + ".shape"
         let items = {
           "label": {name: "Attach Label", icon: "x ion-ios-pricetag-outline"},
           "delete": {name: "Delete", icon: "x ion-ios-close-outline"},

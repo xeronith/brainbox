@@ -1,11 +1,8 @@
-import conf from "./Configuration"
-
 
 import View from "./View"
 import Toolbar from "./Toolbar"
 import Layer from "./Layer"
 import FilterPane from "./FilterPane"
-import Breadcrumb from "./Breadcrumb"
 import Storage from "./io/BackendStorage"
 import SelectionToolPolicy from './policy/SelectionToolPolicy'
 import FileOpen from "./dialog/FileOpen"
@@ -59,7 +56,6 @@ export default class Application {
     this.toolbar = new Toolbar(this, "toolbar", this.view)
     this.layer = new Layer(this, "layer_elements", this.view)
     this.filter = new FilterPane(this, "filter_actions", this.view)
-    this.breadcrumb = new Breadcrumb(this, "breadcrumb")
 
     this.view.installEditPolicy(new SelectionToolPolicy())
 

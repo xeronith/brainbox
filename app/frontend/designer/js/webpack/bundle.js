@@ -167,10 +167,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _Configuration = __webpack_require__(/*! ./Configuration */ "./app/frontend/designer/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
-
 var _View = __webpack_require__(/*! ./View */ "./app/frontend/designer/js/View.js");
 
 var _View2 = _interopRequireDefault(_View);
@@ -186,10 +182,6 @@ var _Layer2 = _interopRequireDefault(_Layer);
 var _FilterPane = __webpack_require__(/*! ./FilterPane */ "./app/frontend/designer/js/FilterPane.js");
 
 var _FilterPane2 = _interopRequireDefault(_FilterPane);
-
-var _Breadcrumb = __webpack_require__(/*! ./Breadcrumb */ "./app/frontend/designer/js/Breadcrumb.js");
-
-var _Breadcrumb2 = _interopRequireDefault(_Breadcrumb);
 
 var _BackendStorage = __webpack_require__(/*! ./io/BackendStorage */ "./app/frontend/designer/js/io/BackendStorage.js");
 
@@ -261,7 +253,6 @@ var Application = function () {
     this.toolbar = new _Toolbar2.default(this, "toolbar", this.view);
     this.layer = new _Layer2.default(this, "layer_elements", this.view);
     this.filter = new _FilterPane2.default(this, "filter_actions", this.view);
-    this.breadcrumb = new _Breadcrumb2.default(this, "breadcrumb");
 
     this.view.installEditPolicy(new _SelectionToolPolicy2.default());
 
@@ -363,81 +354,6 @@ var Application = function () {
 }();
 
 exports.default = Application;
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/designer/js/Breadcrumb.js":
-/*!************************************************!*\
-  !*** ./app/frontend/designer/js/Breadcrumb.js ***!
-  \************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _ShapeSettings = __webpack_require__(/*! ./dialog/ShapeSettings */ "./app/frontend/designer/js/dialog/ShapeSettings.js");
-
-var _ShapeSettings2 = _interopRequireDefault(_ShapeSettings);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Breadcrumb = function () {
-  function Breadcrumb(app, elementId) {
-    var _this = this;
-
-    _classCallCheck(this, Breadcrumb);
-
-    this.app = app;
-    this.html = $("#" + elementId);
-
-    app.storage.addListener("changed", function (data) {
-      return _this.update(data);
-    });
-  }
-
-  /**
-   * @method
-   * Called if the selection in the canvas has been changed. You must register this
-   * class on the canvas to receive this event.
-   *
-   * @param {draw2d.Canvas} canvas the emitter of the event. In this case it is the canvas.
-   * @param {draw2d.Figure} figure
-   */
-
-
-  _createClass(Breadcrumb, [{
-    key: "update",
-    value: function update(data) {
-      var _this2 = this;
-
-      var path = "";
-      if (data.fileName !== null) {
-        window.location.hash = "#file=" + data.fileName;
-        path = data.fileName.replace(/\//g, "<span class='separator'>/</span>");
-      }
-      path = path + "<span class='icon ion-ios-gear-outline'></span>";
-      this.html.html(path);
-
-      $("#breadcrumb .icon").on("click", function () {
-        new _ShapeSettings2.default().show(_this2.app);
-      });
-    }
-  }]);
-
-  return Breadcrumb;
-}();
-
-exports.default = Breadcrumb;
 module.exports = exports["default"];
 
 /***/ }),
@@ -2291,73 +2207,6 @@ var FileSaveAs = function () {
 }();
 
 exports.default = FileSaveAs;
-module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/designer/js/dialog/ShapeSettings.js":
-/*!**********************************************************!*\
-  !*** ./app/frontend/designer/js/dialog/ShapeSettings.js ***!
-  \**********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var ShapeSettings = function () {
-
-  /**
-   * @constructor
-   *
-   */
-  function ShapeSettings() {
-    _classCallCheck(this, ShapeSettings);
-  }
-
-  /**
-   * @method
-   *
-   * Open the file picker and load the selected file.<br>
-   *
-   * @param {Function} successCallback callback method if the user select a file and the content is loaded
-   * @param {Function} errorCallback method to call if any error happens
-   *
-   * @since 4.0.0
-   */
-
-
-  _createClass(ShapeSettings, [{
-    key: "show",
-    value: function show(app) {
-      var baseClass = app.getConfiguration().baseClass;
-
-      $("#shapeSettingsDialog").modal("show");
-
-      $("#shapeSettingsDialog .shapeBaseClass input[type='radio'][data-class='" + baseClass + "']").prop("checked", true);
-
-      // Button: Commit to GitHub
-      //
-      $("#shapeSettingsDialog .okButton").on("click", function () {
-        var baseClass = $("#shapeSettingsDialog .shapeBaseClass input[type='radio']:checked").data("class");
-        app.setConfiguration({ baseClass: baseClass });
-        $('#shapeSettingsDialog').modal('hide');
-      });
-    }
-  }]);
-
-  return ShapeSettings;
-}();
-
-exports.default = ShapeSettings;
 module.exports = exports["default"];
 
 /***/ }),
