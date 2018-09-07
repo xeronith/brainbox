@@ -1,6 +1,5 @@
 
 import ConnectionSelectionFeedbackPolicy from "./ConnectionSelectionFeedbackPolicy"
-import hardware from "./hardware"
 import DecoratedInputPort from "./figures/DecoratedInputPort"
 import Connection from "./figures/Connection"
 import ProbeFigure from "./figures/ProbeFigure"
@@ -11,6 +10,7 @@ import LabelInplaceEditor from "./LabelInplaceEditor"
 import "./util/mousetrap-global"
 import "./util/mousetrap-pause"
 import inlineSVG from "../lib/inlineSVG"
+import hardware from "./hardware"
 
 export default {
   ConnectionSelectionFeedbackPolicy,

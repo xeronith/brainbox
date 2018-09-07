@@ -184,50 +184,59 @@
           </div>
         </div>
         <div class="toolbar">
-                        <span class="group" id="editorgroup_fileoperations">
-                            <img id="editorFileOpen" class="icon" title="Open circuit" src="./images/toolbar_download.svg"/>
-                            <img id="editorFileSave" class="icon" title="Save circuit" src="./images/toolbar_upload.svg"/>
-                        </span>
+            <span class="group" id="editorgroup_fileoperations">
+                <img id="editorFileOpen" class="icon" title="Open circuit" src="./images/toolbar_download.svg"/>
+                <img id="editorFileSave" class="icon" title="Save circuit" src="./images/toolbar_upload.svg"/>
+            </span>
 
-                         <span class="group">
-                            <img id="editDelete" class="icon disabled"  src="./images/toolbar_delete.svg"/>
-                        </span>
+             <span class="group">
+                <img id="editDelete" class="icon disabled"  src="./images/toolbar_delete.svg"/>
+            </span>
 
-                        <span class="group">
-                            <img id="editUndo" class="icon disabled" src="./images/toolbar_undo.svg"/>
-                            <img id="editRedo" class="icon disabled" src="./images/toolbar_redo.svg"/>
-                        </span>
+            <span class="group">
+                <img id="editUndo" class="icon disabled" src="./images/toolbar_undo.svg"/>
+                <img id="editRedo" class="icon disabled" src="./images/toolbar_redo.svg"/>
+            </span>
 
-                        <span id="" class="group">
-                            <span id="editWebUSB" class="icon">X</span>
-                        </span>
+            <span id="" class="group editBase">
+              <label class="checkbox-inline">
+                <input type="checkbox"
+                       id="editWebUSB"
+                       data-toggle="toggle"
+                       data-width="120px"
+                       data-size="small"
+                       data-on="Connected" data-off="Disconnected"
+                       data-onstyle="success" data-offstyle="danger"/>
+                <span>WebUSB</span>
+              </label>
+            </span>
 
-          <span class="group simulationBase" style="display: none;">
-                            <label>Simulation Speed</label>
-                            <input id="simulationBaseTimer"
-                                   type="text"
-                                   value="100"
-                                   data-slider-min="50"
-                                   data-slider-max="500"
-                                   data-slider-step="1"
-                                   data-slider-value="100"
-                                   data-slider-handle="round"
-                                   data-slider-tooltip="hide"
-                                   data-slider-id="simulationBaseTimerSlider"
-                                   data-slider-orientation="horizontal">
-                        </span>
+            <span class="group simulationBase" style="display: none;">
+                <label>Simulation Speed</label>
+                <input id="simulationBaseTimer"
+                       type="text"
+                       value="100"
+                       data-slider-min="50"
+                       data-slider-max="500"
+                       data-slider-step="1"
+                       data-slider-value="100"
+                       data-slider-handle="round"
+                       data-slider-tooltip="hide"
+                       data-slider-id="simulationBaseTimerSlider"
+                       data-slider-orientation="horizontal">
+            </span>
 
-          <span class="group raspiConnection">
-                            Connection to RaspberryPi lost..
-                        </span>
+            <span class="group raspiConnection">
+                Connection to RaspberryPi lost..
+            </span>
 
-          <a href="#" class="morph_btn play" id="simulationStartStop">
-                                <span>
-                                  <span class="s1"></span>
-                                  <span class="s2"></span>
-                                  <span class="s3"></span>
-                                </span>
-          </a>
+             <a href="#" class="morph_btn play" id="simulationStartStop">
+                    <span>
+                      <span class="s1"></span>
+                      <span class="s2"></span>
+                      <span class="s3"></span>
+                    </span>
+             </a>
 
         </div>
         <div class="content" id="draw2dCanvasWrapper">

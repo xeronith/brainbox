@@ -22,10 +22,10 @@ export default shape_designer.filter.OutlineStrokeFilter = class OutlineStrokeFi
       ' <div class="panel-body collapse in" id="outlinestroke_width_panel">' +
       '   <div class="form-group">' +
       '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '       <input id="filter_outlinestroke" type="text" value="' + figure.getOutlineStroke() + '" name="filter_outlinestroke" class="form-control" />' +
+      '       <input id="filter_outlinestroke" type="text" value="' + figure.getOutlineStroke() + '" name="filter_outlinestroke" class="mousetrap-pause form-control" />' +
       '       <div class="input-group">' +
       '          <span class="input-group-addon">#</span>' +
-      '          <input id="filter_outlinestroke_color" type="text" value="" name="outlinestroke-color" class="form-control color"/>' +
+      '          <input id="filter_outlinestroke_color" type="text" value="" name="outlinestroke-color" class="mousetrap-pause form-control color"/>' +
       '       </div>' +
       '   </div>' +
       ' </div>' +

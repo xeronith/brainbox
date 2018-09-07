@@ -142,6 +142,10 @@ var _BackendStorage = __webpack_require__(/*! ./io/BackendStorage */ "../../app/
 
 var _BackendStorage2 = _interopRequireDefault(_BackendStorage);
 
+var _Configuration = __webpack_require__(/*! ./Configuration */ "../../app/frontend/circuit/js/Configuration.js");
+
+var _Configuration2 = _interopRequireDefault(_Configuration);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -157,14 +161,6 @@ var Application = function () {
     var _this = this;
 
     _classCallCheck(this, Application);
-
-    this.localStorage = [];
-
-    try {
-      if ('localStorage' in window && window.localStorage !== null) {
-        this.localStorage = localStorage;
-      }
-    } catch (e) {}
 
     this.palette = new _Palette2.default();
     this.view = new _View2.default("draw2dCanvas");
@@ -281,7 +277,7 @@ var Application = function () {
       if (fileName) {
         _BackendStorage2.default.currentFile = _BackendStorage2.default.sanitize(fileName);
       } else {
-        _BackendStorage2.default.currentFile = "CircuitDiagram.brain";
+        _BackendStorage2.default.currentFile = "CircuitDiagram" + _Configuration2.default.fileSuffix;
       }
       this.view.centerDocument();
     }
@@ -335,12 +331,6 @@ exports.default = {
       del: "../backend/brain/delete",
       rename: "../backend/brain/rename",
       save: "../backend/brain/save"
-    },
-    // registry of RF24 registered devices. Only available if we use
-    // a node.js server and a connected RF24 receiver (e.g. Raspi or arduino with a RF24 receiver)
-    //
-    bloc: {
-      list: "../backend/bloc/list"
     }
   },
   issues: {
@@ -1655,6 +1645,15 @@ var _hardware2 = _interopRequireDefault(_hardware);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+__webpack_require__(/*! bootstrap-toggle/css/bootstrap-toggle.min.css */ "../../node_modules/bootstrap-toggle/css/bootstrap-toggle.min.css"); /**
+                                                           *
+                                                           * The **GraphicalEditor** is responsible for layout and dialog handling.
+                                                           *
+                                                           * @author Andreas Herz
+                                                           */
+
+__webpack_require__(/*! bootstrap-toggle/js/bootstrap-toggle.min */ "../../node_modules/bootstrap-toggle/js/bootstrap-toggle.min.js");
+
 exports.default = draw2d.Canvas.extend({
 
   init: function init(id) {
@@ -1805,8 +1804,25 @@ exports.default = draw2d.Canvas.extend({
       setZoom(_this.getZoom() * 0.8);
     });
 
-    $("#editWebUSB").on("click", function () {
-      _hardware2.default.webusb.connect();
+    var blockEvent = false;
+    $('#editWebUSB').bootstrapToggle(_hardware2.default.arduino.isConnected() ? "on" : "off");
+    _hardware2.default.arduino.on("connect", function () {
+      blockEvent = true;
+      $('#editWebUSB').bootstrapToggle('on');
+      blockEvent = false;
+    });
+    _hardware2.default.arduino.on("disconnect", function () {
+      blockEvent = true;
+      $('#editWebUSB').bootstrapToggle('off');
+      blockEvent = false;
+    });
+    $('#editWebUSB').change(function () {
+      if (blockEvent === true) return;
+      if ($(this).prop('checked')) {
+        _hardware2.default.arduino.connect();
+      } else {
+        _hardware2.default.arduino.disconnect();
+      }
     });
 
     this.deleteSelectionCallback = function () {
@@ -2052,7 +2068,9 @@ exports.default = draw2d.Canvas.extend({
 
     $("#simulationStartStop").addClass("pause");
     $("#simulationStartStop").removeClass("play");
-    $(".simulationBase").fadeIn("slow");
+    $(".editBase").fadeOut("slow", function () {
+      $(".simulationBase").fadeIn("slow");
+    });
     $("#paletteElementsOverlay").fadeIn("fast");
     $("#paletteElementsOverlay").height($("#paletteElements").height());
     this.slider.slider("setValue", 100);
@@ -2071,7 +2089,9 @@ exports.default = draw2d.Canvas.extend({
 
     $("#simulationStartStop").addClass("play");
     $("#simulationStartStop").removeClass("pause");
-    $(".simulationBase").fadeOut("slow");
+    $(".simulationBase").fadeOut("slow", function () {
+      $(".editBase").fadeIn("slow");
+    });
     $("#paletteElementsOverlay").fadeOut("fast");
     this.probeWindow.hide();
   },
@@ -2110,6 +2130,10 @@ exports.default = draw2d.Canvas.extend({
    * @param {draw2d.command.CommandStackEvent} event
    **/
   stackChanged: function stackChanged(event) {
+    if (event.isPreChangeEvent()) {
+      return; // silently
+    }
+
     $("#editUndo").addClass("disabled");
     $("#editRedo").addClass("disabled");
 
@@ -2120,6 +2144,20 @@ exports.default = draw2d.Canvas.extend({
     if (event.getStack().canRedo()) {
       $("#editRedo").removeClass("disabled");
     }
+
+    // check if a new element is added which requires or provides special hardware
+    // support. In this case we can update the UI with some status indicator
+    //
+    var elements = this.getFigures().clone().asArray();
+    elements = elements.filter(function (element) {
+      return element.getRequiredHardware;
+    });
+    var arduinoRequired = elements.reduce(function (sum, cur) {
+      return sum || cur.getRequiredHardware().arduino;
+    }, false);
+    var raspiRequired = elements.reduce(function (sum, cur) {
+      return sum || cur.getRequiredHardware().raspi;
+    }, false);
   },
 
   getBoundingBox: function getBoundingBox() {
@@ -2191,13 +2229,7 @@ exports.default = draw2d.Canvas.extend({
   fromCanvasToDocumentCoordinate: function fromCanvasToDocumentCoordinate(x, y) {
     return new draw2d.geo.Point(x * (1 / this.zoomFactor) + this.getAbsoluteX(), y * (1 / this.zoomFactor) + this.getAbsoluteY());
   }
-}); /**
-     *
-     * The **GraphicalEditor** is responsible for layout and dialog handling.
-     *
-     * @author Andreas Herz
-     */
-
+});
 module.exports = exports["default"];
 
 /***/ }),
@@ -2293,14 +2325,10 @@ exports.default = dialog = new (function () {
       var settings = figure.getParameterSettings().slice(0);
       $.each(settings, function (i, el) {
         el.value = currentFigure.attr("userData." + el.name);
-        el.hasblocid = el.type === "blocid";
       });
-      var compiled = _hogan2.default.compile('  <div class="header">Object Configuration</div>   ' + '  {{#settings}}               ' + '      {{#hasblocid}}      ' + '         <div class="form-group">' + '           <label for="figure_property_{{name}}">{{label}}</label>' + '           <select class="form-control" id="figure_property_{{name}}" data-name="{{name}}" size="4"> ' + '               <option value="-unconnected-">no device selected</option>   ' + '               {{#../blocs_push}}               ' + '               <option data-name="{{name}}" value="{{blocId}}">Push {{blocNr}}</option>   ' + '               {{/../blocs_push}}               ' + '           </select>   ' + '         </div>                  ' + '{{/hasblocid}}             ' + '      {{^hasblocid}}      ' + '         <div class="form-group">' + '           <label for="figure_property_{{name}}">{{label}}</label>' + '           <input type="text" class="form-control" id="figure_property_{{name}}" data-name="{{name}}" value="{{value}}" placeholder="{{label}}">' + '         </div>                  ' + '{{/hasblocid}}                  ' + '  {{/settings}}                  ' + '<button class="submit">Ok</button> ');
+      var compiled = _hogan2.default.compile('  <div class="header">Object Configuration</div>   ' + '  {{#settings}}               ' + '         <div class="form-group">' + '           <label for="figure_property_{{name}}">{{label}}</label>' + '           <input type="text" class="form-control" id="figure_property_{{name}}" data-name="{{name}}" value="{{value}}" placeholder="{{label}}">' + '         </div>                  ' + '  {{/settings}}                  ' + '<button class="submit">Ok</button> ');
       var output = compiled.render({
-        settings: settings,
-        blocs_push: hardware.bloc.connected().filter(function (val) {
-          return val.blocType === "Push";
-        })
+        settings: settings
       });
 
       $("#figureConfigDialog").html(output);
@@ -3676,10 +3704,6 @@ var _ConnectionSelectionFeedbackPolicy = __webpack_require__(/*! ./ConnectionSel
 
 var _ConnectionSelectionFeedbackPolicy2 = _interopRequireDefault(_ConnectionSelectionFeedbackPolicy);
 
-var _hardware = __webpack_require__(/*! ./hardware */ "../../app/frontend/circuit/js/hardware.js");
-
-var _hardware2 = _interopRequireDefault(_hardware);
-
 var _DecoratedInputPort = __webpack_require__(/*! ./figures/DecoratedInputPort */ "../../app/frontend/circuit/js/figures/DecoratedInputPort.js");
 
 var _DecoratedInputPort2 = _interopRequireDefault(_DecoratedInputPort);
@@ -3716,6 +3740,10 @@ var _inlineSVG = __webpack_require__(/*! ../lib/inlineSVG */ "../../app/frontend
 
 var _inlineSVG2 = _interopRequireDefault(_inlineSVG);
 
+var _hardware = __webpack_require__(/*! ./hardware */ "../../app/frontend/circuit/js/hardware.js");
+
+var _hardware2 = _interopRequireDefault(_hardware);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
@@ -3748,56 +3776,40 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _Configuration = __webpack_require__(/*! ./Configuration */ "../../app/frontend/circuit/js/Configuration.js");
-
-var _Configuration2 = _interopRequireDefault(_Configuration);
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _serial = __webpack_require__(/*! ./serial */ "../../app/frontend/circuit/js/serial.js");
 
 var _serial2 = _interopRequireDefault(_serial);
 
+var _EventEmitter2 = __webpack_require__(/*! ./util/EventEmitter */ "../../app/frontend/circuit/js/util/EventEmitter.js");
+
+var _EventEmitter3 = _interopRequireDefault(_EventEmitter2);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-/**
- * Registry of all available devices (connected via RF24 adapter) and of the hub GPIO pins.
- * The hub could be an RaspberryPi or and Arduino.
- *
- * The "hub" is the receiver for the connected devices and expose its own
- * GPIO pins as well.
- */
-var eventSubscriptions = {}; // event listener to the registry
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } /**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * Registry of all available devices (connected via RF24 adapter) and of the hub GPIO pins.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * The hub could be an RaspberryPi or and Arduino.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                *
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * The "hub" is the receiver for the connected devices and expose its own
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                * GPIO pins as well.
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                */
+
 
 var values = {};
-var blocs = [];
 var socket = null;
 var usbPort = null;
-var onLed = new TextEncoder().encode('H');
-var offLed = new TextEncoder().encode('L');
-
-var fireEvent = function fireEvent(event, args) {
-  if (typeof eventSubscriptions[event] === 'undefined') {
-    return;
-  }
-
-  var subscribers = eventSubscriptions[event];
-  for (var i = 0; i < subscribers.length; i++) {
-    try {
-      subscribers[i](args);
-    } catch (exc) {
-      console.log(exc);
-      console.log(subscribers[i]);
-    }
-  }
-};
 
 exports.default = {
   /**
    * Init the listener for the socket.io events
    * Events could be
    *  - changes on the GPIO pins
-   *  - new registered devices (blocs)
-   *  - unregister of devices (blocs)
-   *  - provides events of devices (blocs)
    *
    * @param s
    */
@@ -3811,32 +3823,6 @@ exports.default = {
       values[msg.pin] = !!parseInt(msg.value);
     });
 
-    // bloc...connected Arduino via WLAN
-    //
-    socket.on("bloc:value", function (msg) {
-      values[msg.blocId] = !!parseInt(msg.value);
-    });
-    socket.on("bloc:register", function (msg) {
-      blocs = blocs.filter(function (bloc) {
-        return bloc.blocId != msg.blocId;
-      });
-      blocs.push(msg);
-      fireEvent("bloc:register", msg);
-    });
-    socket.on("bloc:unregister", function (msg) {
-      blocs = blocs.filter(function (bloc) {
-        return bloc.blocId != msg.blocId;
-      });
-      fireEvent("bloc:unregister", msg);
-    });
-    socket.on('connect', function () {
-      if (_Configuration2.default.backend.bloc.list !== null) {
-        $.ajax({ url: _Configuration2.default.backend.bloc.list, method: "GET" }).done(function (content) {
-          blocs = content;
-        });
-      }
-    });
-
     // Init the WEBUSB stuff
     //
     _serial2.default.getPorts().then(function (ports) {
@@ -3844,171 +3830,144 @@ exports.default = {
         console.log('No device found.');
       } else {
         console.log('Connecting...');
-        _this.webusb.connectPort(ports[0]);
+        _this.arduino.connectPort(ports[0]);
       }
     });
-    navigator.usb.addEventListener('connect', function (device) {
-      // Add |device| to the UI.
-      console.log('connected');
-      _serial2.default.getPorts().then(function (ports) {
-        if (ports.length == 0) {
-          console.log('No device found.');
-        } else {
-          console.log('Connecting...');
-          _this.webusb.connectPort(ports[0]);
+    /*
+        if(navigator && navigator.usb) {
+          navigator.usb.addEventListener('connect', device => {
+            // Add |device| to the UI.
+            console.log('connected')
+            serial.getPorts().then(ports => {
+              if (ports.length == 0) {
+                console.log('No device found.')
+              } else {
+                console.log('Connecting...')
+                this.arduino.connectPort(ports[0])
+              }
+            })
+          })
         }
-      });
-    });
+        */
   },
 
-  webusb: {
-    set: function set(pin, value) {
-      /*
-       * 1 = Wright:
-       *     1 = analog:
-       *         "pin number"
-       *         "frequency (0-255)"
-       *     2 = digital:
-       *         "pin number"
-       *         "1 for LOW"
-       *         "2 for HIGH"
-       *  2 = Read:
-       *     1 = analog:
-       *         "pin number"
-       *     2 = digital:
-       *         "pin number"
-       *
-       *  '1/2/7/1/' will turn pin 7 on HIGH
-       *  '1/2/7/0/' would turn pin 7 off
-       *  '1/1/7/255/' would turn pin 7 on at a analog rate of 255 or full power
-       *
-       */
-      var cmd = ["1/", // write
-      "2/", // digital
-      pin, "/", // pin number
-      value ? "2/" : "1/" // on/off
-      ].join("");
-      console.log(cmd);
-      usbPort.send(new TextEncoder().encode(cmd));
-    },
+  arduino: new (function (_EventEmitter) {
+    _inherits(_class, _EventEmitter);
 
-    get: function get(pin) {
-      return values[pin];
-    },
+    function _class() {
+      _classCallCheck(this, _class);
 
-    connect: function connect() {
-      if (usbPort) {
-        usbPort.disconnect();
-        console.log("disconnected");
-        usbPort = null;
-      } else {
+      return _possibleConstructorReturn(this, (_class.__proto__ || Object.getPrototypeOf(_class)).apply(this, arguments));
+    }
+
+    _createClass(_class, [{
+      key: "set",
+      value: function set(pin, value) {
+        /*
+         * 1 = Wright:
+         *     1 = analog:
+         *         "pin number"
+         *         "frequency (0-255)"
+         *     2 = digital:
+         *         "pin number"
+         *         "1 for LOW"
+         *         "2 for HIGH"
+         *  2 = Read:
+         *     1 = analog:
+         *         "pin number"
+         *     2 = digital:
+         *         "pin number"
+         *
+         *  '1/2/7/1/' will turn pin 7 on HIGH
+         *  '1/2/7/0/' would turn pin 7 off
+         *  '1/1/7/255/' would turn pin 7 on at a analog rate of 255 or full power
+         *
+         */
+        var cmd = ["1/", // write
+        "2/", // digital
+        pin, "/", // pin number
+        value ? "2/" : "1/" // on/off
+        ].join("");
+
+        // Either send the command via WebUSB to the connected Arduino
+        //
+        if (usbPort) {
+          usbPort.send(new TextEncoder().encode(cmd)).catch(function (e) {
+            console.log(e);
+          });
+        }
+        // or post it to the server. Maybe the server has an connected Arduino via serial port
+        //
+        else {
+            socket.emit('arduino:set', { cmd: cmd });
+          }
+      }
+    }, {
+      key: "get",
+      value: function get(pin) {
+        return values[pin];
+      }
+    }, {
+      key: "disconnect",
+      value: function disconnect() {
+        if (usbPort) {
+          usbPort.disconnect();
+          usbPort = null;
+          this.emit("disconnect");
+        }
+      }
+    }, {
+      key: "connect",
+      value: function connect() {
+        var _this3 = this;
+
         _serial2.default.requestPort().then(function (selectedPort) {
-          connectPort(selectedPort);
+          _this3.connectPort(selectedPort);
         }).catch(function (error) {
-          console.log(error);
+          _this3.emit("disconnect");
         });
       }
-    },
+    }, {
+      key: "connectPort",
+      value: function connectPort(port) {
+        var _this4 = this;
 
-    connectPort: function connectPort(port) {
-      port.connect().then(function () {
-        usbPort = port;
-        console.log("port connected", usbPort);
-        usbPort.onReceive = function (data) {
-          var textDecoder = new TextDecoder();
-          var txt = textDecoder.decode(data);
-          console.log('-', txt);
-        };
-        usbPort.onReceiveError = function (error) {
-          console.error(error);
-        };
-      }, function (error) {
-        console.log(error);
-      });
-    }
-  },
+        port.connect().then(function () {
+          usbPort = port;
+          _this4.emit("connect");
+          usbPort.onReceive = function (data) {
+            var textDecoder = new TextDecoder();
+            var txt = textDecoder.decode(data);
+            console.log('-', txt);
+          };
+          usbPort.onReceiveError = function (error) {
+            usbPort = null;
+            _this4.emit("disconnect");
+          };
+        }, function (error) {
+          console.log(error);
+          _this4.emit("disconnect");
+        });
+      }
+    }, {
+      key: "isConnected",
+      value: function isConnected() {
+        return usbPort !== null;
+      }
+    }]);
 
-  gpio: {
+    return _class;
+  }(_EventEmitter3.default))(),
+
+  raspi: {
     set: function set(pin, value) {
-      socket.emit('gpi:set', {
+      socket.emit('raspi:set', {
         pin: pin,
         value: value
       });
     },
     get: function get(pin) {
       return values[pin];
-    }
-  },
-
-  bloc: {
-    set: function set(blocId, value) {
-      socket.emit('bloc:set', {
-        blocId: blocId,
-        value: value
-      });
-    },
-    get: function get(blocId) {
-      return values[blocId];
-    },
-    connected: function connected() {
-      return blocs;
-    },
-
-    isConnected: function isConnected(blocId) {
-      return $.grep(blocs, function (e) {
-        return e.blocId == blocId;
-      }).length > 0;
-    },
-
-    /**
-     * @method
-     * Attach an event handler function to "bloc" based events
-     *
-     * possible events are:<br>
-     * <ul>
-     *   <li>bloc:register</li>
-     *   <li>bloc:unregister</li>
-     * </ul>
-     *
-     * @param {String}   event One or more space-separated event types
-     * @param {Function} callback A function to execute when the event is triggered.
-     *
-     * @since 5.0.0
-     */
-    on: function on(event, callback) {
-      var events = event.split(" ");
-      for (var i = 0; i < events.length; i++) {
-        if (typeof eventSubscriptions[events[i]] === 'undefined') {
-          eventSubscriptions[events[i]] = [];
-        }
-        eventSubscriptions[events[i]].push(callback);
-      }
-      return this;
-    },
-
-    /**
-     * @method
-     * The .off() method removes event handlers that were attached with {@link #on}.<br>
-     * Calling .off() with no arguments removes all handlers attached to the registry.<br>
-     *
-     * @param {String|Function} eventOrFunction the event name of the registered function
-     * @since 5.0.0
-     */
-    off: function off(eventOrFunction) {
-      if (typeof eventOrFunction === "undefined") {
-        eventSubscriptions = {};
-      } else if (typeof eventOrFunction === 'string') {
-        eventSubscriptions[eventOrFunction] = [];
-      } else {
-        var check = function check(callback) {
-          return callback !== eventOrFunction;
-        };
-        for (var event in this.eventSubscriptions) {
-          eventSubscriptions[event] = $.grep(eventSubscriptions[event], check);
-        }
-      }
-
-      return this;
     }
   }
 };
@@ -4030,17 +3989,7 @@ __webpack_require__(/*! ../less/index.less */ "../../app/frontend/circuit/less/i
 
 __webpack_require__(/*! font-awesome/css/font-awesome.css */ "../../node_modules/font-awesome/css/font-awesome.css");
 
-__webpack_require__(/*! octicons/build/font/octicons.css */ "../../node_modules/octicons/build/font/octicons.css");
-
 __webpack_require__(/*! ./dialog/PopConfirm */ "../../app/frontend/circuit/js/dialog/PopConfirm.js");
-
-var _global = __webpack_require__(/*! ./global */ "../../app/frontend/circuit/js/global.js");
-
-var _global2 = _interopRequireDefault(_global);
-
-var _hardware = __webpack_require__(/*! ./hardware */ "../../app/frontend/circuit/js/hardware.js");
-
-var _hardware2 = _interopRequireDefault(_hardware);
 
 var _Configuration = __webpack_require__(/*! ./Configuration */ "../../app/frontend/circuit/js/Configuration.js");
 
@@ -4085,13 +4034,19 @@ $(window).load(function () {
   socket = io({
     path: '/circuit/socket.io'
   });
-  // remove the fileOpen/Save stuff if we run in a"serverless" mode. e.g. on gh-pages
+
+  // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
   // (fake event from the socket.io mock )
+  //
   socket.on("serverless", function () {
     $("#leftTabStrip .editor").click();
     $("#fileOpen, #editorFileOpen").remove();
     $("#fileSave, #editorFileSave").remove();
-    // $("#files_tab").remove();
+    // $("#files_tab").remove()
+
+    // patch the URL for the backedn to deliver predefined files
+    // for the static website with a nodeJS backend
+    //
     _Configuration2.default.backend.file.list = function (path) {
       return "../brain/index.json";
     };
@@ -4109,13 +4064,13 @@ $(window).load(function () {
     // export all required classes for deserialize JSON with "eval"
     // "eval" code didn't sees imported class or code
     //
-    for (var k in _global2.default) {
-      window[k] = _global2.default[k];
+    var global = __webpack_require__(/*! ./global */ "../../app/frontend/circuit/js/global.js");
+    for (var k in global) {
+      window[k] = global[k];
     }app = __webpack_require__(/*! ./Application */ "../../app/frontend/circuit/js/Application.js");
-    _hardware2.default.init(socket);
+    __webpack_require__(/*! ./hardware */ "../../app/frontend/circuit/js/hardware.js").init(socket);
+    inlineSVG.init();
   });
-
-  _global2.default.inlineSVG.init();
 });
 
 /***/ }),
@@ -4136,10 +4091,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _EventEmitter2 = __webpack_require__(/*! ../util/EventEmitter */ "../../app/frontend/circuit/js/util/EventEmitter.js");
-
-var _EventEmitter3 = _interopRequireDefault(_EventEmitter2);
-
 var _Configuration = __webpack_require__(/*! ../Configuration */ "../../app/frontend/circuit/js/Configuration.js");
 
 var _Configuration2 = _interopRequireDefault(_Configuration);
@@ -4148,14 +4099,9 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
 var _sanitize = __webpack_require__(/*! sanitize-filename */ "../../node_modules/sanitize-filename/index.js");
 
-var BackendStorage = function (_EventEmitter) {
-  _inherits(BackendStorage, _EventEmitter);
+var BackendStorage = function () {
 
   /**
    * @constructor
@@ -4164,11 +4110,8 @@ var BackendStorage = function (_EventEmitter) {
   function BackendStorage() {
     _classCallCheck(this, BackendStorage);
 
-    var _this = _possibleConstructorReturn(this, (BackendStorage.__proto__ || Object.getPrototypeOf(BackendStorage)).call(this));
-
-    _this.fileName = "";
-    Object.preventExtensions(_this);
-    return _this;
+    this.fileName = "";
+    Object.preventExtensions(this);
   }
 
   _createClass(BackendStorage, [{
@@ -4303,12 +4246,11 @@ var BackendStorage = function (_EventEmitter) {
         id: 'editor',
         file: name
       }, 'Brainbox Simulator | ' + name, window.location.href.split('?')[0] + '?file=' + name);
-      this.emit("changed", { fileName: this.fileName });
     }
   }]);
 
   return BackendStorage;
-}(_EventEmitter3.default);
+}();
 
 var storage = new BackendStorage();
 exports.default = storage;
@@ -4374,57 +4316,9 @@ var Port = function () {
       });
     }
   }, {
-    key: 'connect2',
-    value: function connect2() {
-      var _this2 = this;
-
-      var readLoop = function readLoop() {
-        console.log('reading...');
-        _this2.device_.transferIn(5, 64).then(function (result) {
-          console.log('\tread=', result);
-          if (result.status === 'ok') {
-            _this2.onReceive(result.data);
-            readLoop();
-          }
-          if (result.status === 'stall') {
-            console.error('Endpoint stalled. Clearing.');
-            _this2.device_.clearHalt(5);
-          }
-        }, function (error) {
-          console.error(error);
-          _this2.onReceiveError(error);
-        });
-      };
-
-      return this.device_.open().then(function () {
-        console.log("\topening  ...");
-        if (_this2.device_.configuration === null) {
-          return _this2.device_.selectConfiguration(1);
-        }
-      }).then(function () {
-        console.log("\tclaiming (2)...");
-        _this2.device_.claimInterface(2);
-        console.log("\t\tclaimed");
-      }).then(function () {
-        _this2.device_.controlTransferOut({
-          'requestType': 'class',
-          'recipient': 'interface',
-          'request': 0x22,
-          'value': 0x01,
-          'index': 0x02
-        });
-        console.log('\tcontrol request done');
-      }).then(function () {
-        console.log('\tlistening');
-        readLoop();
-      }).catch(function (err) {
-        console.error("USB Error ---", err);
-      });
-    }
-  }, {
     key: 'disconnect',
     value: function disconnect() {
-      var _this3 = this;
+      var _this2 = this;
 
       return this.device_.controlTransferOut({
         'requestType': 'class',
@@ -4433,7 +4327,7 @@ var Port = function () {
         'value': 0x00,
         'index': 0x02
       }).then(function () {
-        return _this3.device_.close();
+        return _this2.device_.close();
       });
     }
   }, {
@@ -4454,6 +4348,10 @@ var Serial = function () {
   _createClass(Serial, null, [{
     key: 'getPorts',
     value: function getPorts() {
+      if (!navigator || !navigator.usb) {
+        return Promise.resolve([]);
+      }
+
       return navigator.usb.getDevices().then(function (devices) {
         return devices.map(function (device) {
           return new Port(device);
@@ -4463,6 +4361,10 @@ var Serial = function () {
   }, {
     key: 'requestPort',
     value: function requestPort() {
+      if (!navigator || !navigator.usb) {
+        return Promise.resolve();
+      }
+
       var filters = [{ 'vendorId': 0x2341, 'productId': 0x8036 }, { 'vendorId': 0x2341, 'productId': 0x8037 }];
       return navigator.usb.requestDevice({ 'filters': filters }).then(function (device) {
         return new Port(device);
@@ -4508,14 +4410,14 @@ var EventEmitter = function () {
   }
 
   _createClass(EventEmitter, [{
-    key: 'addListener',
-    value: function addListener(label, callback) {
+    key: 'on',
+    value: function on(label, callback) {
       this.listeners.has(label) || this.listeners.set(label, []);
       this.listeners.get(label).push(callback);
     }
   }, {
-    key: 'removeListener',
-    value: function removeListener(label, callback) {
+    key: 'off',
+    value: function off(label, callback) {
       var listeners = this.listeners.get(label),
           index = void 0;
 
@@ -7245,6 +7147,74 @@ return Autolinker;
 
 /***/ }),
 
+/***/ "../../node_modules/bootstrap-toggle/css/bootstrap-toggle.min.css":
+/*!**************************************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/bootstrap-toggle/css/bootstrap-toggle.min.css ***!
+  \**************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../css-loader!./bootstrap-toggle.min.css */ "../../node_modules/css-loader/index.js!../../node_modules/bootstrap-toggle/css/bootstrap-toggle.min.css");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../style-loader/lib/addStyles.js */ "../../node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
+/***/ "../../node_modules/bootstrap-toggle/js/bootstrap-toggle.min.js":
+/*!************************************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/bootstrap-toggle/js/bootstrap-toggle.min.js ***!
+  \************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+/*! ========================================================================
+ * Bootstrap Toggle: bootstrap-toggle.js v2.2.0
+ * http://www.bootstraptoggle.com
+ * ========================================================================
+ * Copyright 2014 Min Hur, The New York Times Company
+ * Licensed under MIT
+ * ======================================================================== */
++function(a){"use strict";function b(b){return this.each(function(){var d=a(this),e=d.data("bs.toggle"),f="object"==typeof b&&b;e||d.data("bs.toggle",e=new c(this,f)),"string"==typeof b&&e[b]&&e[b]()})}var c=function(b,c){this.$element=a(b),this.options=a.extend({},this.defaults(),c),this.render()};c.VERSION="2.2.0",c.DEFAULTS={on:"On",off:"Off",onstyle:"primary",offstyle:"default",size:"normal",style:"",width:null,height:null},c.prototype.defaults=function(){return{on:this.$element.attr("data-on")||c.DEFAULTS.on,off:this.$element.attr("data-off")||c.DEFAULTS.off,onstyle:this.$element.attr("data-onstyle")||c.DEFAULTS.onstyle,offstyle:this.$element.attr("data-offstyle")||c.DEFAULTS.offstyle,size:this.$element.attr("data-size")||c.DEFAULTS.size,style:this.$element.attr("data-style")||c.DEFAULTS.style,width:this.$element.attr("data-width")||c.DEFAULTS.width,height:this.$element.attr("data-height")||c.DEFAULTS.height}},c.prototype.render=function(){this._onstyle="btn-"+this.options.onstyle,this._offstyle="btn-"+this.options.offstyle;var b="large"===this.options.size?"btn-lg":"small"===this.options.size?"btn-sm":"mini"===this.options.size?"btn-xs":"",c=a('<label class="btn">').html(this.options.on).addClass(this._onstyle+" "+b),d=a('<label class="btn">').html(this.options.off).addClass(this._offstyle+" "+b+" active"),e=a('<span class="toggle-handle btn btn-default">').addClass(b),f=a('<div class="toggle-group">').append(c,d,e),g=a('<div class="toggle btn" data-toggle="toggle">').addClass(this.$element.prop("checked")?this._onstyle:this._offstyle+" off").addClass(b).addClass(this.options.style);this.$element.wrap(g),a.extend(this,{$toggle:this.$element.parent(),$toggleOn:c,$toggleOff:d,$toggleGroup:f}),this.$toggle.append(f);var h=this.options.width||Math.max(c.outerWidth(),d.outerWidth())+e.outerWidth()/2,i=this.options.height||Math.max(c.outerHeight(),d.outerHeight());c.addClass("toggle-on"),d.addClass("toggle-off"),this.$toggle.css({width:h,height:i}),this.options.height&&(c.css("line-height",c.height()+"px"),d.css("line-height",d.height()+"px")),this.update(!0),this.trigger(!0)},c.prototype.toggle=function(){this.$element.prop("checked")?this.off():this.on()},c.prototype.on=function(a){return this.$element.prop("disabled")?!1:(this.$toggle.removeClass(this._offstyle+" off").addClass(this._onstyle),this.$element.prop("checked",!0),void(a||this.trigger()))},c.prototype.off=function(a){return this.$element.prop("disabled")?!1:(this.$toggle.removeClass(this._onstyle).addClass(this._offstyle+" off"),this.$element.prop("checked",!1),void(a||this.trigger()))},c.prototype.enable=function(){this.$toggle.removeAttr("disabled"),this.$element.prop("disabled",!1)},c.prototype.disable=function(){this.$toggle.attr("disabled","disabled"),this.$element.prop("disabled",!0)},c.prototype.update=function(a){this.$element.prop("disabled")?this.disable():this.enable(),this.$element.prop("checked")?this.on(a):this.off(a)},c.prototype.trigger=function(b){this.$element.off("change.bs.toggle"),b||this.$element.change(),this.$element.on("change.bs.toggle",a.proxy(function(){this.update()},this))},c.prototype.destroy=function(){this.$element.off("change.bs.toggle"),this.$toggleGroup.remove(),this.$element.removeData("bs.toggle"),this.$element.unwrap()};var d=a.fn.bootstrapToggle;a.fn.bootstrapToggle=b,a.fn.bootstrapToggle.Constructor=c,a.fn.toggle.noConflict=function(){return a.fn.bootstrapToggle=d,this},a(function(){a("input[type=checkbox][data-toggle^=toggle]").bootstrapToggle()}),a(document).on("click.bs.toggle","div[data-toggle^=toggle]",function(b){var c=a(this).find("input[type=checkbox]");c.bootstrapToggle("toggle"),b.preventDefault()})}(jQuery);
+//# sourceMappingURL=bootstrap-toggle.min.js.map
+
+/***/ }),
+
+/***/ "../../node_modules/css-loader/index.js!../../node_modules/bootstrap-toggle/css/bootstrap-toggle.min.css":
+/*!**********************************************************************************************************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/css-loader!/Users/d023280/Documents/workspace/brainbox/node_modules/bootstrap-toggle/css/bootstrap-toggle.min.css ***!
+  \**********************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../css-loader/lib/css-base.js */ "../../node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "/*! ========================================================================\n * Bootstrap Toggle: bootstrap-toggle.css v2.2.0\n * http://www.bootstraptoggle.com\n * ========================================================================\n * Copyright 2014 Min Hur, The New York Times Company\n * Licensed under MIT\n * ======================================================================== */\n.checkbox label .toggle,.checkbox-inline .toggle{margin-left:-20px;margin-right:5px}\n.toggle{position:relative;overflow:hidden}\n.toggle input[type=checkbox]{display:none}\n.toggle-group{position:absolute;width:200%;top:0;bottom:0;left:0;transition:left .35s;-webkit-transition:left .35s;-moz-user-select:none;-webkit-user-select:none}\n.toggle.off .toggle-group{left:-100%}\n.toggle-on{position:absolute;top:0;bottom:0;left:0;right:50%;margin:0;border:0;border-radius:0}\n.toggle-off{position:absolute;top:0;bottom:0;left:50%;right:0;margin:0;border:0;border-radius:0}\n.toggle-handle{position:relative;margin:0 auto;padding-top:0;padding-bottom:0;height:100%;width:0;border-width:0 1px}\n.toggle.btn{min-width:59px;min-height:34px}\n.toggle-on.btn{padding-right:24px}\n.toggle-off.btn{padding-left:24px}\n.toggle.btn-lg{min-width:79px;min-height:45px}\n.toggle-on.btn-lg{padding-right:31px}\n.toggle-off.btn-lg{padding-left:31px}\n.toggle-handle.btn-lg{width:40px}\n.toggle.btn-sm{min-width:50px;min-height:30px}\n.toggle-on.btn-sm{padding-right:20px}\n.toggle-off.btn-sm{padding-left:20px}\n.toggle.btn-xs{min-width:35px;min-height:22px}\n.toggle-on.btn-xs{padding-right:12px}\n.toggle-off.btn-xs{padding-left:12px}", ""]);
+
+// exports
+
+
+/***/ }),
+
 /***/ "../../node_modules/css-loader/index.js!../../node_modules/font-awesome/css/font-awesome.css":
 /*!**********************************************************************************************************************************************************************!*\
   !*** /Users/d023280/Documents/workspace/brainbox/node_modules/css-loader!/Users/d023280/Documents/workspace/brainbox/node_modules/font-awesome/css/font-awesome.css ***!
@@ -7296,27 +7266,7 @@ exports = module.exports = __webpack_require__(/*! ../../../../node_modules/css-
 
 
 // module
-exports.push([module.i, "body {\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\nbody #layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\nbody #layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\nbody #layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\nbody #layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\nbody #layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\nbody #layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\nbody #layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\nbody #layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\nbody #layout .tab-content .tab-pane .workspace .palette {\n  position: absolute;\n  height: 100%;\n  width: 250px;\n  padding: 0;\n  z-index: 1000;\n}\nbody #layout .tab-content .tab-pane .workspace .palette #filter {\n  top: 90px;\n  position: absolute;\n  font-size: 20px;\n  width: 245px;\n  left: 2px;\n}\nbody #layout .tab-content .tab-pane .workspace .palette #paletteElementsScroll {\n  position: absolute;\n  width: 248px;\n  margin: 0;\n  padding: 0;\n  top: 150px;\n  bottom: 0px;\n  overflow: auto;\n}\nbody #layout .tab-content .tab-pane .workspace .palette #paletteElementsScroll #paletteElements {\n  position: absolute;\n  width: 100%;\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\nbody #layout .tab-content .tab-pane .workspace .palette #paletteElementsScroll #paletteElements .mix {\n  height: 125px;\n  border: 1px solid #f0f0f0;\n  /* to avoid doubling the border of the grid */\n  margin: -1px 0 0 -1px;\n}\nbody #layout .tab-content .tab-pane .workspace .toolbar {\n  position: absolute;\n  height: 60px;\n  right: 0;\n  top: 0;\n  left: 250px;\n}\nbody #layout .tab-content .tab-pane .workspace .toolbar .icon {\n  width: 50px;\n  height: 50px;\n  margin: 5px;\n  padding: 0px;\n}\nbody #layout .tab-content .tab-pane .workspace .content {\n  position: absolute;\n  right: 0px;\n  top: 60px;\n  bottom: 0px;\n  left: 250px;\n  overflow: scroll;\n}\nbody #layout .tab-content .tab-pane .workspace .content .canvas {\n  width: 6000px;\n  height: 6000px;\n}\nbody #layout .tab-content .active {\n  display: block;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n/* CSS from the cool website: http://cssarrowplease.com/ */\n.draw2d_tooltip {\n  position: absolute;\n  background: #88b7d5;\n  /* with border\n  border: 2px solid #c2e1f5;\n */\n  padding: 10px;\n  border-radius: 6px;\n}\n.draw2d_tooltip:after,\n.draw2d_tooltip:before {\n  bottom: 100%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none;\n}\n.draw2d_tooltip:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-bottom-color: #88b7d5;\n  border-width: 4px;\n  left: 50%;\n  margin-left: -4px;\n}\n/* with border\n.draw2d_tooltip:before {\n  border-color: rgba(194, 225, 245, 0);\n  border-bottom-color: #c2e1f5;\n  border-width: 8px;\n  left: 50%;\n  margin-left: -8px;\n}\n*/\n#codePreviewDialog .modal-content {\n  border-radius: 0;\n}\n#codePreviewDialog .btn-primary {\n  background-color: #B2E2F2;\n  border: 0;\n}\n#codePreviewDialog .prettyprint {\n  max-height: 450px;\n  max-height: 250px;\n  overflow: scroll;\n  border-radius: 0;\n}\n.modal-content {\n  border-radius: 2px;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n}\n.modal-backdrop.in {\n  opacity: 0.3;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #282a30;\n}\n.githubFileDialog .githubNavigation .glyphicon,\n.githubFileDialog .githubNavigation .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #282a30;\n}\n.githubFileDialog .githubNavigation a.list-group-item:hover {\n  text-decoration: underline;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n#githubNewFileDialog .githubFilePreview {\n  font-size: 115px;\n  color: #282a30;\n}\n#githubFileSelectDialog .githubNavigation {\n  height: 300px;\n  overflow: scroll;\n}\n#githubSaveFileDialog .githubFilePreview {\n  font-size: 100px;\n}\n#githubFileSaveAsDialog .githubFilePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .githubNavigation {\n  height: 250px;\n  overflow: scroll;\n}\n#markdownDialog .modal-body {\n  max-height: calc(100vh - 200px);\n  overflow-y: auto;\n}\n#markdownDialog .modal-dialog {\n  width: 70%;\n}\n#markdownDialog .modal-content {\n  border-radius: 0;\n}\n#markdownDialog .btn-primary {\n  background-color: #B2E2F2;\n  border: 0;\n}\n#markdownDialog .html table {\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  margin: 20px;\n  margin-left: 0;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n#markdownDialog .html table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n#markdownDialog .html table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n#markdownDialog .html table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n#markdownDialog .html table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n#markdownDialog .html table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n#markdownDialog .html table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n#markdownDialog .html table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n#markdownDialog .html tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n#markdownDialog .html tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n#markdownDialog .html table tr:last-child td {\n  border-bottom: 0;\n}\n#markdownDialog .html table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n#markdownDialog .html table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.confirm-dialog-btn-confirm {\n  background-color: #C71D3D;\n}\n.context-menu-list {\n  margin: 0;\n  padding: 0;\n  min-width: 120px;\n  max-width: 250px;\n  display: inline-block;\n  position: absolute;\n  list-style-type: none;\n  border: 1px solid #DDD;\n  background: white;\n  border-left: 2px solid #B2E2F2;\n  -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -moz-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -ms-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -o-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  font-size: 15px;\n  white-space: nowrap;\n}\n.context-menu-item {\n  padding: 5px 5px 5px 24px;\n  position: relative;\n  -webkit-user-select: none;\n  -moz-user-select: -moz-none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.context-menu-separator {\n  padding-bottom: 0;\n  border-bottom: 1px solid #DDD;\n}\n.context-menu-item > label > input,\n.context-menu-item > label > textarea {\n  -webkit-user-select: text;\n  -moz-user-select: text;\n  -ms-user-select: text;\n  user-select: text;\n}\n.context-menu-item.hover {\n  cursor: pointer;\n  background-color: #B2E2F2;\n  color: white;\n}\n.context-menu-item.disabled {\n  color: #666;\n}\n.context-menu-input.hover,\n.context-menu-item.disabled.hover {\n  cursor: default;\n  background-color: #EEE;\n}\n.context-menu-submenu:after {\n  content: \">\";\n  color: #666;\n  position: absolute;\n  top: 0;\n  right: 3px;\n  z-index: 1;\n}\n/* icons\n    #protip:\n    In case you want to use sprites for icons (which I would suggest you do) have a look at\n    http://css-tricks.com/13224-pseudo-spriting/ to get an idea of how to implement\n    .context-menu-item.icon:before {}\n */\n.context-menu-item.icon {\n  min-height: 18px;\n}\n.context-menu-item.icon:before {\n  position: relative;\n  left: -15px;\n  font-size: 19px;\n}\n/* vertically align inside labels */\n.context-menu-input > label > * {\n  vertical-align: top;\n}\n/* position checkboxes and radios as icons */\n.context-menu-input > label > input[type=\"checkbox\"],\n.context-menu-input > label > input[type=\"radio\"] {\n  margin-left: -17px;\n}\n.context-menu-input > label > span {\n  margin-left: 5px;\n}\n.context-menu-input > label,\n.context-menu-input > label > input[type=\"text\"],\n.context-menu-input > label > textarea,\n.context-menu-input > label > select {\n  display: block;\n  width: 100%;\n  -webkit-box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  -ms-box-sizing: border-box;\n  -o-box-sizing: border-box;\n  box-sizing: border-box;\n}\n.context-menu-input > label > textarea {\n  height: 100px;\n}\n.context-menu-item > .context-menu-list {\n  display: none;\n  /* re-positioned by js */\n  right: -5px;\n  top: 5px;\n}\n.context-menu-item.hover > .context-menu-list {\n  display: block;\n}\n.context-menu-accesskey {\n  text-decoration: underline;\n}\n#probe_hint {\n  display: block;\n  padding: 30px;\n  color: white;\n  font-size: 20px;\n  font-weight: 100;\n}\n#probe_window {\n  background: #009DAC;\n  bottom: 0;\n  height: 0;\n  display: none;\n  color: white;\n  position: absolute;\n  right: 0;\n  left: 250px;\n}\n#probe_window span {\n  font-size: 45px;\n  vertical-align: middle;\n  padding-right: 10px;\n}\n#probe_window_stick {\n  font-size: 34px;\n  position: absolute;\n  right: 10px;\n  top: -5px;\n  cursor: pointer;\n}\n#probeSortable {\n  padding-left: 0;\n}\n#probeSortable li {\n  list-style-type: none;\n  padding-top: 10px;\n  padding-left: 0;\n}\n#probeSortable li path {\n  stroke: white;\n}\n#probeSortable li div {\n  cursor: pointer;\n  display: inline-block;\n  padding-left: 10px;\n  padding-right: 10px;\n  position: absolute;\n  background: rgba(0, 157, 172, 0.8);\n}\n#probeSortable li:nth-child(even) {\n  background: #04A9B9;\n}\n#probeSortable li:nth-child(even) div {\n  background: rgba(4, 169, 185, 0.5);\n}\n#probeSortable .inplaceEdit {\n  background: rgba(255, 255, 255, 0.1);\n}\nellipse.draw2d_shape_basic_LineStartResizeHandle,\nellipse.draw2d_shape_basic_LineEndResizeHandle,\nrect.draw2d_policy_line_OrthogonalSelectionFeedbackPolicy_ResizeHandle {\n  fill: #B2E2F2;\n}\nellipse.draw2d_InputPort,\nellipse.DecoratedInputPort,\nellipse.draw2d_OutputPort {\n  fill: #C71D3D;\n}\n.vertical-text {\n  transform: rotate(-90deg);\n  white-space: nowrap;\n  top: 200px;\n  left: 20px;\n  font-size: 50px;\n  color: white;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"BrainBox\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -60px);\n  -moz-transform: rotate(-90deg) translate(-90px, -60px);\n  -ms-transform: rotate(-90deg) translate(-90px, -60px);\n  transform: rotate(-90deg) translate(-90px, -60px);\n  font-size: 50px;\n  color: white;\n  white-space: nowrap;\n  opacity: 0.4;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #B2E2F2;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n.ui-draggable-dragging {\n  z-index: 10000;\n}\ntext.highlightOnHover:hover {\n  cursor: pointer;\n  font-weight: bold;\n}\nellipse.highlightOnHover:hover {\n  cursor: pointer;\n}\nrect.Raft {\n  fill: rgba(28, 155, 171, 0.1);\n}\n#configMenuIcon {\n  font-size: 25px;\n  cursor: pointer;\n  opacity: 0.3;\n}\n#configMenuIcon:hover {\n  opacity: 1;\n  color: #B2E2F2;\n}\n#paletteElementsOverlay {\n  bottom: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  background-color: rgba(255, 255, 255, 0.7);\n  display: none;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 20px;\n  background-color: rgba(28, 155, 171, 0.05);\n  border-radius: 8px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #B2E2F2 !important;\n}\n#figureConfigDialog {\n  display: none;\n  background-color: white;\n  border: 1px solid rgba(0, 0, 0, 0.2);\n  padding: 10px;\n  margin-left: 30px;\n  border-left: 3px solid #B2E2F2;\n  border-radius: 4px;\n}\n#figureConfigDialog .header {\n  font-size: 16px;\n  font-weight: 600;\n  padding-bottom: 15px;\n}\n#figureConfigDialog .figureAddLabel {\n  font-size: 12px;\n  font-weight: 200;\n  cursor: pointer;\n}\n#figureConfigDialog .figureAddLabel:hover {\n  color: #B2E2F2;\n}\n#figureConfigDialog:after {\n  content: '';\n  display: block;\n  position: absolute;\n  left: -20px;\n  top: 10px;\n  width: 0;\n  height: 0;\n  border-right: 10px solid #B2E2F2;\n  border-top: 10px solid transparent;\n  border-left: 10px solid transparent;\n  border-bottom: 10px solid transparent;\n}\n.pallette_item {\n  text-align: center;\n}\n/*\n@keyframes spinner {\n  to {transform: rotate(360deg);}\n}\n\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  width: 20px;\n  height: 20px;\n  margin-top: -10px;\n  margin-left: -10px;\n  border-radius: 50%;\n  border: 2px solid transparent;\n  border-top-color: #07d;\n  border-bottom-color: #07d;\n  animation: spinner .8s ease infinite;\n}\n*/\n@keyframes spinner {\n  to {\n    transform: rotate(360deg);\n  }\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .palette {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .palette #filter {\n  outline: none;\n}\n.workspace .palette .title {\n  left: 10px;\n  right: 0px;\n  top: 10px;\n  position: absolute;\n}\n.workspace .palette .title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n}\n.workspace .palette .title div {\n  position: absolute;\n  left: 90px;\n}\n.workspace .palette .title div h1 {\n  font-size: 25px;\n  font-weight: 200;\n  line-height: 45px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n}\n.workspace .palette .title div h2 {\n  font-size: 15px;\n  font-weight: 200;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n}\n.workspace .palette .pallette_item {\n  padding: 0px;\n}\n.workspace .palette .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .palette .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .palette .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.workspace .palette .pallette_item .glowBorder {\n  border: 1px solid #B2E2F2;\n}\n.workspace .palette .draw2d_droppable {\n  cursor: move;\n  max-height: 80px;\n}\n.workspace .palette .request {\n  font-size: 10px;\n  color: #B2E2F2;\n}\n.workspace .palette .request .icon {\n  cursor: pointer;\n  font-size: 75px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\n.workspace .content .canvas {\n  -webkit-touch-callout: none;\n  -webkit-user-select: none;\n  -khtml-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  width: 24px;\n  color: #282a30;\n  top: 8px;\n  cursor: pointer;\n  border: 1px solid black;\n  border-radius: 50%;\n  background-color: rgba(255, 0, 0, 0.5);\n}\n#files .deleteIcon:hover {\n  background-color: rgba(255, 0, 0, 0.9);\n}\n#files .thumb .thumbnail img {\n  cursor: pointer;\n}\n#files .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #282a30;\n  margin-top: 5px;\n}\n#files .thumb h4 {\n  font-size: 18px;\n  color: #282a30;\n}\n#files .thumbAdd {\n  color: #282a30;\n  color: #0078f2;\n  border: 1px solid rgba(0, 120, 242, 0.33);\n  border-radius: 6px;\n  cursor: pointer;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .thumbAdd div {\n  font-size: 160px;\n  text-align: center;\n}\n#files .thumbAdd h4 {\n  text-align: center;\n}\n#files .thumbAdd:hover {\n  border: 1px solid #0078f2;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#home {\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  padding: 40px !important;\n  overflow: auto;\n  background-size: cover;\n}\n#home .branding {\n  color: #282a30;\n}\n#home .hacksterProjectCard {\n  border: 1px solid black;\n}\n#home .paragraph h3 {\n  color: #282a30;\n  padding-top: 45px;\n}\n#home .paragraph .block {\n  padding-bottom: 30px;\n}\n#home .teaser {\n  margin-bottom: 30px;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#home .teaser .title {\n  color: #282a30;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#home .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#home .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#home .introText {\n  font-size: 20px;\n  font-weight: 200;\n  color: #34495e;\n}\n#home footer {\n  text-align: center;\n  margin-top: 100px;\n  color: #282a30;\n}\n#home footer a {\n  color: #282a30;\n  text-decoration: underline;\n}\n.raspiConnection {\n  color: red !important;\n  border: 1px solid red;\n  padding: 10px;\n  border-radius: 5px;\n}\n.morph_btn {\n  display: inline-block;\n  width: 4em;\n  height: 4em;\n  background-color: #FFF;\n  color: #9e9e9e;\n  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);\n  border-radius: 2em;\n  overflow: hidden;\n  -webkit-transform: translateZ(0);\n  transform: translateZ(0);\n  -webkit-transition: all 500ms ease;\n  -moz-transition: all 500ms ease;\n  -ms-transition: all 500ms ease;\n  -o-transition: all 500ms ease;\n  transition: all 500ms ease;\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\n}\n.morph_btn:hover {\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);\n}\n.morph_btn:active {\n  -webkit-transform: scale(1.1, 1.1);\n  transform: scale(1.1, 1.1);\n}\n.morph_btn:focus {\n  outline: 0;\n  border: none;\n  color: rgba(0, 0, 0, 0);\n}\n.morph_btn > span {\n  display: block;\n  position: relative;\n  width: 2em;\n  height: 2em;\n  -webkit-transition: all 500ms ease;\n  -moz-transition: all 500ms ease;\n  -ms-transition: all 500ms ease;\n  -o-transition: all 500ms ease;\n  transition: all 500ms ease;\n  overflow: hidden;\n  margin: 1em;\n}\n.morph_btn > span > span {\n  display: block;\n  background-color: #C71D3D;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 2em;\n  height: 2em;\n  -webkit-transition: all 500ms ease;\n  -moz-transition: all 500ms ease;\n  -ms-transition: all 500ms ease;\n  -o-transition: all 500ms ease;\n  transition: all 500ms ease;\n  border: 1px solid transparent;\n}\n.morph_btn.play > span {\n  -webkit-transform: translate(1em, 0) scale(1.6, 1);\n  transform: translate(1em, 0) scale(1.6, 1);\n}\n.morph_btn.play > span > span {\n  -webkit-transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  background-color: #B2E2F2;\n}\n.morph_btn.pause > span > span {\n  -webkit-transform: scale(0.4, 1) translate(-1.6em, 0);\n  transform: scale(0.4, 1) translate(-1.6em, 0);\n}\n.morph_btn.pause > span > span.s3 {\n  -webkit-transform: scale(0.4, 1) translate(1.6em, 0);\n  transform: scale(0.4, 1) translate(1.6em, 0);\n}\n.drop {\n  display: block;\n  position: absolute;\n  background: #CCC;\n  border-radius: 100%;\n  -webkit-transform: scale(0);\n  transform: scale(0);\n  pointer-events: none;\n  width: 100%;\n  height: 100%;\n}\n.drop:before {\n  display: block;\n  position: absolute;\n  content: \"\";\n  background-color: #EEE;\n  border-radius: 100%;\n  width: 100%;\n  height: 100%;\n  top: 0;\n  left: 0;\n  -webkit-transform: scale(0);\n  transform: scale(0);\n}\n.slider-handle {\n  border-radius: 50%;\n  background-color: #B2E2F2;\n}\n#simulationStartStop {\n  position: absolute;\n  right: 30px;\n  top: 30px;\n  z-index: 30000;\n}\n#simulationBaseTimer {\n  width: 200px;\n}\n.simulationBase label {\n  display: block;\n  opacity: 0.5;\n  font-size: 10px;\n}\n.workspace .toolbar {\n  background-color: #B2E2F2;\n  min-width: 700px;\n}\n.workspace .toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: middle;\n}\n.workspace .toolbar label {\n  color: #777;\n  font-weight: 200;\n}\n.workspace .toolbar .icon {\n  cursor: pointer;\n  border: 1px solid transparent;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n}\n.workspace .toolbar .icon:hover {\n  border: 1px solid #B2E2F2;\n}\n.workspace .toolbar .icon.disabled {\n  opacity: 0.2;\n  border: 1px solid transparent;\n}\n", ""]);
-
-// exports
-
-
-/***/ }),
-
-/***/ "../../node_modules/css-loader/index.js!../../node_modules/octicons/build/font/octicons.css":
-/*!*********************************************************************************************************************************************************************!*\
-  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/css-loader!/Users/d023280/Documents/workspace/brainbox/node_modules/octicons/build/font/octicons.css ***!
-  \*********************************************************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-var escape = __webpack_require__(/*! ../../../css-loader/lib/url/escape.js */ "../../node_modules/css-loader/lib/url/escape.js");
-exports = module.exports = __webpack_require__(/*! ../../../css-loader/lib/css-base.js */ "../../node_modules/css-loader/lib/css-base.js")(false);
-// imports
-
-
-// module
-exports.push([module.i, "\n@font-face {\n  font-family:\"Octicons\";\n  src:url(" + escape(__webpack_require__(/*! ./octicons.eot?ef21c39f0ca9b1b5116e5eb7ac5eabe6 */ "../../node_modules/octicons/build/font/octicons.eot?ef21c39f0ca9b1b5116e5eb7ac5eabe6")) + ");\n  src:url(" + escape(__webpack_require__(/*! ./octicons.eot */ "../../node_modules/octicons/build/font/octicons.eot")) + "?#iefix) format(\"embedded-opentype\"),\n\t\turl(" + escape(__webpack_require__(/*! ./octicons.woff2?ef21c39f0ca9b1b5116e5eb7ac5eabe6 */ "../../node_modules/octicons/build/font/octicons.woff2?ef21c39f0ca9b1b5116e5eb7ac5eabe6")) + ") format(\"woff2\"),\n\t\turl(" + escape(__webpack_require__(/*! ./octicons.woff?ef21c39f0ca9b1b5116e5eb7ac5eabe6 */ "../../node_modules/octicons/build/font/octicons.woff?ef21c39f0ca9b1b5116e5eb7ac5eabe6")) + ") format(\"woff\"),\n\t\turl(" + escape(__webpack_require__(/*! ./octicons.ttf?ef21c39f0ca9b1b5116e5eb7ac5eabe6 */ "../../node_modules/octicons/build/font/octicons.ttf?ef21c39f0ca9b1b5116e5eb7ac5eabe6")) + ") format(\"truetype\"),\n\t\turl(" + escape(__webpack_require__(/*! ./octicons.svg?ef21c39f0ca9b1b5116e5eb7ac5eabe6 */ "../../node_modules/octicons/build/font/octicons.svg?ef21c39f0ca9b1b5116e5eb7ac5eabe6")) + "#octicons) format(\"svg\");\n  font-weight:normal;\n  font-style:normal;\n}\n\n\n/*\n\n.octicon is optimized for 16px.\n.mega-octicon is optimized for 32px but can be used larger.\n\n*/\n.octicon, .mega-octicon {\n  font: normal normal normal 16px/1 Octicons;\n  display: inline-block;\n  text-decoration: none;\n  text-rendering: auto;\n  -webkit-font-smoothing: antialiased;\n  -moz-osx-font-smoothing: grayscale;\n  -webkit-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n  speak: none;\n}\n.mega-octicon { font-size: 32px; }\n\n.octicon-alert:before { content:\"\\F02D\"; }\n\n.octicon-arrow-down:before { content:\"\\F03F\"; }\n\n.octicon-arrow-left:before { content:\"\\F040\"; }\n\n.octicon-arrow-right:before { content:\"\\F03E\"; }\n\n.octicon-arrow-small-down:before { content:\"\\F0A0\"; }\n\n.octicon-arrow-small-left:before { content:\"\\F0A1\"; }\n\n.octicon-arrow-small-right:before { content:\"\\F071\"; }\n\n.octicon-arrow-small-up:before { content:\"\\F09F\"; }\n\n.octicon-arrow-up:before { content:\"\\F03D\"; }\n\n.octicon-beaker:before { content:\"\\F0DD\"; }\n\n.octicon-bell:before { content:\"\\F0DE\"; }\n\n.octicon-bold:before { content:\"\\F0E2\"; }\n\n.octicon-book:before { content:\"\\F007\"; }\n\n.octicon-bookmark:before { content:\"\\F07B\"; }\n\n.octicon-briefcase:before { content:\"\\F0D3\"; }\n\n.octicon-broadcast:before { content:\"\\F048\"; }\n\n.octicon-browser:before { content:\"\\F0C5\"; }\n\n.octicon-bug:before { content:\"\\F091\"; }\n\n.octicon-calendar:before { content:\"\\F068\"; }\n\n.octicon-check:before { content:\"\\F03A\"; }\n\n.octicon-checklist:before { content:\"\\F076\"; }\n\n.octicon-chevron-down:before { content:\"\\F0A3\"; }\n\n.octicon-chevron-left:before { content:\"\\F0A4\"; }\n\n.octicon-chevron-right:before { content:\"\\F078\"; }\n\n.octicon-chevron-up:before { content:\"\\F0A2\"; }\n\n.octicon-circle-slash:before { content:\"\\F084\"; }\n\n.octicon-circuit-board:before { content:\"\\F0D6\"; }\n\n.octicon-clippy:before { content:\"\\F035\"; }\n\n.octicon-clock:before { content:\"\\F046\"; }\n\n.octicon-cloud-download:before { content:\"\\F00B\"; }\n\n.octicon-cloud-upload:before { content:\"\\F00C\"; }\n\n.octicon-code:before { content:\"\\F05F\"; }\n\n.octicon-comment-discussion:before { content:\"\\F04F\"; }\n\n.octicon-comment:before { content:\"\\F02B\"; }\n\n.octicon-credit-card:before { content:\"\\F045\"; }\n\n.octicon-dash:before { content:\"\\F0CA\"; }\n\n.octicon-dashboard:before { content:\"\\F07D\"; }\n\n.octicon-database:before { content:\"\\F096\"; }\n\n.octicon-desktop-download:before { content:\"\\F0DC\"; }\n\n.octicon-device-camera-video:before { content:\"\\F057\"; }\n\n.octicon-device-camera:before { content:\"\\F056\"; }\n\n.octicon-device-desktop:before { content:\"\\F27C\"; }\n\n.octicon-device-mobile:before { content:\"\\F038\"; }\n\n.octicon-diff-added:before { content:\"\\F06B\"; }\n\n.octicon-diff-ignored:before { content:\"\\F099\"; }\n\n.octicon-diff-modified:before { content:\"\\F06D\"; }\n\n.octicon-diff-removed:before { content:\"\\F06C\"; }\n\n.octicon-diff-renamed:before { content:\"\\F06E\"; }\n\n.octicon-diff:before { content:\"\\F04D\"; }\n\n.octicon-ellipses:before { content:\"\\F101\"; }\n\n.octicon-ellipsis:before { content:\"\\F09A\"; }\n\n.octicon-eye:before { content:\"\\F04E\"; }\n\n.octicon-file-binary:before { content:\"\\F094\"; }\n\n.octicon-file-code:before { content:\"\\F010\"; }\n\n.octicon-file-directory:before { content:\"\\F016\"; }\n\n.octicon-file-media:before { content:\"\\F012\"; }\n\n.octicon-file-pdf:before { content:\"\\F014\"; }\n\n.octicon-file-submodule:before { content:\"\\F017\"; }\n\n.octicon-file-symlink-directory:before { content:\"\\F0B1\"; }\n\n.octicon-file-symlink-file:before { content:\"\\F0B0\"; }\n\n.octicon-file-text:before { content:\"\\F011\"; }\n\n.octicon-file-zip:before { content:\"\\F013\"; }\n\n.octicon-file:before { content:\"\\F102\"; }\n\n.octicon-flame:before { content:\"\\F0D2\"; }\n\n.octicon-fold:before { content:\"\\F0CC\"; }\n\n.octicon-gear:before { content:\"\\F02F\"; }\n\n.octicon-gift:before { content:\"\\F042\"; }\n\n.octicon-gist-secret:before { content:\"\\F08C\"; }\n\n.octicon-gist:before { content:\"\\F00E\"; }\n\n.octicon-git-branch:before { content:\"\\F020\"; }\n\n.octicon-git-commit:before { content:\"\\F01F\"; }\n\n.octicon-git-compare:before { content:\"\\F0AC\"; }\n\n.octicon-git-merge:before { content:\"\\F023\"; }\n\n.octicon-git-pull-request:before { content:\"\\F009\"; }\n\n.octicon-globe:before { content:\"\\F0B6\"; }\n\n.octicon-grabber:before { content:\"\\F103\"; }\n\n.octicon-graph:before { content:\"\\F043\"; }\n\n.octicon-heart:before { content:\"\\2665\"; }\n\n.octicon-history:before { content:\"\\F07E\"; }\n\n.octicon-home:before { content:\"\\F08D\"; }\n\n.octicon-horizontal-rule:before { content:\"\\F070\"; }\n\n.octicon-hubot:before { content:\"\\F09D\"; }\n\n.octicon-inbox:before { content:\"\\F0CF\"; }\n\n.octicon-info:before { content:\"\\F059\"; }\n\n.octicon-issue-closed:before { content:\"\\F028\"; }\n\n.octicon-issue-opened:before { content:\"\\F026\"; }\n\n.octicon-issue-reopened:before { content:\"\\F027\"; }\n\n.octicon-italic:before { content:\"\\F0E4\"; }\n\n.octicon-jersey:before { content:\"\\F019\"; }\n\n.octicon-key:before { content:\"\\F049\"; }\n\n.octicon-keyboard:before { content:\"\\F00D\"; }\n\n.octicon-law:before { content:\"\\F0D8\"; }\n\n.octicon-light-bulb:before { content:\"\\F000\"; }\n\n.octicon-link-external:before { content:\"\\F07F\"; }\n\n.octicon-link:before { content:\"\\F05C\"; }\n\n.octicon-list-ordered:before { content:\"\\F062\"; }\n\n.octicon-list-unordered:before { content:\"\\F061\"; }\n\n.octicon-location:before { content:\"\\F060\"; }\n\n.octicon-lock:before { content:\"\\F06A\"; }\n\n.octicon-logo-gist:before { content:\"\\F0AD\"; }\n\n.octicon-logo-github:before { content:\"\\F092\"; }\n\n.octicon-mail-read:before { content:\"\\F03C\"; }\n\n.octicon-mail-reply:before { content:\"\\F051\"; }\n\n.octicon-mail:before { content:\"\\F03B\"; }\n\n.octicon-mark-github:before { content:\"\\F00A\"; }\n\n.octicon-markdown:before { content:\"\\F0C9\"; }\n\n.octicon-megaphone:before { content:\"\\F077\"; }\n\n.octicon-mention:before { content:\"\\F0BE\"; }\n\n.octicon-milestone:before { content:\"\\F075\"; }\n\n.octicon-mirror:before { content:\"\\F024\"; }\n\n.octicon-mortar-board:before { content:\"\\F0D7\"; }\n\n.octicon-mute:before { content:\"\\F080\"; }\n\n.octicon-no-newline:before { content:\"\\F09C\"; }\n\n.octicon-octoface:before { content:\"\\F008\"; }\n\n.octicon-organization:before { content:\"\\F037\"; }\n\n.octicon-package:before { content:\"\\F0C4\"; }\n\n.octicon-paintcan:before { content:\"\\F0D1\"; }\n\n.octicon-pencil:before { content:\"\\F058\"; }\n\n.octicon-person:before { content:\"\\F018\"; }\n\n.octicon-pin:before { content:\"\\F041\"; }\n\n.octicon-plug:before { content:\"\\F0D4\"; }\n\n.octicon-plus-small:before { content:\"\\F104\"; }\n\n.octicon-plus:before { content:\"\\F05D\"; }\n\n.octicon-primitive-dot:before { content:\"\\F052\"; }\n\n.octicon-primitive-square:before { content:\"\\F053\"; }\n\n.octicon-pulse:before { content:\"\\F085\"; }\n\n.octicon-question:before { content:\"\\F02C\"; }\n\n.octicon-quote:before { content:\"\\F063\"; }\n\n.octicon-radio-tower:before { content:\"\\F030\"; }\n\n.octicon-reply:before { content:\"\\F105\"; }\n\n.octicon-repo-clone:before { content:\"\\F04C\"; }\n\n.octicon-repo-force-push:before { content:\"\\F04A\"; }\n\n.octicon-repo-forked:before { content:\"\\F002\"; }\n\n.octicon-repo-pull:before { content:\"\\F006\"; }\n\n.octicon-repo-push:before { content:\"\\F005\"; }\n\n.octicon-repo:before { content:\"\\F001\"; }\n\n.octicon-rocket:before { content:\"\\F033\"; }\n\n.octicon-rss:before { content:\"\\F034\"; }\n\n.octicon-ruby:before { content:\"\\F047\"; }\n\n.octicon-search:before { content:\"\\F02E\"; }\n\n.octicon-server:before { content:\"\\F097\"; }\n\n.octicon-settings:before { content:\"\\F07C\"; }\n\n.octicon-shield:before { content:\"\\F0E1\"; }\n\n.octicon-sign-in:before { content:\"\\F036\"; }\n\n.octicon-sign-out:before { content:\"\\F032\"; }\n\n.octicon-smiley:before { content:\"\\F0E7\"; }\n\n.octicon-squirrel:before { content:\"\\F0B2\"; }\n\n.octicon-star:before { content:\"\\F02A\"; }\n\n.octicon-stop:before { content:\"\\F08F\"; }\n\n.octicon-sync:before { content:\"\\F087\"; }\n\n.octicon-tag:before { content:\"\\F015\"; }\n\n.octicon-tasklist:before { content:\"\\F0E5\"; }\n\n.octicon-telescope:before { content:\"\\F088\"; }\n\n.octicon-terminal:before { content:\"\\F0C8\"; }\n\n.octicon-text-size:before { content:\"\\F0E3\"; }\n\n.octicon-three-bars:before { content:\"\\F05E\"; }\n\n.octicon-thumbsdown:before { content:\"\\F0DB\"; }\n\n.octicon-thumbsup:before { content:\"\\F0DA\"; }\n\n.octicon-tools:before { content:\"\\F031\"; }\n\n.octicon-trashcan:before { content:\"\\F0D0\"; }\n\n.octicon-triangle-down:before { content:\"\\F05B\"; }\n\n.octicon-triangle-left:before { content:\"\\F044\"; }\n\n.octicon-triangle-right:before { content:\"\\F05A\"; }\n\n.octicon-triangle-up:before { content:\"\\F0AA\"; }\n\n.octicon-unfold:before { content:\"\\F039\"; }\n\n.octicon-unmute:before { content:\"\\F0BA\"; }\n\n.octicon-unverified:before { content:\"\\F0E8\"; }\n\n.octicon-verified:before { content:\"\\F0E6\"; }\n\n.octicon-versions:before { content:\"\\F064\"; }\n\n.octicon-watch:before { content:\"\\F0E0\"; }\n\n.octicon-x:before { content:\"\\F081\"; }\n\n.octicon-zap:before { content:\"\\26A1\"; }\n\n", ""]);
+exports.push([module.i, "body {\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\nbody #layout {\n  width: 100%;\n  height: 100%;\n  padding: 0;\n  margin: 0;\n}\nbody #layout .nav-tabs {\n  float: left;\n  border-bottom: 0;\n}\nbody #layout .nav-tabs li {\n  float: none;\n  margin: 0;\n}\nbody #layout .nav-tabs li a {\n  margin-right: 0;\n  border: 0;\n}\nbody #layout #leftTabStrip {\n  height: 100%;\n  position: absolute;\n  width: 60px;\n  padding-top: 60px;\n  overflow: hidden;\n}\nbody #layout #leftTabStrip .leftTab {\n  border-radius: 0 !important;\n  width: 60px;\n  height: 60px;\n}\nbody #layout .tab-content {\n  position: relative;\n  margin-left: 60px;\n  height: 100%;\n}\nbody #layout .tab-content .tab-pane {\n  display: none;\n  padding: 0;\n  height: 100%;\n  position: relative;\n}\nbody #layout .tab-content .tab-pane .workspace .palette {\n  position: absolute;\n  height: 100%;\n  width: 250px;\n  padding: 0;\n  z-index: 1000;\n}\nbody #layout .tab-content .tab-pane .workspace .palette #filter {\n  top: 90px;\n  position: absolute;\n  font-size: 20px;\n  width: 245px;\n  left: 2px;\n}\nbody #layout .tab-content .tab-pane .workspace .palette #paletteElementsScroll {\n  position: absolute;\n  width: 248px;\n  margin: 0;\n  padding: 0;\n  top: 150px;\n  bottom: 0px;\n  overflow: auto;\n}\nbody #layout .tab-content .tab-pane .workspace .palette #paletteElementsScroll #paletteElements {\n  position: absolute;\n  width: 100%;\n  margin: 0;\n  padding: 0;\n  overflow: hidden;\n}\nbody #layout .tab-content .tab-pane .workspace .palette #paletteElementsScroll #paletteElements .mix {\n  height: 125px;\n  border: 1px solid #f0f0f0;\n  /* to avoid doubling the border of the grid */\n  margin: -1px 0 0 -1px;\n}\nbody #layout .tab-content .tab-pane .workspace .toolbar {\n  position: absolute;\n  height: 60px;\n  right: 0;\n  top: 0;\n  left: 250px;\n}\nbody #layout .tab-content .tab-pane .workspace .toolbar .icon {\n  width: 50px;\n  height: 50px;\n  margin: 5px;\n  padding: 0px;\n}\nbody #layout .tab-content .tab-pane .workspace .content {\n  position: absolute;\n  right: 0px;\n  top: 60px;\n  bottom: 0px;\n  left: 250px;\n  overflow: scroll;\n}\nbody #layout .tab-content .tab-pane .workspace .content .canvas {\n  width: 6000px;\n  height: 6000px;\n}\nbody #layout .tab-content .active {\n  display: block;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n/* CSS from the cool website: http://cssarrowplease.com/ */\n.draw2d_tooltip {\n  position: absolute;\n  background: #88b7d5;\n  /* with border\n  border: 2px solid #c2e1f5;\n */\n  padding: 10px;\n  border-radius: 6px;\n}\n.draw2d_tooltip:after,\n.draw2d_tooltip:before {\n  bottom: 100%;\n  border: solid transparent;\n  content: \" \";\n  height: 0;\n  width: 0;\n  position: absolute;\n  pointer-events: none;\n}\n.draw2d_tooltip:after {\n  border-color: rgba(136, 183, 213, 0);\n  border-bottom-color: #88b7d5;\n  border-width: 4px;\n  left: 50%;\n  margin-left: -4px;\n}\n/* with border\n.draw2d_tooltip:before {\n  border-color: rgba(194, 225, 245, 0);\n  border-bottom-color: #c2e1f5;\n  border-width: 8px;\n  left: 50%;\n  margin-left: -8px;\n}\n*/\n#codePreviewDialog .modal-content {\n  border-radius: 0;\n}\n#codePreviewDialog .btn-primary {\n  background-color: #B2E2F2;\n  border: 0;\n}\n#codePreviewDialog .prettyprint {\n  max-height: 450px;\n  max-height: 250px;\n  overflow: scroll;\n  border-radius: 0;\n}\n.modal-content {\n  border-radius: 2px;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n}\n.modal-backdrop.in {\n  opacity: 0.3;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"true\"] {\n  font-weight: bold;\n  color: #282a30;\n}\n.githubFileDialog .githubNavigation .glyphicon,\n.githubFileDialog .githubNavigation .fa {\n  font-size: 20px;\n  padding-right: 10px;\n  color: #282a30;\n}\n.githubFileDialog .githubNavigation a.list-group-item:hover {\n  text-decoration: underline;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"false\"][data-type=\"file\"] {\n  color: gray;\n  cursor: default;\n  text-decoration: none !important;\n}\n.githubFileDialog .githubNavigation *[data-draw2d=\"false\"][data-type=\"file\"] .fa {\n  color: gray;\n}\n#githubNewFileDialog .githubFilePreview {\n  font-size: 115px;\n  color: #282a30;\n}\n#githubFileSelectDialog .githubNavigation {\n  height: 300px;\n  overflow: scroll;\n}\n#githubSaveFileDialog .githubFilePreview {\n  font-size: 100px;\n}\n#githubFileSaveAsDialog .githubFilePreview {\n  max-width: 200px;\n  max-height: 200px;\n}\n#githubFileSaveAsDialog .githubNavigation {\n  height: 250px;\n  overflow: scroll;\n}\n#markdownDialog .modal-body {\n  max-height: calc(100vh - 200px);\n  overflow-y: auto;\n}\n#markdownDialog .modal-dialog {\n  width: 70%;\n}\n#markdownDialog .modal-content {\n  border-radius: 0;\n}\n#markdownDialog .btn-primary {\n  background-color: #B2E2F2;\n  border: 0;\n}\n#markdownDialog .html table {\n  font-family: Arial, Helvetica, sans-serif;\n  color: #666;\n  font-size: 12px;\n  text-shadow: 1px 1px 0px #fff;\n  background: #eaebec;\n  margin: 20px;\n  margin-left: 0;\n  border: #ccc 1px solid;\n  -moz-border-radius: 3px;\n  -webkit-border-radius: 3px;\n  border-radius: 3px;\n  -moz-box-shadow: 0 1px 2px #d1d1d1;\n  -webkit-box-shadow: 0 1px 2px #d1d1d1;\n  box-shadow: 0 1px 2px #d1d1d1;\n}\n#markdownDialog .html table th {\n  padding: 21px 25px 22px 25px;\n  border-top: 1px solid #fafafa;\n  border-bottom: 1px solid #e0e0e0;\n}\n#markdownDialog .html table th:first-child {\n  text-align: left;\n  padding-left: 20px;\n}\n#markdownDialog .html table tr:first-child th:first-child {\n  -moz-border-radius-topleft: 3px;\n  -webkit-border-top-left-radius: 3px;\n  border-top-left-radius: 3px;\n}\n#markdownDialog .html table tr:first-child th:last-child {\n  -moz-border-radius-topright: 3px;\n  -webkit-border-top-right-radius: 3px;\n  border-top-right-radius: 3px;\n}\n#markdownDialog .html table tr {\n  text-align: center;\n  padding-left: 20px;\n}\n#markdownDialog .html table tr td:first-child {\n  text-align: left;\n  padding-left: 20px;\n  border-left: 0;\n}\n#markdownDialog .html table tr td {\n  padding: 18px;\n  border-top: 1px solid #ffffff;\n  border-bottom: 1px solid #e0e0e0;\n  border-left: 1px solid #e0e0e0;\n}\n#markdownDialog .html tbody tr:nth-child(odd) {\n  background: #fafafa;\n}\n#markdownDialog .html tbody tr:nth-child(even) {\n  background: #f3f3f3;\n}\n#markdownDialog .html table tr:last-child td {\n  border-bottom: 0;\n}\n#markdownDialog .html table tr:last-child td:first-child {\n  -moz-border-radius-bottomleft: 3px;\n  -webkit-border-bottom-left-radius: 3px;\n  border-bottom-left-radius: 3px;\n}\n#markdownDialog .html table tr:last-child td:last-child {\n  -moz-border-radius-bottomright: 3px;\n  -webkit-border-bottom-right-radius: 3px;\n  border-bottom-right-radius: 3px;\n}\n.confirm-dialog-btn-confirm {\n  background-color: #C71D3D;\n}\n.context-menu-list {\n  margin: 0;\n  padding: 0;\n  min-width: 120px;\n  max-width: 250px;\n  display: inline-block;\n  position: absolute;\n  list-style-type: none;\n  border: 1px solid #DDD;\n  background: white;\n  border-left: 2px solid #B2E2F2;\n  -webkit-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -moz-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -ms-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  -o-box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);\n  font-size: 15px;\n  white-space: nowrap;\n}\n.context-menu-item {\n  padding: 5px 5px 5px 24px;\n  position: relative;\n  -webkit-user-select: none;\n  -moz-user-select: -moz-none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.context-menu-separator {\n  padding-bottom: 0;\n  border-bottom: 1px solid #DDD;\n}\n.context-menu-item > label > input,\n.context-menu-item > label > textarea {\n  -webkit-user-select: text;\n  -moz-user-select: text;\n  -ms-user-select: text;\n  user-select: text;\n}\n.context-menu-item.hover {\n  cursor: pointer;\n  background-color: #B2E2F2;\n  color: white;\n}\n.context-menu-item.disabled {\n  color: #666;\n}\n.context-menu-input.hover,\n.context-menu-item.disabled.hover {\n  cursor: default;\n  background-color: #EEE;\n}\n.context-menu-submenu:after {\n  content: \">\";\n  color: #666;\n  position: absolute;\n  top: 0;\n  right: 3px;\n  z-index: 1;\n}\n/* icons\n    #protip:\n    In case you want to use sprites for icons (which I would suggest you do) have a look at\n    http://css-tricks.com/13224-pseudo-spriting/ to get an idea of how to implement\n    .context-menu-item.icon:before {}\n */\n.context-menu-item.icon {\n  min-height: 18px;\n}\n.context-menu-item.icon:before {\n  position: relative;\n  left: -15px;\n  font-size: 19px;\n}\n/* vertically align inside labels */\n.context-menu-input > label > * {\n  vertical-align: top;\n}\n/* position checkboxes and radios as icons */\n.context-menu-input > label > input[type=\"checkbox\"],\n.context-menu-input > label > input[type=\"radio\"] {\n  margin-left: -17px;\n}\n.context-menu-input > label > span {\n  margin-left: 5px;\n}\n.context-menu-input > label,\n.context-menu-input > label > input[type=\"text\"],\n.context-menu-input > label > textarea,\n.context-menu-input > label > select {\n  display: block;\n  width: 100%;\n  -webkit-box-sizing: border-box;\n  -moz-box-sizing: border-box;\n  -ms-box-sizing: border-box;\n  -o-box-sizing: border-box;\n  box-sizing: border-box;\n}\n.context-menu-input > label > textarea {\n  height: 100px;\n}\n.context-menu-item > .context-menu-list {\n  display: none;\n  /* re-positioned by js */\n  right: -5px;\n  top: 5px;\n}\n.context-menu-item.hover > .context-menu-list {\n  display: block;\n}\n.context-menu-accesskey {\n  text-decoration: underline;\n}\n#probe_hint {\n  display: block;\n  padding: 30px;\n  color: white;\n  font-size: 20px;\n  font-weight: 100;\n}\n#probe_window {\n  background: #009DAC;\n  bottom: 0;\n  height: 0;\n  display: none;\n  color: white;\n  position: absolute;\n  right: 0;\n  left: 250px;\n}\n#probe_window span {\n  font-size: 45px;\n  vertical-align: middle;\n  padding-right: 10px;\n}\n#probe_window_stick {\n  font-size: 34px;\n  position: absolute;\n  right: 10px;\n  top: -5px;\n  cursor: pointer;\n}\n#probeSortable {\n  padding-left: 0;\n}\n#probeSortable li {\n  list-style-type: none;\n  padding-top: 10px;\n  padding-left: 0;\n}\n#probeSortable li path {\n  stroke: white;\n}\n#probeSortable li div {\n  cursor: pointer;\n  display: inline-block;\n  padding-left: 10px;\n  padding-right: 10px;\n  position: absolute;\n  background: rgba(0, 157, 172, 0.8);\n}\n#probeSortable li:nth-child(even) {\n  background: #04A9B9;\n}\n#probeSortable li:nth-child(even) div {\n  background: rgba(4, 169, 185, 0.5);\n}\n#probeSortable .inplaceEdit {\n  background: rgba(255, 255, 255, 0.1);\n}\nellipse.draw2d_shape_basic_LineStartResizeHandle,\nellipse.draw2d_shape_basic_LineEndResizeHandle,\nrect.draw2d_policy_line_OrthogonalSelectionFeedbackPolicy_ResizeHandle {\n  fill: #B2E2F2;\n}\nellipse.draw2d_InputPort,\nellipse.DecoratedInputPort,\nellipse.draw2d_OutputPort {\n  fill: #C71D3D;\n}\n.vertical-text {\n  transform: rotate(-90deg);\n  white-space: nowrap;\n  top: 200px;\n  left: 20px;\n  font-size: 50px;\n  color: white;\n}\n#layout #leftTabStrip {\n  background-color: #C71D3D;\n}\n#layout #leftTabStrip:after {\n  content: \"BrainBox\";\n  -webkit-transform: rotate(-90deg) translate(-90px, -60px);\n  -moz-transform: rotate(-90deg) translate(-90px, -60px);\n  -ms-transform: rotate(-90deg) translate(-90px, -60px);\n  transform: rotate(-90deg) translate(-90px, -60px);\n  font-size: 50px;\n  color: white;\n  white-space: nowrap;\n  opacity: 0.4;\n}\n#layout #leftTabStrip li.active a:hover {\n  background-color: white;\n}\n#layout #leftTabStrip li.active svg path[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg g[stroke] {\n  stroke: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg rect[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li.active svg circle[fill] {\n  fill: #C71D3D !important;\n}\n#layout #leftTabStrip li a {\n  padding: 4px;\n}\n#layout #leftTabStrip li a:hover {\n  background-color: rgba(0, 0, 0, 0.1);\n}\n#layout #leftTabStrip li a svg path[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg g[stroke] {\n  stroke: white !important;\n}\n#layout #leftTabStrip li a svg rect[fill] {\n  fill: white !important;\n}\n#layout #leftTabStrip li a svg circle[fill] {\n  fill: white !important;\n}\n.shadow {\n  border: 1px solid #B2E2F2;\n  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);\n  background-color: white;\n}\n.ui-draggable-dragging {\n  z-index: 10000;\n}\ntext.highlightOnHover:hover {\n  cursor: pointer;\n  font-weight: bold;\n}\nellipse.highlightOnHover:hover {\n  cursor: pointer;\n}\nrect.Raft {\n  fill: rgba(28, 155, 171, 0.1);\n}\n#configMenuIcon {\n  font-size: 25px;\n  cursor: pointer;\n  opacity: 0.3;\n}\n#configMenuIcon:hover {\n  opacity: 1;\n  color: #B2E2F2;\n}\n#paletteElementsOverlay {\n  bottom: 0;\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  background-color: rgba(255, 255, 255, 0.7);\n  display: none;\n}\n#canvas_zoom {\n  position: fixed;\n  bottom: 20px;\n  right: 20px;\n  background-color: rgba(28, 155, 171, 0.05);\n  border-radius: 8px;\n}\n#canvas_zoom button {\n  background-color: transparent;\n  font-weight: 300;\n  padding: 5px;\n  padding-left: 10px;\n  padding-right: 10px;\n  border: 1px solid transparent;\n  outline: none;\n}\n#canvas_zoom button:hover {\n  border: 1px solid #B2E2F2 !important;\n}\n#figureConfigDialog {\n  display: none;\n  background-color: white;\n  border: 1px solid rgba(0, 0, 0, 0.2);\n  padding: 10px;\n  margin-left: 30px;\n  border-left: 3px solid #B2E2F2;\n  border-radius: 4px;\n}\n#figureConfigDialog .header {\n  font-size: 16px;\n  font-weight: 600;\n  padding-bottom: 15px;\n}\n#figureConfigDialog .figureAddLabel {\n  font-size: 12px;\n  font-weight: 200;\n  cursor: pointer;\n}\n#figureConfigDialog .figureAddLabel:hover {\n  color: #B2E2F2;\n}\n#figureConfigDialog:after {\n  content: '';\n  display: block;\n  position: absolute;\n  left: -20px;\n  top: 10px;\n  width: 0;\n  height: 0;\n  border-right: 10px solid #B2E2F2;\n  border-top: 10px solid transparent;\n  border-left: 10px solid transparent;\n  border-bottom: 10px solid transparent;\n}\n.pallette_item {\n  text-align: center;\n}\n/*\n@keyframes spinner {\n  to {transform: rotate(360deg);}\n}\n\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  width: 20px;\n  height: 20px;\n  margin-top: -10px;\n  margin-left: -10px;\n  border-radius: 50%;\n  border: 2px solid transparent;\n  border-top-color: #07d;\n  border-bottom-color: #07d;\n  animation: spinner .8s ease infinite;\n}\n*/\n@keyframes spinner {\n  to {\n    transform: rotate(360deg);\n  }\n}\n.spinner:before {\n  content: '';\n  box-sizing: border-box;\n  position: absolute;\n  top: 35%;\n  left: 50%;\n  width: 30px;\n  height: 30px;\n  margin-top: -15px;\n  margin-left: -15px;\n  border-radius: 50%;\n  border: 2px solid #ccc;\n  border-top-color: #07d;\n  animation: spinner 0.6s linear infinite;\n}\n.workspace .palette {\n  box-shadow: 5px 0 20px -3px rgba(31, 73, 125, 0.3), -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  border-right: 1px solid rgba(74, 74, 74, 0.5);\n  border-left: 1px solid rgba(74, 74, 74, 0.5);\n}\n.workspace .palette #filter {\n  outline: none;\n}\n.workspace .palette .title {\n  left: 10px;\n  right: 0px;\n  top: 10px;\n  position: absolute;\n}\n.workspace .palette .title img {\n  padding-right: 20px;\n  position: absolute;\n  left: 10px;\n}\n.workspace .palette .title div {\n  position: absolute;\n  left: 90px;\n}\n.workspace .palette .title div h1 {\n  font-size: 25px;\n  font-weight: 200;\n  line-height: 45px;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n}\n.workspace .palette .title div h2 {\n  font-size: 15px;\n  font-weight: 200;\n  margin: 0;\n  padding: 0;\n  text-align: left;\n  letter-spacing: 4px;\n}\n.workspace .palette .pallette_item {\n  padding: 0px;\n}\n.workspace .palette .pallette_item > div {\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  border: 1px solid transparent;\n}\n.workspace .palette .pallette_item > div img {\n  position: absolute;\n  top: 0px;\n  bottom: 0;\n  margin: auto;\n  left: 50%;\n  transform: translate(-50%, -10px);\n}\n.workspace .palette .pallette_item > div div {\n  position: absolute;\n  padding-bottom: 2px;\n  width: 100%;\n  bottom: 0;\n  padding-top: 2px;\n  background-color: rgba(0, 0, 0, 0.05);\n  cursor: default;\n}\n.workspace .palette .pallette_item .glowBorder {\n  border: 1px solid #B2E2F2;\n}\n.workspace .palette .draw2d_droppable {\n  cursor: move;\n  max-height: 80px;\n}\n.workspace .palette .request {\n  font-size: 10px;\n  color: #B2E2F2;\n}\n.workspace .palette .request .icon {\n  cursor: pointer;\n  font-size: 75px;\n  margin-top: 10px;\n  margin-bottom: 10px;\n}\n.workspace .content .canvas {\n  -webkit-touch-callout: none;\n  -webkit-user-select: none;\n  -khtml-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n.nav-tabs > li.active > a,\n.nav-tabs > li.active > a:hover,\n.nav-tabs > li.active > a:focus {\n  border: 0;\n}\n#files {\n  overflow-y: scroll;\n  padding: 30px !important;\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n}\n#files .deleteIcon {\n  position: absolute;\n  right: 24px;\n  width: 24px;\n  color: #282a30;\n  top: 8px;\n  cursor: pointer;\n  border: 1px solid black;\n  border-radius: 50%;\n  background-color: rgba(255, 0, 0, 0.5);\n}\n#files .deleteIcon:hover {\n  background-color: rgba(255, 0, 0, 0.9);\n}\n#files .thumb .thumbnail img {\n  cursor: pointer;\n}\n#files .thumb .filenameInplaceEdit {\n  font-size: 18px;\n  color: #282a30;\n  margin-top: 5px;\n}\n#files .thumb h4 {\n  font-size: 18px;\n  color: #282a30;\n}\n#files .thumbAdd {\n  color: #282a30;\n  color: #0078f2;\n  border: 1px solid rgba(0, 120, 242, 0.33);\n  border-radius: 6px;\n  cursor: pointer;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#files .thumbAdd div {\n  font-size: 160px;\n  text-align: center;\n}\n#files .thumbAdd h4 {\n  text-align: center;\n}\n#files .thumbAdd:hover {\n  border: 1px solid #0078f2;\n  transition: all 1s;\n  -webkit-transition: all 1s;\n}\n#home {\n  box-shadow: -6px 0 20px -4px rgba(31, 73, 125, 0.3);\n  padding: 40px !important;\n  overflow: auto;\n  background-size: cover;\n}\n#home .branding {\n  color: #282a30;\n}\n#home .hacksterProjectCard {\n  border: 1px solid black;\n}\n#home .paragraph h3 {\n  color: #282a30;\n  padding-top: 45px;\n}\n#home .paragraph .block {\n  padding-bottom: 30px;\n}\n#home .teaser {\n  margin-bottom: 30px;\n  background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, rgba(255, 255, 255, 0.4) 70%, #fff 100%), radial-gradient(ellipse at center, rgba(247, 249, 250, 0.7) 0%, rgba(247, 249, 250, 0) 60%), linear-gradient(to bottom, rgba(247, 249, 250, 0) 0%, #f7f9fa 100%);\n}\n#home .teaser .title {\n  color: #282a30;\n  font-weight: 200;\n  font-size: 4vw;\n  white-space: nowrap;\n  margin-bottom: 10px;\n}\n#home .teaser .title img {\n  padding-right: 40px;\n  height: 100px;\n}\n#home .teaser .slogan {\n  font-size: 2vw;\n  font-weight: 200;\n  color: #34495e;\n}\n#home .introText {\n  font-size: 20px;\n  font-weight: 200;\n  color: #34495e;\n}\n#home footer {\n  text-align: center;\n  margin-top: 100px;\n  color: #282a30;\n}\n#home footer a {\n  color: #282a30;\n  text-decoration: underline;\n}\n.raspiConnection {\n  color: red !important;\n  border: 1px solid red;\n  padding: 10px;\n  border-radius: 5px;\n}\n.morph_btn {\n  display: inline-block;\n  width: 4em;\n  height: 4em;\n  background-color: #FFF;\n  color: #9e9e9e;\n  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);\n  border-radius: 2em;\n  overflow: hidden;\n  -webkit-transform: translateZ(0);\n  transform: translateZ(0);\n  -webkit-transition: all 500ms ease;\n  -moz-transition: all 500ms ease;\n  -ms-transition: all 500ms ease;\n  -o-transition: all 500ms ease;\n  transition: all 500ms ease;\n  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);\n}\n.morph_btn:hover {\n  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);\n}\n.morph_btn:active {\n  -webkit-transform: scale(1.1, 1.1);\n  transform: scale(1.1, 1.1);\n}\n.morph_btn:focus {\n  outline: 0;\n  border: none;\n  color: rgba(0, 0, 0, 0);\n}\n.morph_btn > span {\n  display: block;\n  position: relative;\n  width: 2em;\n  height: 2em;\n  -webkit-transition: all 500ms ease;\n  -moz-transition: all 500ms ease;\n  -ms-transition: all 500ms ease;\n  -o-transition: all 500ms ease;\n  transition: all 500ms ease;\n  overflow: hidden;\n  margin: 1em;\n}\n.morph_btn > span > span {\n  display: block;\n  background-color: #C71D3D;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 2em;\n  height: 2em;\n  -webkit-transition: all 500ms ease;\n  -moz-transition: all 500ms ease;\n  -ms-transition: all 500ms ease;\n  -o-transition: all 500ms ease;\n  transition: all 500ms ease;\n  border: 1px solid transparent;\n}\n.morph_btn.play > span {\n  -webkit-transform: translate(1em, 0) scale(1.6, 1);\n  transform: translate(1em, 0) scale(1.6, 1);\n}\n.morph_btn.play > span > span {\n  -webkit-transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);\n  background-color: #B2E2F2;\n}\n.morph_btn.pause > span > span {\n  -webkit-transform: scale(0.4, 1) translate(-1.6em, 0);\n  transform: scale(0.4, 1) translate(-1.6em, 0);\n}\n.morph_btn.pause > span > span.s3 {\n  -webkit-transform: scale(0.4, 1) translate(1.6em, 0);\n  transform: scale(0.4, 1) translate(1.6em, 0);\n}\n.drop {\n  display: block;\n  position: absolute;\n  background: #CCC;\n  border-radius: 100%;\n  -webkit-transform: scale(0);\n  transform: scale(0);\n  pointer-events: none;\n  width: 100%;\n  height: 100%;\n}\n.drop:before {\n  display: block;\n  position: absolute;\n  content: \"\";\n  background-color: #EEE;\n  border-radius: 100%;\n  width: 100%;\n  height: 100%;\n  top: 0;\n  left: 0;\n  -webkit-transform: scale(0);\n  transform: scale(0);\n}\n.slider-handle {\n  border-radius: 50%;\n  background-color: #C71D3D;\n}\n#simulationStartStop {\n  position: absolute;\n  right: 30px;\n  top: 30px;\n  z-index: 30000;\n}\n#simulationBaseTimer {\n  width: 200px;\n}\n.simulationBase label {\n  display: block;\n  opacity: 0.5;\n  font-size: 10px;\n}\n.workspace .toolbar {\n  background-color: #B2E2F2;\n  min-width: 700px;\n}\n.workspace .toolbar .group {\n  padding-right: 20px;\n  display: inline-block;\n  vertical-align: top;\n}\n.workspace .toolbar .group div {\n  vertical-align: top;\n}\n.workspace .toolbar .group span {\n  vertical-align: top;\n}\n.workspace .toolbar label {\n  color: #777;\n  font-weight: 200;\n}\n.workspace .toolbar .checkbox-inline {\n  top: 10px;\n}\n.workspace .toolbar .checkbox-inline label {\n  color: white;\n}\n.workspace .toolbar .icon {\n  cursor: pointer;\n  border: 1px solid transparent;\n  position: relative;\n  display: inline-block;\n  text-align: center;\n  color: #777;\n  font-size: 45px;\n}\n.workspace .toolbar .icon:hover {\n  border: 1px solid #B2E2F2;\n}\n.workspace .toolbar .icon.disabled {\n  opacity: 0.2;\n  border: 1px solid transparent;\n}\n", ""]);
 
 // exports
 
@@ -37879,102 +37829,6 @@ var __WEBPACK_AMD_DEFINE_RESULT__;/*global define:false */
     }
 }) (typeof window !== 'undefined' ? window : null, typeof  window !== 'undefined' ? document : null);
 
-
-/***/ }),
-
-/***/ "../../node_modules/octicons/build/font/octicons.css":
-/*!*************************************************************************************************!*\
-  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/octicons/build/font/octicons.css ***!
-  \*************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-
-var content = __webpack_require__(/*! !../../../css-loader!./octicons.css */ "../../node_modules/css-loader/index.js!../../node_modules/octicons/build/font/octicons.css");
-
-if(typeof content === 'string') content = [[module.i, content, '']];
-
-var transform;
-var insertInto;
-
-
-
-var options = {"hmr":true}
-
-options.transform = transform
-options.insertInto = undefined;
-
-var update = __webpack_require__(/*! ../../../style-loader/lib/addStyles.js */ "../../node_modules/style-loader/lib/addStyles.js")(content, options);
-
-if(content.locals) module.exports = content.locals;
-
-if(false) {}
-
-/***/ }),
-
-/***/ "../../node_modules/octicons/build/font/octicons.eot":
-/*!*************************************************************************************************!*\
-  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/octicons/build/font/octicons.eot ***!
-  \*************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/d038ccbc4a99be24f33a54b482b2422e.eot";
-
-/***/ }),
-
-/***/ "../../node_modules/octicons/build/font/octicons.eot?ef21c39f0ca9b1b5116e5eb7ac5eabe6":
-/*!**********************************************************************************************************************************!*\
-  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/octicons/build/font/octicons.eot?ef21c39f0ca9b1b5116e5eb7ac5eabe6 ***!
-  \**********************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/d038ccbc4a99be24f33a54b482b2422e.eot";
-
-/***/ }),
-
-/***/ "../../node_modules/octicons/build/font/octicons.svg?ef21c39f0ca9b1b5116e5eb7ac5eabe6":
-/*!**********************************************************************************************************************************!*\
-  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/octicons/build/font/octicons.svg?ef21c39f0ca9b1b5116e5eb7ac5eabe6 ***!
-  \**********************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/190e72572ee84190f4777765fa49fc47.svg";
-
-/***/ }),
-
-/***/ "../../node_modules/octicons/build/font/octicons.ttf?ef21c39f0ca9b1b5116e5eb7ac5eabe6":
-/*!**********************************************************************************************************************************!*\
-  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/octicons/build/font/octicons.ttf?ef21c39f0ca9b1b5116e5eb7ac5eabe6 ***!
-  \**********************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/e0d4a324833e13be7d4fa762146d0a71.ttf";
-
-/***/ }),
-
-/***/ "../../node_modules/octicons/build/font/octicons.woff2?ef21c39f0ca9b1b5116e5eb7ac5eabe6":
-/*!************************************************************************************************************************************!*\
-  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/octicons/build/font/octicons.woff2?ef21c39f0ca9b1b5116e5eb7ac5eabe6 ***!
-  \************************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/de59a97248b44599e6747a27a943f738.woff2";
-
-/***/ }),
-
-/***/ "../../node_modules/octicons/build/font/octicons.woff?ef21c39f0ca9b1b5116e5eb7ac5eabe6":
-/*!***********************************************************************************************************************************!*\
-  !*** /Users/d023280/Documents/workspace/brainbox/node_modules/octicons/build/font/octicons.woff?ef21c39f0ca9b1b5116e5eb7ac5eabe6 ***!
-  \***********************************************************************************************************************************/
-/*! no static exports found */
-/***/ (function(module, exports) {
-
-module.exports = "js/webpack/ee5b1bee959a95bd43b223ec901d098a.woff";
 
 /***/ }),
 

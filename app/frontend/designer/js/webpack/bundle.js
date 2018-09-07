@@ -245,6 +245,12 @@ var Application = function () {
       }
     } catch (e) {}
 
+    $("body").delegate(".mousetrap-pause", "focus", function () {
+      Mousetrap.pause();
+    }).delegate(".mousetrap-pause", "blur", function () {
+      Mousetrap.unpause();
+    });
+
     // automatic add the configuration to the very first shape
     // in the document as userData
     //
@@ -575,32 +581,59 @@ Object.defineProperty(exports, "__esModule", {
 //
 exports.default = {
 
-  gpio: {
+  raspi: {
     set: function set(pin, value) {},
     get: function get(pin) {
       return false;
     }
   },
 
-  webusb: {
+  arduino: {
     set: function set(pin, value) {},
     get: function get(pin) {
       return false;
-    }
-  },
-
-  bloc: {
-    set: function set(blocId, value) {},
-    get: function get(blocId) {
-      return false;
-    },
-    on: function on() {},
-    off: function off() {},
-    isConnected: function isConnected(blocId) {
-      return true;
     }
   }
 };
+module.exports = exports["default"];
+
+/***/ }),
+
+/***/ "./app/frontend/designer/js/LabelInplaceEditor.js":
+/*!********************************************************!*\
+  !*** ./app/frontend/designer/js/LabelInplaceEditor.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = draw2d.ui.LabelInplaceEditor.extend({
+
+  NAME: "LabelInplaceEditor",
+
+  /**
+   * @constructor
+   *
+   */
+  init: function init(attr, setter, getter) {
+    this._super({
+      onStart: function onStart() {
+        Mousetrap.pause();
+      },
+      onCancel: function onCancel() {
+        Mousetrap.unpause();
+      },
+      onCommit: function onCommit() {
+        Mousetrap.unpause();
+      }
+    }, setter, getter);
+  }
+});
 module.exports = exports["default"];
 
 /***/ }),
@@ -1410,6 +1443,12 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _FigureTest = __webpack_require__(/*! ./FigureTest */ "./app/frontend/designer/js/dialog/FigureTest.js");
+
+var _FigureTest2 = _interopRequireDefault(_FigureTest);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var FigureCodeEdit = function () {
@@ -1418,7 +1457,7 @@ var FigureCodeEdit = function () {
   }
 
   _createClass(FigureCodeEdit, [{
-    key: 'show',
+    key: "show",
     value: function show() {
       Mousetrap.pause();
       var code = shape_designer.app.getConfiguration("code");
@@ -1500,7 +1539,7 @@ var FigureCodeEdit = function () {
       $("#test_run").on("click", function () {
         var code = editor.getValue();
         shape_designer.app.setConfiguration({ code: code });
-        new shape_designer.dialog.FigureTest().show();
+        new _FigureTest2.default().show();
       });
     }
   }]);
@@ -1509,7 +1548,7 @@ var FigureCodeEdit = function () {
 }();
 
 exports.default = FigureCodeEdit;
-module.exports = exports['default'];
+module.exports = exports["default"];
 
 /***/ }),
 
@@ -2092,10 +2131,12 @@ var FileSave = function () {
           $(event.currentTarget).find('input:first').focus();
         });
         $("#githubSaveFileDialog").modal("show");
+        Mousetrap.pause();
 
         // Button: Commit to GitHub
         //
         $("#githubSaveFileDialog .okButton").off('click').on("click", function () {
+          Mousetrap.unpause();
           var writer = new draw2d.io.json.Writer();
           writer.marshal(canvas, function (json) {
             var newName = $("#githubSaveFileDialog .githubFileName").val();
@@ -2178,8 +2219,6 @@ var FileSaveAs = function () {
         $("#githubFileSaveAsDialog .okButton").prop("disabled", false);
         _this.fetchPathContent(storage, storage.currentDir);
 
-        $('#githubFileSaveAsDialog').modal('show');
-
         $("#githubFileSaveAsDialog .githubFilePreview").attr("src", imageDataUrl);
         $("#githubFileSaveAsDialog .githubFileName").val(storage.currentFile);
 
@@ -2187,10 +2226,12 @@ var FileSaveAs = function () {
           $(event.currentTarget).find('input:first').focus();
         });
         $("#githubFileSaveAsDialog").modal("show");
+        Mousetrap.pause();
 
         // Button: Commit to GitHub
         //
         $("#githubFileSaveAsDialog .okButton").off('click').on("click", function () {
+          Mousetrap.unpause();
           var writer = new draw2d.io.json.Writer();
           writer.marshal(canvas, function (json) {
             var title = $("#githubFileSaveAsDialog .githubFileName").val();
@@ -2404,7 +2445,7 @@ exports.default = shape_designer.figure.ExtLabel = draw2d.shape.basic.Label.exte
     this.filters.add(new shape_designer.filter.FontSizeFilter());
     this.filters.add(new shape_designer.filter.FontColorFilter());
 
-    this.installEditor(new draw2d.ui.LabelInplaceEditor());
+    this.installEditor(new LabelInplaceEditor());
   },
 
   getPotentialFilters: function getPotentialFilters() {
@@ -3675,7 +3716,7 @@ exports.default = shape_designer.filter.BlurFilter = function (_Filter) {
     key: "insertPane",
     value: function insertPane(figure, $parent) {
       $parent.append('<div id="' + this.cssScope + '_filter_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_width_panel">' + '     Blur' + '    <span id="button_remove_' + this.cssScope + '"><img class="svg icon pull-right" src="./images/dialog_close.svg"/></span></span>' + '</div>' + ' <div class="panel-body collapse in" id="' + this.cssScope + '_blur_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '       <input id="filter_blur" type="text" value="' + figure.getBlur() + '"  name="filter_blur" class="form-control" />' + '   </div>' + ' </div>' + '</div>');
+      '       <input id="filter_blur" type="text" value="' + figure.getBlur() + '"  name="filter_blur" class="mousetrap-pause form-control" />' + '   </div>' + ' </div>' + '</div>');
       inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("#filter_blur").TouchSpin({
@@ -3754,7 +3795,7 @@ exports.default = shape_designer.filter.FanoutFilter = function (_Filter) {
     key: "insertPane",
     value: function insertPane(figure, $parent) {
       $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_width_panel">' + '     Maximal fan out' + '</div>' + ' <div class="panel-body collapse in" id="' + this.cssScope + '_width_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '       <input id="filter_' + this.cssScope + '_fanout" type="text" value="' + figure.getMaxFanOut() + '" name="filter_' + this.cssScope + '_fanout" class="form-control" />' + '   </div>' + ' </div>' + '</div>');
+      '       <input id="filter_' + this.cssScope + '_fanout" type="text" value="' + figure.getMaxFanOut() + '" name="filter_' + this.cssScope + '_fanout" class="mousetrap-pause form-control" />' + '   </div>' + ' </div>' + '</div>');
       inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("input[name='filter_" + this.cssScope + "_fanout']").TouchSpin({
@@ -3834,7 +3875,7 @@ exports.default = shape_designer.filter.FillColorFilter = function (_Filter) {
     value: function insertPane(figure, $parent) {
 
       $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#color_fill_panel">' + '    Color Fill' + '    <span id="button_remove_FillColorFilter"><img class="svg icon pull-right" src="./images/dialog_close.svg"/><span>' + ' </div>' + ' <div class="panel-body collapse in" id="color_fill_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '      <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="filter_color_fill" type="text" value="" name="filter_color_fill" class="form-control color"/>' + '       </div>' + '    </div>' + ' </div>' + '</div>');
+      '      <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="filter_color_fill" type="text" value="" name="filter_color_fill" class="mousetrap-pause form-control color"/>' + '       </div>' + '    </div>' + ' </div>' + '</div>');
       inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       var picker = this.colorPicker = new _jscolor2.default.color(document.getElementById('filter_color_fill'), {});
@@ -3990,7 +4031,7 @@ exports.default = shape_designer.filter.FontColorFilter = function (_Filter) {
       var _this2 = this;
 
       $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#color_fill_panel">' + '    Font Color' + '    <span id="button_remove_FillColorFilter"><img class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' + ' </div>' + ' <div class="panel-body collapse in" id="color_fill_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '      <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="filter_color_fill" type="text" value="" name="filter_color_fill" class="form-control color"/>' + '       </div>' + '    </div>' + ' </div>' + '</div>');
+      '      <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="filter_color_fill" type="text" value="" name="filter_color_fill" class="mousetrap-pause form-control color"/>' + '       </div>' + '    </div>' + ' </div>' + '</div>');
       inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       var picker = this.colorPicker = new _jscolor2.default.color(document.getElementById('filter_color_fill'), {});
@@ -4075,7 +4116,7 @@ exports.default = shape_designer.filter.FontSizeFilter = function (_Filter) {
       var _this2 = this;
 
       $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#fontsize_width_panel">' + '     Font Size' + '    <span id="button_remove_FontSizeFilter"><img  class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' + '</div>' + ' <div class="panel-body collapse in" id="fontsize_width_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '       <input id="filter_fontsize" type="text" value="' + figure.getFontSize() + '" name="filter_fontsize" class="form-control" />' + '   </div>' + ' </div>' + '</div>');
+      '       <input id="filter_fontsize" type="text" value="' + figure.getFontSize() + '" name="filter_fontsize" class="mousetrap-pause form-control" />' + '   </div>' + ' </div>' + '</div>');
       inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("#filter_fontsize").TouchSpin({
@@ -4177,7 +4218,7 @@ exports.default = shape_designer.filter.LinearGradientFilter = function (_Filter
       var _this2 = this;
 
       $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_panel">' + '     Linear Gradient' + '    <span id="button_remove_' + this.cssScope + '"><img  class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' + '</div>' + ' <div class="panel-body collapse in" id="' + this.cssScope + '_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '      <div class="input-group text-center" style="width:100%" >' + '           <div id="' + this.cssScope + '_angle" />' + '      </div> ' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="' + this.cssScope + '_color1" type="text" value="' + this.startColor + '" class="form-control color"/>' + '       </div>' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="' + this.cssScope + '_color2" type="text" value="' + this.endColor + '" class="form-control color"/>' + '       </div>' + '   </div>' + ' </div>' + '</div>');
+      '      <div class="input-group text-center" style="width:100%" >' + '           <div id="' + this.cssScope + '_angle" />' + '      </div> ' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="' + this.cssScope + '_color1" type="text" value="' + this.startColor + '" class="mousetrap-pause form-control color"/>' + '       </div>' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="' + this.cssScope + '_color2" type="text" value="' + this.endColor + '" class="mousetrap-pause form-control color"/>' + '       </div>' + '   </div>' + ' </div>' + '</div>');
       inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $('#' + this.cssScope + '_angle').anglepicker({
@@ -4313,7 +4354,7 @@ exports.default = shape_designer.filter.OpacityFilter = function (_Filter) {
       var _this2 = this;
 
       $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#opacity_panel">' + '    Opacity' + '    <span id="button_remove_OpacityFilter"><img  class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' + '</div>' + ' <div class="panel-body collapse in" id="opacity_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '      <div class="input-group">' + '         <input class="form-control" id="filter_opacity" type="text" value="' + parseInt(figure.getAlpha() * 100) + '" />' + '      </div>' + '   </div>' + ' </div>' + '</div>');
+      '      <div class="input-group">' + '         <input class="mousetrap-pause form-control" id="filter_opacity" type="text" value="' + parseInt(figure.getAlpha() * 100) + '" />' + '      </div>' + '   </div>' + ' </div>' + '</div>');
       inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("#filter_opacity").TouchSpin({
@@ -4400,7 +4441,7 @@ exports.default = shape_designer.filter.OutlineStrokeFilter = function (_Filter)
       var _this2 = this;
 
       $parent.append('<div id="' + this.cssScope + '_conainer" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#outlinestroke_width_panel">' + '     Outline Stroke' + '    <img id="button_remove_OutlineStrokeFilter" class="icon pull-right" src="./images/dialog_close.svg"/>' + '</div>' + ' <div class="panel-body collapse in" id="outlinestroke_width_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '       <input id="filter_outlinestroke" type="text" value="' + figure.getOutlineStroke() + '" name="filter_outlinestroke" class="form-control" />' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="filter_outlinestroke_color" type="text" value="" name="outlinestroke-color" class="form-control color"/>' + '       </div>' + '   </div>' + ' </div>' + '</div>');
+      '       <input id="filter_outlinestroke" type="text" value="' + figure.getOutlineStroke() + '" name="filter_outlinestroke" class="mousetrap-pause form-control" />' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="filter_outlinestroke_color" type="text" value="" name="outlinestroke-color" class="mousetrap-pause form-control color"/>' + '       </div>' + '   </div>' + ' </div>' + '</div>');
       inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("input[name='filter_outlinestroke']").TouchSpin({
@@ -4670,7 +4711,7 @@ exports.default = shape_designer.filter.PositionFilter = function (_Filter) {
       var _this2 = this;
 
       $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#position_width_panel">' + '     Position' + '</div>' + ' <div class="panel-body  collapse in" id="position_width_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '       <input id="filter_position_x" type="text" value="' + parseFloat(figure.getPosition().x) + '" name="filter_position_x" class="form-control" />' + '       <input id="filter_position_y" type="text" value="' + parseFloat(figure.getPosition().y) + '" name="filter_position_y" class="form-control" />' + '   </div>' + ' </div>' + '</div>');
+      '       <input id="filter_position_x" type="text" value="' + parseFloat(figure.getPosition().x) + '" name="filter_position_x" class="mousetrap-pause form-control" />' + '       <input id="filter_position_y" type="text" value="' + parseFloat(figure.getPosition().y) + '" name="filter_position_y" class="mousetrap-pause form-control" />' + '   </div>' + ' </div>' + '</div>');
       inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("#filter_position_x").TouchSpin({
@@ -4781,7 +4822,7 @@ exports.default = shape_designer.filter.RadiusFilter = function (_Filter) {
       var _this2 = this;
 
       $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#radius_panel">' + '    Corner Radius' + '    <span id="button_remove_RadiusFilter"><img class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' + '</div>' + ' <div class="panel-body collapse in" id="radius_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '      <div class="input-group">' + '         <input class="form-control" id="filter_radius" type="text" value="' + figure.getRadius() + '" />' + '      </div>' + '   </div>' + ' </div>' + '</div>');
+      '      <div class="input-group">' + '         <input class="mousetrap-pause form-control" id="filter_radius" type="text" value="' + figure.getRadius() + '" />' + '      </div>' + '   </div>' + ' </div>' + '</div>');
       inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("#filter_radius").TouchSpin({
@@ -4863,7 +4904,7 @@ exports.default = shape_designer.filter.SizeFilter = function (_Filter) {
       var _this2 = this;
 
       $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#size_width_panel">' + '     Size' + ' </div>' + ' <div class="panel-body  collapse in" id="size_width_panel">' + '   <div class="form-group">' + '       <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '       <input id="filter_width"  type="text" value="' + figure.getWidth() + '"  name="filter_width"  class="form-control" />' + '       <input id="filter_height" type="text" value="' + figure.getHeight() + '" name="filter_height" class="form-control" />' + '   </div>' + ' </div>' + '</div>');
+      '       <input id="filter_width"  type="text" value="' + figure.getWidth() + '"  name="filter_width"  class="mousetrap-pause form-control" />' + '       <input id="filter_height" type="text" value="' + figure.getHeight() + '" name="filter_height" class="mousetrap-pause form-control" />' + '   </div>' + ' </div>' + '</div>');
       inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("#filter_width").TouchSpin({
@@ -4977,7 +5018,7 @@ exports.default = shape_designer.filter.StrokeFilter = function (_Filter) {
       var _this2 = this;
 
       $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_width_panel">' + '     Stroke' + '    <span id="button_remove_' + this.cssScope + '"><img  class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' + '</div>' + ' <div class="panel-body collapse in" id="' + this.cssScope + '_width_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '       <input id="filter_' + this.cssScope + '_width" type="text" value="' + figure.getStroke() + '" name="filter_' + this.cssScope + '_width" class="form-control" />' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="filter_' + this.cssScope + '_color" type="text" value="" name="stroke_' + this.cssScope + '_color" class="form-control color"/>' + '       </div>' + '   </div>' + ' </div>' + '</div>');
+      '       <input id="filter_' + this.cssScope + '_width" type="text" value="' + figure.getStroke() + '" name="filter_' + this.cssScope + '_width" class="mousetrap-pause form-control" />' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="filter_' + this.cssScope + '_color" type="text" value="" name="stroke_' + this.cssScope + '_color" class="mousetrap-pause form-control color"/>' + '       </div>' + '   </div>' + ' </div>' + '</div>');
       inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $("input[name='filter_" + this.cssScope + "_width']").TouchSpin({
@@ -5087,7 +5128,7 @@ exports.default = shape_designer.filter.TextLinearGradientFilter = function (_Fi
       var _this2 = this;
 
       $parent.append('<div id="' + this.cssScope + '_container" class="panel panel-default">' + ' <div class="panel-heading filter-heading" data-toggle="collapse" data-target="#' + this.cssScope + '_panel">' + '     Linear Gradient' + '    <span id="button_remove_' + this.cssScope + '"><img  class="svg icon pull-right" src="./images/dialog_close.svg"/></span>' + '</div>' + ' <div class="panel-body collapse in" id="' + this.cssScope + '_panel">' + '   <div class="form-group">' + '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '      <div class="input-group text-center" style="width:100%" >' + '           <div id="' + this.cssScope + '_angle" />' + '      </div> ' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="' + this.cssScope + '_color1" type="text" value="' + this.startColor + '" class="form-control color"/>' + '       </div>' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="' + this.cssScope + '_color2" type="text" value="' + this.endColor + '" class="form-control color"/>' + '       </div>' + '   </div>' + ' </div>' + '</div>');
+      '      <div class="input-group text-center" style="width:100%" >' + '           <div id="' + this.cssScope + '_angle" />' + '      </div> ' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="' + this.cssScope + '_color1" type="text" value="' + this.startColor + '" class="mousetrap-pause form-control color"/>' + '       </div>' + '       <div class="input-group">' + '          <span class="input-group-addon">#</span>' + '          <input id="' + this.cssScope + '_color2" type="text" value="' + this.endColor + '" class="mousetrap-pause form-control color"/>' + '       </div>' + '   </div>' + ' </div>' + '</div>');
       inlineSVG.init({ svgSelector: "#" + this.cssScope + "_container img.svg" });
 
       $('#' + this.cssScope + '_angle').anglepicker({
@@ -5228,11 +5269,16 @@ var _inlineSVG = __webpack_require__(/*! ../lib/inlineSVG */ "./app/frontend/des
 
 var _inlineSVG2 = _interopRequireDefault(_inlineSVG);
 
+var _LabelInplaceEditor = __webpack_require__(/*! ./LabelInplaceEditor */ "./app/frontend/designer/js/LabelInplaceEditor.js");
+
+var _LabelInplaceEditor2 = _interopRequireDefault(_LabelInplaceEditor);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 exports.default = {
   hardware: _Hardware2.default,
   DecoratedInputPort: _DecoratedInputPort2.default,
+  LabelInplaceEditor: _LabelInplaceEditor2.default,
   Mousetrap: _mousetrap2.default,
   inlineSVG: _inlineSVG2.default
 };
@@ -5329,10 +5375,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _EventEmitter2 = __webpack_require__(/*! ../util/EventEmitter */ "./app/frontend/designer/js/util/EventEmitter.js");
-
-var _EventEmitter3 = _interopRequireDefault(_EventEmitter2);
-
 var _Configuration = __webpack_require__(/*! ../Configuration */ "./app/frontend/designer/js/Configuration.js");
 
 var _Configuration2 = _interopRequireDefault(_Configuration);
@@ -5341,12 +5383,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var BackendStorage = function (_EventEmitter) {
-  _inherits(BackendStorage, _EventEmitter);
+var BackendStorage = function () {
 
   /**
    * @constructor
@@ -5355,11 +5392,8 @@ var BackendStorage = function (_EventEmitter) {
   function BackendStorage() {
     _classCallCheck(this, BackendStorage);
 
-    var _this = _possibleConstructorReturn(this, (BackendStorage.__proto__ || Object.getPrototypeOf(BackendStorage)).call(this));
-
-    _this.fileName = "";
-    Object.preventExtensions(_this);
-    return _this;
+    this.fileName = "";
+    Object.preventExtensions(this);
   }
 
   _createClass(BackendStorage, [{
@@ -5474,7 +5508,7 @@ var BackendStorage = function (_EventEmitter) {
   }]);
 
   return BackendStorage;
-}(_EventEmitter3.default);
+}();
 
 exports.default = BackendStorage;
 module.exports = exports["default"];
@@ -6694,86 +6728,6 @@ exports.default = _AbstractToolPolicy2.default.extend({
   }
 });
 module.exports = exports["default"];
-
-/***/ }),
-
-/***/ "./app/frontend/designer/js/util/EventEmitter.js":
-/*!*******************************************************!*\
-  !*** ./app/frontend/designer/js/util/EventEmitter.js ***!
-  \*******************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var isFunction = function isFunction(obj) {
-  return typeof obj == 'function' || false;
-};
-
-var EventEmitter = function () {
-  function EventEmitter() {
-    //  this.listeners = new Map();
-
-    _classCallCheck(this, EventEmitter);
-  }
-
-  _createClass(EventEmitter, [{
-    key: 'addListener',
-    value: function addListener(label, callback) {
-      //   this.listeners.has(label) || this.listeners.set(label, []);
-      //   this.listeners.get(label).push(callback);
-    }
-  }, {
-    key: 'removeListener',
-    value: function removeListener(label, callback) {
-      /*
-      let listeners = this.listeners.get(label),
-        index;
-       if (listeners && listeners.length) {
-        index = listeners.reduce((i, listener, index) => {
-          return (isFunction(listener) && listener === callback) ?
-            i = index :
-            i;
-        }, -1);
-         if (index > -1) {
-          listeners.splice(index, 1);
-          this.listeners.set(label, listeners);
-          return true;
-        }
-      }
-      */
-      return false;
-    }
-  }, {
-    key: 'emit',
-    value: function emit(label) {
-      /*
-      let listeners = this.listeners.get(label);
-       if (listeners && listeners.length) {
-        listeners.forEach((listener) => {
-          listener(...args);
-        });
-        return true;
-      }
-      */
-      return false;
-    }
-  }]);
-
-  return EventEmitter;
-}();
-
-exports.default = EventEmitter;
-module.exports = exports['default'];
 
 /***/ }),
 

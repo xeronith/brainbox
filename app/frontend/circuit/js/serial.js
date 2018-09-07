@@ -1,4 +1,4 @@
-class Port{
+class Port {
   constructor(device) {
     this.device_ = device
   }
@@ -32,58 +32,6 @@ class Port{
       })
   }
 
-  connect2() {
-    let readLoop = () => {
-      console.log('reading...')
-      this.device_.transferIn(5, 64).then(result => {
-        console.log('\tread=', result)
-        if (result.status === 'ok') {
-          this.onReceive(result.data)
-          readLoop()
-        }
-        if (result.status === 'stall') {
-          console.error('Endpoint stalled. Clearing.')
-          this.device_.clearHalt(5)
-        }
-      }, error => {
-        console.error(error)
-        this.onReceiveError(error)
-      })
-    }
-
-    return this.device_.open()
-      .then(() => {
-        console.log("\topening  ...")
-        if (this.device_.configuration === null) {
-          return this.device_.selectConfiguration(1)
-        }
-
-      })
-      .then(() => {
-        console.log("\tclaiming (2)...")
-        this.device_.claimInterface(2)
-        console.log("\t\tclaimed")
-      })
-
-      .then(() => {
-        this.device_.controlTransferOut({
-          'requestType': 'class',
-          'recipient': 'interface',
-          'request': 0x22,
-          'value': 0x01,
-          'index': 0x02
-        })
-        console.log('\tcontrol request done')
-      })
-      .then(() => {
-        console.log('\tlistening')
-        readLoop()
-      })
-      .catch(err => {
-        console.error("USB Error ---", err)
-      })
-  };
-
   disconnect() {
     return this.device_.controlTransferOut({
       'requestType': 'class',
@@ -102,16 +50,24 @@ class Port{
 
 
 export default class Serial {
-  constructor(){
+  constructor() {
   }
 
   static getPorts() {
+    if(!navigator || !navigator.usb ){
+      return Promise.resolve([])
+    }
+
     return navigator.usb.getDevices().then(devices => {
       return devices.map(device => new Port(device))
     })
   };
 
   static requestPort() {
+    if(!navigator || !navigator.usb ){
+      return Promise.resolve()
+    }
+
     const filters = [
       {'vendorId': 0x2341, 'productId': 0x8036},
       {'vendorId': 0x2341, 'productId': 0x8037}

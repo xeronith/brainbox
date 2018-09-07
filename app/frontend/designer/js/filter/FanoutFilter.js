@@ -17,7 +17,7 @@ export default shape_designer.filter.FanoutFilter = class FanoutFilter extends F
       ' <div class="panel-body collapse in" id="' + this.cssScope + '_width_panel">' +
       '   <div class="form-group">' +
       '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '       <input id="filter_' + this.cssScope + '_fanout" type="text" value="' + figure.getMaxFanOut() + '" name="filter_' + this.cssScope + '_fanout" class="form-control" />' +
+      '       <input id="filter_' + this.cssScope + '_fanout" type="text" value="' + figure.getMaxFanOut() + '" name="filter_' + this.cssScope + '_fanout" class="mousetrap-pause form-control" />' +
       '   </div>' +
       ' </div>' +
       '</div>')

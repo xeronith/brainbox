@@ -41,6 +41,14 @@ export default class Application {
 
     }
 
+    $( "body" )
+      .delegate( ".mousetrap-pause", "focus", function() {
+        Mousetrap.pause()
+      })
+      .delegate(".mousetrap-pause", "blur", function (){
+        Mousetrap.unpause()
+      });
+
     // automatic add the configuration to the very first shape
     // in the document as userData
     //

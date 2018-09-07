@@ -1,44 +1,46 @@
-let isFunction = function(obj) {
-  return typeof obj == 'function' || false;
-};
+let isFunction = function (obj) {
+  return typeof obj == 'function' || false
+}
 
 export default class EventEmitter {
   constructor() {
-    this.listeners = new Map();
-  }
-  addListener(label, callback) {
-    this.listeners.has(label) || this.listeners.set(label, []);
-    this.listeners.get(label).push(callback);
+    this.listeners = new Map()
   }
 
-  removeListener(label, callback) {
+  on(label, callback) {
+    this.listeners.has(label) || this.listeners.set(label, [])
+    this.listeners.get(label).push(callback)
+  }
+
+  off(label, callback) {
     let listeners = this.listeners.get(label),
-      index;
+      index
 
     if (listeners && listeners.length) {
       index = listeners.reduce((i, listener, index) => {
         return (isFunction(listener) && listener === callback) ?
           i = index :
-          i;
-      }, -1);
+          i
+      }, -1)
 
       if (index > -1) {
-        listeners.splice(index, 1);
-        this.listeners.set(label, listeners);
-        return true;
+        listeners.splice(index, 1)
+        this.listeners.set(label, listeners)
+        return true
       }
     }
-    return false;
+    return false
   }
+
   emit(label, ...args) {
-    let listeners = this.listeners.get(label);
+    let listeners = this.listeners.get(label)
 
     if (listeners && listeners.length) {
       listeners.forEach((listener) => {
-        listener(...args);
-      });
-      return true;
+        listener(...args)
+      })
+      return true
     }
-    return false;
+    return false
   }
 }

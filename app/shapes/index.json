@@ -1,5 +1,19 @@
 [
   {
+    "name": "Arduino",
+    "tags": [
+      "Arduino"
+    ],
+    "filePath": "Arduino.shape"
+  },
+  {
+    "name": "ArduinoLed",
+    "tags": [
+      "ArduinoLed"
+    ],
+    "filePath": "ArduinoLed.shape"
+  },
+  {
     "name": "draw2d_circuit_alu_FullAdder",
     "tags": [
       "draw2d",
@@ -160,16 +174,6 @@
     "filePath": "draw2d_circuit_gate_OR.shape"
   },
   {
-    "name": "draw2d_circuit_hardware_BlocINPUT",
-    "tags": [
-      "draw2d",
-      "circuit",
-      "hardware",
-      "BlocINPUT"
-    ],
-    "filePath": "draw2d_circuit_hardware_BlocINPUT.shape"
-  },
-  {
     "name": "draw2d_circuit_hardware_RaspiGPIO",
     "tags": [
       "draw2d",
@@ -275,19 +279,5 @@
       "HiveMQ"
     ],
     "filePath": "HiveMQ.shape"
-  },
-  {
-    "name": "rect2",
-    "tags": [
-      "rect2"
-    ],
-    "filePath": "rect2.shape"
-  },
-  {
-    "name": "SBLed",
-    "tags": [
-      "SBLed"
-    ],
-    "filePath": "SBLed.shape"
   }
 ]

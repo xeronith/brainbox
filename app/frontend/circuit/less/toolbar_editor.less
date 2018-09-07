@@ -132,7 +132,7 @@
 
 .slider-handle {
   border-radius: 50%;
-  background-color: @tintColorEdit;
+  background-color: @tintColorHIGH;
 }
 
 #simulationStartStop{
@@ -165,12 +165,25 @@
     .group{
       padding-right:20px;
       display: inline-block;
-      vertical-align: middle;
+      vertical-align: top;
+      div {
+        vertical-align: top;
+      }
+      span{
+        vertical-align: top;
+      }
     }
 
     label{
       color:#777;
       font-weight:200;
+    }
+
+    .checkbox-inline{
+      top:10px;
+      label{
+        color:white;
+      }
     }
 
     .icon{

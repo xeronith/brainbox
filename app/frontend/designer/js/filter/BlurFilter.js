@@ -19,7 +19,7 @@ export default shape_designer.filter.BlurFilter = class BlurFilter extends Filte
       ' <div class="panel-body collapse in" id="' + this.cssScope + '_blur_panel">' +
       '   <div class="form-group">' +
       '      <div class="input-group" ></div> ' + // required to ensure the correct width of the siblings
-      '       <input id="filter_blur" type="text" value="' + figure.getBlur() + '"  name="filter_blur" class="form-control" />' +
+      '       <input id="filter_blur" type="text" value="' + figure.getBlur() + '"  name="filter_blur" class="mousetrap-pause form-control" />' +
       '   </div>' +
       ' </div>' +
       '</div>')

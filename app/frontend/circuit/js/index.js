@@ -1,10 +1,7 @@
 
 import "../less/index.less"
 import "font-awesome/css/font-awesome.css"
-import "octicons/build/font/octicons.css"
 import "./dialog/PopConfirm"
-
-import global from "./global"
 
 //require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
 
@@ -46,7 +43,6 @@ if (!jQuery.browser) {
 }
 
 
-import hardware from "./hardware"
 import conf from './Configuration'
 
 $(window).load(function () {
@@ -54,13 +50,19 @@ $(window).load(function () {
   {
     path: '/circuit/socket.io'
   })
-  // remove the fileOpen/Save stuff if we run in a"serverless" mode. e.g. on gh-pages
+
+  // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
   // (fake event from the socket.io mock )
+  //
   socket.on("serverless", () => {
     $("#leftTabStrip .editor").click()
     $("#fileOpen, #editorFileOpen").remove();
     $("#fileSave, #editorFileSave").remove();
-   // $("#files_tab").remove();
+   // $("#files_tab").remove()
+
+    // patch the URL for the backedn to deliver predefined files
+    // for the static website with a nodeJS backend
+    //
     conf.backend.file.list = path => `../brain/index.json`
     conf.backend.file.get = file => `../brain/${file}`
     conf.backend.file.image =  ()=> `../brain/img`
@@ -73,10 +75,11 @@ $(window).load(function () {
     // export all required classes for deserialize JSON with "eval"
     // "eval" code didn't sees imported class or code
     //
-    for(var k in global) window[k]=global[k];
+    let global = require("./global")
+    for(let k in global) window[k]=global[k];
     app = require("./Application")
-    hardware.init(socket)
+    require("./hardware").init(socket)
+    inlineSVG.init()
   });
 
-  global.inlineSVG.init()
 });

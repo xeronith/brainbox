@@ -10,6 +10,7 @@ import Files from "./Files"
 import FileOpen from "./dialog/FileOpen"
 import FileSave from "./dialog/FileSave"
 import storage from './io/BackendStorage'
+import conf from "./Configuration"
 
 class Application {
 
@@ -19,15 +20,6 @@ class Application {
    * @param {String} canvasId the id of the DOM element to use as paint container
    */
   constructor() {
-    this.localStorage = []
-
-    try {
-      if ('localStorage' in window && window.localStorage !== null) {
-        this.localStorage = localStorage
-      }
-    } catch (e) {
-    }
-
     this.palette = new Palette()
     this.view = new View("draw2dCanvas")
     this.filePane = new Files()
@@ -139,7 +131,7 @@ class Application {
       storage.currentFile = storage.sanitize(fileName)
     }
     else {
-      storage.currentFile = "CircuitDiagram.brain"
+      storage.currentFile = "CircuitDiagram"+conf.fileSuffix
     }
     this.view.centerDocument()
   }

@@ -16,6 +16,9 @@ import MarkdownDialog from "./dialog/MarkdownDialog"
 import CodeDialog from "./dialog/CodeDialog"
 import hardware from "./hardware"
 
+require("bootstrap-toggle/css/bootstrap-toggle.min.css")
+require("bootstrap-toggle/js/bootstrap-toggle.min")
+
 export default draw2d.Canvas.extend({
 
   init: function (id) {
@@ -168,8 +171,27 @@ export default draw2d.Canvas.extend({
       setZoom(_this.getZoom() * 0.8)
     })
 
-    $("#editWebUSB").on("click", function () {
-      hardware.webusb.connect()
+    let blockEvent = false
+    $('#editWebUSB').bootstrapToggle(hardware.arduino.isConnected() ? "on" : "off")
+    hardware.arduino.on("connect", () => {
+      blockEvent = true
+      $('#editWebUSB').bootstrapToggle('on')
+      blockEvent = false
+    })
+    hardware.arduino.on("disconnect", () => {
+      blockEvent = true
+      $('#editWebUSB').bootstrapToggle('off')
+      blockEvent = false
+    })
+    $('#editWebUSB').change(function () {
+      if (blockEvent === true)
+        return
+      if ($(this).prop('checked')) {
+        hardware.arduino.connect()
+      }
+      else {
+        hardware.arduino.disconnect()
+      }
     })
 
     this.deleteSelectionCallback = function () {
@@ -196,7 +218,7 @@ export default draw2d.Canvas.extend({
     }
 
     $(".toolbar").delegate("#editDelete:not(.disabled)", "click", this.deleteSelectionCallback)
-    Mousetrap.bindGlobal(['del', 'backspace'], this.deleteSelectionCallback);
+    Mousetrap.bindGlobal(['del', 'backspace'], this.deleteSelectionCallback)
 
 
     $(".toolbar").delegate("#editUndo:not(.disabled)", "click", function () {
@@ -274,7 +296,7 @@ export default draw2d.Canvas.extend({
                   let locator = new draw2d.layout.locator.SmartDraggableLocator()
                   label.installEditor(new LabelInplaceEditor())
                   figure.add(label, locator)
-                  Object.defineProperty(figure, "canvas", { configurable: false, writable: false });
+                  Object.defineProperty(figure, "canvas", {configurable: false, writable: false})
                 }
                 break
               case "design":
@@ -285,7 +307,7 @@ export default draw2d.Canvas.extend({
                   new MarkdownDialog().show(content)
                 })
                 break
-               case "delete":
+              case "delete":
                 let cmd = new draw2d.command.CommandDelete(figure)
                 _this.getCommandStack().execute(cmd)
                 break
@@ -312,7 +334,7 @@ export default draw2d.Canvas.extend({
       $.getScript(conf.shapes.url + msg.jsPath + "?timestamp=" + new Date().getTime(),
         this.reloadFromCache.bind(this)
       )
-    });
+    })
 
     this.slider = $('#simulationBaseTimer')
       .slider({
@@ -340,7 +362,7 @@ export default draw2d.Canvas.extend({
       $(".raspiConnection").fadeIn()
     })
 
-    if(socket.connected){
+    if (socket.connected) {
       $(".raspiConnection").fadeOut()
     }
     socket.on('connect', function () {
@@ -425,7 +447,9 @@ export default draw2d.Canvas.extend({
 
     $("#simulationStartStop").addClass("pause")
     $("#simulationStartStop").removeClass("play")
-    $(".simulationBase").fadeIn("slow")
+    $(".editBase").fadeOut("slow", ()=>{
+      $(".simulationBase").fadeIn("slow")
+    })
     $("#paletteElementsOverlay").fadeIn("fast")
     $("#paletteElementsOverlay").height($("#paletteElements").height())
     this.slider.slider("setValue", 100)
@@ -444,7 +468,9 @@ export default draw2d.Canvas.extend({
 
     $("#simulationStartStop").addClass("play")
     $("#simulationStartStop").removeClass("pause")
-    $(".simulationBase").fadeOut("slow")
+    $(".simulationBase").fadeOut("slow", ()=>{
+      $(".editBase").fadeIn("slow")
+    })
     $("#paletteElementsOverlay").fadeOut("fast")
     this.probeWindow.hide()
   },
@@ -483,6 +509,10 @@ export default draw2d.Canvas.extend({
    * @param {draw2d.command.CommandStackEvent} event
    **/
   stackChanged: function (event) {
+    if (event.isPreChangeEvent()) {
+      return // silently
+    }
+
     $("#editUndo").addClass("disabled")
     $("#editRedo").addClass("disabled")
 
@@ -493,6 +523,14 @@ export default draw2d.Canvas.extend({
     if (event.getStack().canRedo()) {
       $("#editRedo").removeClass("disabled")
     }
+
+    // check if a new element is added which requires or provides special hardware
+    // support. In this case we can update the UI with some status indicator
+    //
+    let elements = this.getFigures().clone().asArray()
+    elements = elements.filter(element => element.getRequiredHardware)
+    let arduinoRequired = elements.reduce((sum, cur) => sum || cur.getRequiredHardware().arduino, false)
+    let raspiRequired = elements.reduce((sum, cur) => sum || cur.getRequiredHardware().raspi, false)
 
   },
 

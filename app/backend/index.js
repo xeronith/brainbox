@@ -13,7 +13,7 @@ const glob = require("glob");
 
 const io = require('./src/comm/websocket').connect(http, { path: '/circuit/socket.io'});
 const mqtt = require('./src/comm/hive-mqtt').connect(io, "freegroup/brainbox");
-const gpio = require("./src/comm/gpio").connect(io);
+const raspi = require("./src/comm/raspi").connect(io);
 
 // Tell the bodyparser middleware to accept more data
 app.use(bodyParser.json({limit: '50mb'}));
@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 // application specific configuration settings
 //
-const deviceRegistry = require("./src/device-registry.js");
+const arduino = require("./src/comm/arduino");
 const storage= require("./src/storage.js");
 const shapeDirApp = path.normalize(__dirname + '/../shapes/')
 const shape2CodeDir = path.normalize(__dirname + '/../shape2code/')
@@ -38,11 +38,7 @@ const port = 7400;
 // ask to user which one to use.
 //
 // =======================================================================
-deviceRegistry.init(runServer);
-// forward the hardware/box events to the browser UI
-deviceRegistry.on("register",    event => io.sockets.emit("bloc:register", event));
-deviceRegistry.on("unregister",  event => io.sockets.emit("bloc:unregister", event));
-deviceRegistry.on("value",       event => io.sockets.emit("bloc:value", event));
+arduino.init(io, runServer);
 
 
 // =======================================================================
@@ -136,15 +132,6 @@ function runServer() {
     });
   });
 
-
-  // =================================================================
-  // The UI can request all registered devices at once.
-  // Dynamic remove/add of devices are handled by socket.io events
-  // =================================================================
-  app.get('/backend/bloc/list', function (req, res) {
-    res.setHeader('Content-Type', 'application/json');
-    res.send(JSON.stringify(deviceRegistry.getAll(), undefined, 2));
-  });
 
   http.listen(port, function () {
     console.log('using phantomJS for server side rendering of shape previews:', phantomjs.path)

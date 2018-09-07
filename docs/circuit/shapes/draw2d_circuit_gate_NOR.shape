@@ -197,7 +197,7 @@
     "fontSize": 20,
     "fontColor": "#080808",
     "fontFamily": null,
-    "editor": "draw2d.ui.LabelInplaceEditor",
+    "editor": "LabelInplaceEditor",
     "filters": [
       {
         "name": "shape_designer.filter.PositionFilter"

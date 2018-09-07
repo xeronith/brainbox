@@ -1,3 +1,5 @@
+import FigureTest from "./FigureTest"
+
 export default class FigureCodeEdit {
   constructor() {
   }
@@ -89,7 +91,7 @@ export default class FigureCodeEdit {
     $("#test_run").on("click", function () {
       let code = editor.getValue()
       shape_designer.app.setConfiguration({code: code})
-      new shape_designer.dialog.FigureTest().show()
+      new FigureTest().show()
     })
   }
 }

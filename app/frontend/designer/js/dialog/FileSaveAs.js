@@ -27,8 +27,6 @@ export default class FileSaveAs {
       $("#githubFileSaveAsDialog .okButton").prop("disabled", false)
       this.fetchPathContent(storage, storage.currentDir)
 
-      $('#githubFileSaveAsDialog').modal('show')
-
       $("#githubFileSaveAsDialog .githubFilePreview").attr("src", imageDataUrl)
       $("#githubFileSaveAsDialog .githubFileName").val(storage.currentFile)
 
@@ -36,10 +34,12 @@ export default class FileSaveAs {
         $(event.currentTarget).find('input:first').focus()
       })
       $("#githubFileSaveAsDialog").modal("show")
+      Mousetrap.pause()
 
       // Button: Commit to GitHub
       //
       $("#githubFileSaveAsDialog .okButton").off('click').on("click",  () => {
+        Mousetrap.unpause()
         let writer = new draw2d.io.json.Writer()
         writer.marshal(canvas, (json) => {
           var title = $("#githubFileSaveAsDialog .githubFileName").val()

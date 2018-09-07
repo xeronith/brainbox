@@ -1,0 +1,78 @@
+/**
+ * by 'Draw2D Shape Designer'
+ *
+ * Custom JS code to tweak the standard behaviour of the generated
+ * shape. add your custome code and event handler here.
+ *
+ *
+ */
+Arduino = Arduino.extend({
+
+    init: function(attr, setter, getter){
+         this._super(attr, setter, getter);
+
+         this.attr({resizeable:false});
+         this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());
+         
+         var _this= this;
+         this.onChangeCallback = function(emitter, event){
+            if(event.value){
+                _this.layerAttr("circle",{fill:"#C21B7A"});
+            }
+            else{
+                _this.layerAttr("circle",{fill:"#f0f0f0"});
+            }
+            // set the LED on the Arduino on/off
+            hardware.arduino.set(3, !!event.value);
+         }
+    },
+    
+    calculate:function(){
+        this.propagate(2,  this.getPort("port_d2"));
+        this.propagate(3,  this.getPort("port_d3"));
+        this.propagate(4,  this.getPort("port_d4"));
+        this.propagate(5,  this.getPort("port_d5"));
+        this.propagate(6,  this.getPort("port_d6"));
+        this.propagate(7,  this.getPort("port_d7"));
+        this.propagate(8,  this.getPort("port_d8"));
+        this.propagate(9,  this.getPort("port_d9"));
+        this.propagate(10, this.getPort("port_d10"));
+        this.propagate(11, this.getPort("port_d11"));
+        this.propagate(12, this.getPort("port_d12"));
+        this.propagate(13, this.getPort("port_d13"));
+    },
+
+    propagate: function(index, port){
+        if(!port.getConnections().isEmpty()){
+            var con = port.getConnections().first();
+            var other = con.getSource()===port?con.getTarget():con.getSource()
+            if(other instanceof draw2d.InputPort){
+                
+            }
+            else {
+                hardware.arduino.set(index,!!other.getValue())
+            }
+        }
+    },
+    
+    /**
+     *  Called if the simulation mode is starting
+     **/
+    onStart:function(){
+    },
+
+    /**
+     *  Called if the simulation mode is stopping
+     **/
+    onStop:function(){
+    //    this.getInputPort(0).off("change:value", this.onChangeCallback);
+    },
+    
+    getRequiredHardware: function(){
+      return {
+        raspi: false,
+        arduino: true
+      }
+    }
+    
+});

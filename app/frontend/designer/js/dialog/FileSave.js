@@ -29,10 +29,12 @@ export default class FileSave {
         $(event.currentTarget).find('input:first').focus()
       })
       $("#githubSaveFileDialog").modal("show")
+      Mousetrap.pause()
 
       // Button: Commit to GitHub
       //
       $("#githubSaveFileDialog .okButton").off('click').on("click", () => {
+        Mousetrap.unpause()
         let writer = new draw2d.io.json.Writer()
         writer.marshal(canvas, json => {
           let newName = $("#githubSaveFileDialog .githubFileName").val()

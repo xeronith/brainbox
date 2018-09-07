@@ -1,17 +1,15 @@
-import EventEmitter from "../util/EventEmitter"
 import conf from '../Configuration'
 
 let sanitize = require("sanitize-filename")
 
 
-class BackendStorage extends EventEmitter {
+class BackendStorage {
 
   /**
    * @constructor
    *
    */
   constructor() {
-    super()
     this.fileName = ""
     Object.preventExtensions(this)
   }
@@ -30,7 +28,6 @@ class BackendStorage extends EventEmitter {
       id: 'editor',
       file: name
     }, 'Brainbox Simulator | ' + name, window.location.href.split('?')[0] + '?file=' + name)
-    this.emit("changed", {fileName: this.fileName})
   }
 
   getFiles(path) {

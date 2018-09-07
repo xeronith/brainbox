@@ -17,8 +17,7 @@ export default shape_designer.figure.ExtLabel = draw2d.shape.basic.Label.extend(
     this.filters.add(new shape_designer.filter.FontSizeFilter())
     this.filters.add(new shape_designer.filter.FontColorFilter())
 
-    this.installEditor(new draw2d.ui.LabelInplaceEditor())
-
+    this.installEditor(new LabelInplaceEditor())
   },
 
   getPotentialFilters: function () {

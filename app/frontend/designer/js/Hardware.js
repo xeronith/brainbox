@@ -3,7 +3,7 @@
 //
 export default {
 
-  gpio: {
+  raspi: {
     set: function (pin, value) {
     },
     get: function (pin) {
@@ -11,26 +11,11 @@ export default {
     }
   },
 
-  webusb: {
+  arduino: {
     set: function (pin, value) {
     },
     get: function (pin) {
       return false
-    }
-  },
-
-  bloc: {
-    set: function (blocId, value) {
-    },
-    get: function (blocId) {
-      return false
-    },
-    on: function () {
-    },
-    off: function () {
-    },
-    isConnected: function (blocId) {
-      return true
     }
   }
 }

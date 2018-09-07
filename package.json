@@ -59,6 +59,7 @@
   },
   "dependencies": {
     "body-parser": "1.18.3",
+    "bootstrap-toggle": "^2.2.2",
     "draw2d": "1.0.12",
     "express": "4.16.3",
     "glob": "7.0.3",
@@ -75,7 +76,7 @@
     "prettify": "0.1.7",
     "prompt": "1.0.0",
     "sanitize-filename": "^1.6.1",
-    "serialport": "6.2.2",
+    "serialport": "7.0.2",
     "socket.io": "2.1.1",
     "system": "2.0.1",
     "webpage": "0.3.0"

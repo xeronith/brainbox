@@ -1,14 +1,12 @@
-import EventEmitter from "../util/EventEmitter"
 import conf from '../Configuration'
 
-export default class BackendStorage extends EventEmitter{
+export default class BackendStorage{
 
   /**
    * @constructor
    *
    */
   constructor() {
-    super()
     this.fileName = ""
     Object.preventExtensions(this);
   }
