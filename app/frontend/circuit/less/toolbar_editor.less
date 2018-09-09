@@ -29,22 +29,22 @@
   transition: all 500ms ease;
 
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  &:hover {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  }
+
+  &:active {
+    -webkit-transform: scale(1.1, 1.1);
+    transform: scale(1.1, 1.1);
+  }
+  &:focus {
+    outline: 0;
+    border: none;
+    color: rgba(0, 0, 0, 0);
+  }
 }
 
-.morph_btn:hover {
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
-}
 
-.morph_btn:active {
-  -webkit-transform: scale(1.1, 1.1);
-  transform: scale(1.1, 1.1);
-}
-
-.morph_btn:focus {
-  outline: 0;
-  border: none;
-  color: rgba(0, 0, 0, 0);
-}
 
 .morph_btn > span {
   display: block;
@@ -89,7 +89,7 @@
 .morph_btn.play > span > span {
   -webkit-transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);
   transform: rotate(-45deg) translate(-1em, -1em) scale(1, 1);
-  background-color: @tintColorEdit;
+  background-color: @tintColorHIGH;
 }
 
 .morph_btn.pause > span > span {
@@ -171,6 +171,57 @@
       }
       span{
         vertical-align: top;
+      }
+
+      .form-horizontal {
+        text-align: center;
+        width:220px;
+        .statusIndicator {
+          margin: 20px;
+          img {
+            display: block;
+            cursor:pointer;
+            margin:auto;
+            &:hover {
+              box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+            }
+          }
+          span {
+            font-size: .8em;
+            text-align: center;
+            width: 100%;
+            display: inline-block;
+          }
+          .connected{
+            display: block;
+          }
+          .disconnected{
+            display: none;
+          }
+        }
+        .statusIndicator.disabled {
+          img {
+            opacity: 0.5;
+            cursor: not-allowed;
+          }
+          span {
+            opacity: 0.5;
+          }
+        }
+        .statusIndicator.error {
+          img {
+          }
+          span {
+            color:red;
+            font-weight: bold;
+          }
+          .connected{
+            display: none;
+          }
+          .disconnected{
+            display: block;
+          }
+        }
       }
     }
 

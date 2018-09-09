@@ -21,7 +21,6 @@ export default class BackendStorage{
 
   set currentFile(name){
     this.fileName=name;
-    this.emit("changed", {fileName:this.fileName})
   }
 
   getFiles(path){

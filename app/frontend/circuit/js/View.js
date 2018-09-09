@@ -16,6 +16,10 @@ import MarkdownDialog from "./dialog/MarkdownDialog"
 import CodeDialog from "./dialog/CodeDialog"
 import hardware from "./hardware"
 
+import imgConnectionStatusNeutral from "../images/status_index.svg"
+import imgConnectionStatusTrue from "../images/status_index_true.svg"
+import imgConnectionStatusFalse from "../images/status_index_false.svg"
+
 require("bootstrap-toggle/css/bootstrap-toggle.min.css")
 require("bootstrap-toggle/js/bootstrap-toggle.min")
 
@@ -171,28 +175,21 @@ export default draw2d.Canvas.extend({
       setZoom(_this.getZoom() * 0.8)
     })
 
-    let blockEvent = false
-    $('#editWebUSB').bootstrapToggle(hardware.arduino.isConnected() ? "on" : "off")
-    hardware.arduino.on("connect", () => {
-      blockEvent = true
-      $('#editWebUSB').bootstrapToggle('on')
-      blockEvent = false
-    })
-    hardware.arduino.on("disconnect", () => {
-      blockEvent = true
-      $('#editWebUSB').bootstrapToggle('off')
-      blockEvent = false
-    })
-    $('#editWebUSB').change(function () {
-      if (blockEvent === true)
-        return
-      if ($(this).prop('checked')) {
-        hardware.arduino.connect()
-      }
-      else {
+    hardware.arduino.on("disconnect", this.hardwareChanged.bind(this));
+    hardware.arduino.on("connect", this.hardwareChanged.bind(this));
+    hardware.raspi.on("disconnect", this.hardwareChanged.bind(this));
+    hardware.raspi.on("connect", this.hardwareChanged.bind(this));
+
+
+    $('#statusWebUSB').on("click", () =>{
+      if (hardware.arduino.connected) {
         hardware.arduino.disconnect()
       }
+      else {
+        hardware.arduino.connect()
+      }
     })
+
 
     this.deleteSelectionCallback = function () {
       let selection = _this.getSelection()
@@ -357,17 +354,6 @@ export default draw2d.Canvas.extend({
           _this.timerBase = parseInt(11 - ((event.value - 100) * (10 - 2) / (500 - 100) + 2))
         }
       })
-
-    socket.on('disconnect', function () {
-      $(".raspiConnection").fadeIn()
-    })
-
-    if (socket.connected) {
-      $(".raspiConnection").fadeOut()
-    }
-    socket.on('connect', function () {
-      $(".raspiConnection").fadeOut()
-    })
   },
 
   isSimulationRunning: function () {
@@ -524,6 +510,22 @@ export default draw2d.Canvas.extend({
       $("#editRedo").removeClass("disabled")
     }
 
+    this.hardwareChanged()
+    /*
+    else{
+      $(".arduinoRequired").addClass("hidden")
+    }
+
+    if(raspiRequired){
+      $(".raspiRequired").removeClass("hidden")
+    }
+    else{
+      $(".raspiRequired").addClass("hidden")
+    }
+    */
+  },
+
+  hardwareChanged: function(){
     // check if a new element is added which requires or provides special hardware
     // support. In this case we can update the UI with some status indicator
     //
@@ -531,7 +533,38 @@ export default draw2d.Canvas.extend({
     elements = elements.filter(element => element.getRequiredHardware)
     let arduinoRequired = elements.reduce((sum, cur) => sum || cur.getRequiredHardware().arduino, false)
     let raspiRequired = elements.reduce((sum, cur) => sum || cur.getRequiredHardware().raspi, false)
+    let raspiConnected =  hardware.raspi.connected
+    let arduinoConnected = hardware.arduino.connected
 
+    // Det the status of top button for the pulldown menu.
+    //
+    if(arduinoRequired===false && raspiRequired==false){
+      $("#editConnections").attr("src", imgConnectionStatusNeutral)
+    }
+    else{
+      let error =
+        (raspiRequired===true && raspiConnected===false ) ||
+        (arduinoRequired===true && arduinoConnected===false )
+      $("#editConnections").attr("src", error?imgConnectionStatusFalse:imgConnectionStatusTrue)
+    }
+
+    // set the status indicator for the arduino webusb connections
+    //
+    if(arduinoConnected){
+      $("#statusWebUSB").removeClass("error")
+    }
+    else{
+      $("#statusWebUSB").addClass("error")
+    }
+
+    // set the status indicator for the arduino webusb connections
+    //
+    if(raspiConnected){
+      $("#statusRaspi").removeClass("error")
+    }
+    else{
+      $("#statusRaspi").addClass("error")
+    }
   },
 
   getBoundingBox: function () {

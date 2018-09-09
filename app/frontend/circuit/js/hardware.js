@@ -25,8 +25,15 @@ export default {
     socket = s
     // GPIO from RasperyPi
     //
-    socket.on("gpo:change", function (msg) {
+    socket.on("gpo:change", msg =>{
       values[msg.pin] = !!parseInt(msg.value)
+    })
+
+    socket.on('disconnect',  () => {
+      this.raspi.emit("disconnect")
+    })
+    socket.on('connect',  () => {
+      this.raspi.emit("connect")
     })
 
     // Init the WEBUSB stuff
@@ -39,22 +46,6 @@ export default {
         this.arduino.connectPort(ports[0])
       }
     })
-/*
-    if(navigator && navigator.usb) {
-      navigator.usb.addEventListener('connect', device => {
-        // Add |device| to the UI.
-        console.log('connected')
-        serial.getPorts().then(ports => {
-          if (ports.length == 0) {
-            console.log('No device found.')
-          } else {
-            console.log('Connecting...')
-            this.arduino.connectPort(ports[0])
-          }
-        })
-      })
-    }
-    */
   },
 
   arduino: new class extends EventEmitter{
@@ -139,21 +130,27 @@ export default {
       })
     }
 
-    isConnected(){
+    get connected(){
       return usbPort!==null
     }
   },
 
 
-  raspi: {
-    set: function (pin, value) {
+  raspi:  new class extends EventEmitter{
+    set(pin, value) {
       socket.emit('raspi:set', {
         pin: pin,
         value: value
       })
-    },
-    get: function (pin) {
+    }
+
+    get (pin) {
       return values[pin]
     }
+
+    get connected(){
+      return socket.connected
+    }
   }
+
 }

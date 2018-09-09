@@ -199,16 +199,29 @@
             </span>
 
             <span id="" class="group editBase">
-              <label class="checkbox-inline">
-                <input type="checkbox"
-                       id="editWebUSB"
-                       data-toggle="toggle"
-                       data-width="120px"
-                       data-size="small"
-                       data-on="Connected" data-off="Disconnected"
-                       data-onstyle="success" data-offstyle="danger"/>
-                <span>WebUSB</span>
-              </label>
+                <label id="tool_shape" class="dropdown" >
+                  <img data-toggle="dropdown"  id="editConnections" class="icon" src="./images/status_index.svg">
+
+                  <ul class="dropdown-menu" role="menu" >
+                      <form class="form-horizontal" role="form">
+
+                        <label class="statusIndicator" id="statusWebUSB" >
+                          <img src="./images/status_arduino.svg"/>
+                          <span>WebUSB</span>
+                          <span class="connected">connected</span>
+                          <span class="disconnected">disconnected</span>
+                        </label>
+
+                        <label class="statusIndicator" id="statusRaspi" >
+                          <img src="./images/status_raspi.svg"/>
+                          <span>Server</span>
+                          <span class="connected">connected</span>
+                          <span class="disconnected">disconnected</span>
+                        </label>
+
+                      </form>
+                  </ul>
+                </label>
             </span>
 
             <span class="group simulationBase" style="display: none;">
@@ -224,10 +237,6 @@
                        data-slider-tooltip="hide"
                        data-slider-id="simulationBaseTimerSlider"
                        data-slider-orientation="horizontal">
-            </span>
-
-            <span class="group raspiConnection">
-                Connection to RaspberryPi lost..
             </span>
 
              <a href="#" class="morph_btn play" id="simulationStartStop">

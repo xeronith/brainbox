@@ -5352,7 +5352,6 @@ var BackendStorage = function () {
     },
     set: function set(name) {
       this.fileName = name;
-      this.emit("changed", { fileName: this.fileName });
     }
   }]);
 
