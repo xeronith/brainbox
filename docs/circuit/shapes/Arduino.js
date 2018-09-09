@@ -448,6 +448,16 @@ var Arduino = draw2d.SetFigure.extend({
        shape.attr({"x":77.90659999999843,"y":202.6171875,"text-anchor":"start","text":"D13","font-family":"\"Arial\"","font-size":8,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
        shape.data("name","Label");
        
+       // led_power
+       shape = this.canvas.paper.ellipse();
+       shape.attr({"rx":6.090499999999338,"ry":6.090499999999338,"cx":79.99709999999777,"cy":65.26980000000003,"stroke":"#1B1B1B","stroke-width":1,"fill":"#FF3C00","dasharray":null,"opacity":1});
+       shape.data("name","led_power");
+       
+       // led_d13
+       shape = this.canvas.paper.ellipse();
+       shape.attr({"rx":6.090499999999338,"ry":6.090499999999338,"cx":64.59019999999964,"cy":65.26980000000003,"stroke":"#1B1B1B","stroke-width":1,"fill":"#33DE09","dasharray":null,"opacity":1});
+       shape.data("name","led_d13");
+       
 
        return this.canvas.paper.setFinish();
    },
@@ -631,13 +641,20 @@ Arduino = Arduino.extend({
          var _this= this;
          this.onChangeCallback = function(emitter, event){
             if(event.value){
-                _this.layerAttr("circle",{fill:"#C21B7A"});
+                _this.layerAttr("led_d13",{fill:"#33DE09"});
             }
             else{
-                _this.layerAttr("circle",{fill:"#f0f0f0"});
+                _this.layerAttr("led_d13",{fill:"#f0f0f0"});
             }
-            // set the LED on the Arduino on/off
-            hardware.arduino.set(3, !!event.value);
+         }
+
+         this.onConnectedCallback = function(emitter, event){
+            if(hardware.arduino.connected){
+                _this.layerAttr("led_power",{fill:"#FF3C00"});
+            }
+            else{
+                _this.layerAttr("led_power",{fill:"#f0f0f0"});
+            }
          }
     },
     
@@ -669,17 +686,43 @@ Arduino = Arduino.extend({
         }
     },
     
-    /**
+   /**
      *  Called if the simulation mode is starting
      **/
     onStart:function(){
+        this.getPort("port_d13").on("change:value", this.onChangeCallback);
     },
 
     /**
      *  Called if the simulation mode is stopping
      **/
     onStop:function(){
-    //    this.getInputPort(0).off("change:value", this.onChangeCallback);
+        this.getPort("port_d13").off("change:value", this.onChangeCallback);
+    },
+    
+    setCanvas: function(canvas)
+    {
+        // deregister old listerener ...if exists
+        if(this.canvas !==null) {
+            hardware.arduino.off("connect", this.onConnectedCallback);
+            hardware.arduino.off("disconnect", this.onConnectedCallback);
+        }
+        
+        this._super(canvas);
+        
+        // register new listener...if requried
+        if(this.canvas !==null) {
+            hardware.arduino.on("connect", this.onConnectedCallback);
+            hardware.arduino.on("disconnect", this.onConnectedCallback);
+            
+            this.onConnectedCallback();
+            if(this.getPort("port_d13").getValue() && !this.getPort("port_d13").getConnections().isEmpty()) {
+                 this.onChangeCallback(this, {value:true})
+            }
+            else{
+                 this.onChangeCallback(this, {value:false})
+            }
+        }
     },
     
     getRequiredHardware: function(){

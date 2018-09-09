@@ -8,7 +8,10 @@ export default {
     },
     get: function (pin) {
       return false
-    }
+    },
+    on: function(event, callback){
+    },
+    connected: false
   },
 
   arduino: {
@@ -16,6 +19,9 @@ export default {
     },
     get: function (pin) {
       return false
-    }
+    },
+    on: function(event, callback){
+    },
+    connected: false
   }
 }

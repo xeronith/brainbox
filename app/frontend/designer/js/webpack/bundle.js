@@ -501,14 +501,18 @@ exports.default = {
     set: function set(pin, value) {},
     get: function get(pin) {
       return false;
-    }
+    },
+    on: function on(event, callback) {},
+    connected: false
   },
 
   arduino: {
     set: function set(pin, value) {},
     get: function get(pin) {
       return false;
-    }
+    },
+    on: function on(event, callback) {},
+    connected: false
   }
 };
 module.exports = exports["default"];

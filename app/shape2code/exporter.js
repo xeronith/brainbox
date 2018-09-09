@@ -10,7 +10,7 @@ var json=[
     "angle": 0,
     "userData": {
       "baseClass": "draw2d.SetFigure",
-      "code": "/**\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custome code and event handler here.\n *\n *\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n         this._super(attr, setter, getter);\n\n         this.attr({resizeable:false});\n         this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());\n         \n         var _this= this;\n         this.onChangeCallback = function(emitter, event){\n            if(event.value){\n                _this.layerAttr(\"circle\",{fill:\"#C21B7A\"});\n            }\n            else{\n                _this.layerAttr(\"circle\",{fill:\"#f0f0f0\"});\n            }\n            // set the LED on the Arduino on/off\n            hardware.arduino.set(3, !!event.value);\n         }\n    },\n    \n    calculate:function(){\n        this.propagate(2,  this.getPort(\"port_d2\"));\n        this.propagate(3,  this.getPort(\"port_d3\"));\n        this.propagate(4,  this.getPort(\"port_d4\"));\n        this.propagate(5,  this.getPort(\"port_d5\"));\n        this.propagate(6,  this.getPort(\"port_d6\"));\n        this.propagate(7,  this.getPort(\"port_d7\"));\n        this.propagate(8,  this.getPort(\"port_d8\"));\n        this.propagate(9,  this.getPort(\"port_d9\"));\n        this.propagate(10, this.getPort(\"port_d10\"));\n        this.propagate(11, this.getPort(\"port_d11\"));\n        this.propagate(12, this.getPort(\"port_d12\"));\n        this.propagate(13, this.getPort(\"port_d13\"));\n    },\n\n    propagate: function(index, port){\n        if(!port.getConnections().isEmpty()){\n            var con = port.getConnections().first();\n            var other = con.getSource()===port?con.getTarget():con.getSource()\n            if(other instanceof draw2d.InputPort){\n                \n            }\n            else {\n                hardware.arduino.set(index,!!other.getValue())\n            }\n        }\n    },\n    \n    /**\n     *  Called if the simulation mode is starting\n     **/\n    onStart:function(){\n    },\n\n    /**\n     *  Called if the simulation mode is stopping\n     **/\n    onStop:function(){\n    //    this.getInputPort(0).off(\"change:value\", this.onChangeCallback);\n    },\n    \n    getRequiredHardware: function(){\n      return {\n        raspi: false,\n        arduino: true\n      }\n    }\n    \n});",
+      "code": "/**\n * by 'Draw2D Shape Designer'\n *\n * Custom JS code to tweak the standard behaviour of the generated\n * shape. add your custome code and event handler here.\n *\n *\n */\ntestShape = testShape.extend({\n\n    init: function(attr, setter, getter){\n         this._super(attr, setter, getter);\n\n         this.attr({resizeable:false});\n         this.installEditPolicy(new draw2d.policy.figure.AntSelectionFeedbackPolicy());\n         \n         var _this= this;\n         this.onChangeCallback = function(emitter, event){\n            if(event.value){\n                _this.layerAttr(\"led_d13\",{fill:\"#33DE09\"});\n            }\n            else{\n                _this.layerAttr(\"led_d13\",{fill:\"#f0f0f0\"});\n            }\n         }\n\n         this.onConnectedCallback = function(emitter, event){\n            if(hardware.arduino.connected){\n                _this.layerAttr(\"led_power\",{fill:\"#FF3C00\"});\n            }\n            else{\n                _this.layerAttr(\"led_power\",{fill:\"#f0f0f0\"});\n            }\n         }\n    },\n    \n    calculate:function(){\n        this.propagate(2,  this.getPort(\"port_d2\"));\n        this.propagate(3,  this.getPort(\"port_d3\"));\n        this.propagate(4,  this.getPort(\"port_d4\"));\n        this.propagate(5,  this.getPort(\"port_d5\"));\n        this.propagate(6,  this.getPort(\"port_d6\"));\n        this.propagate(7,  this.getPort(\"port_d7\"));\n        this.propagate(8,  this.getPort(\"port_d8\"));\n        this.propagate(9,  this.getPort(\"port_d9\"));\n        this.propagate(10, this.getPort(\"port_d10\"));\n        this.propagate(11, this.getPort(\"port_d11\"));\n        this.propagate(12, this.getPort(\"port_d12\"));\n        this.propagate(13, this.getPort(\"port_d13\"));\n    },\n\n    propagate: function(index, port){\n        if(!port.getConnections().isEmpty()){\n            var con = port.getConnections().first();\n            var other = con.getSource()===port?con.getTarget():con.getSource()\n            if(other instanceof draw2d.InputPort){\n                \n            }\n            else {\n                hardware.arduino.set(index,!!other.getValue())\n            }\n        }\n    },\n    \n   /**\n     *  Called if the simulation mode is starting\n     **/\n    onStart:function(){\n        this.getPort(\"port_d13\").on(\"change:value\", this.onChangeCallback);\n    },\n\n    /**\n     *  Called if the simulation mode is stopping\n     **/\n    onStop:function(){\n        this.getPort(\"port_d13\").off(\"change:value\", this.onChangeCallback);\n    },\n    \n    setCanvas: function(canvas)\n    {\n        // deregister old listerener ...if exists\n        if(this.canvas !==null) {\n            hardware.arduino.off(\"connect\", this.onConnectedCallback);\n            hardware.arduino.off(\"disconnect\", this.onConnectedCallback);\n        }\n        \n        this._super(canvas);\n        \n        // register new listener...if requried\n        if(this.canvas !==null) {\n            hardware.arduino.on(\"connect\", this.onConnectedCallback);\n            hardware.arduino.on(\"disconnect\", this.onConnectedCallback);\n            \n            this.onConnectedCallback();\n            if(this.getPort(\"port_d13\").getValue() && !this.getPort(\"port_d13\").getConnections().isEmpty()) {\n                 this.onChangeCallback(this, {value:true})\n            }\n            else{\n                 this.onChangeCallback(this, {value:false})\n            }\n        }\n    },\n    \n    getRequiredHardware: function(){\n      return {\n        raspi: false,\n        arduino: true\n      }\n    }\n    \n});",
       "name": "circle",
       "markdown": "# High / Low Signal display\n\nsimple `HIGH`/ `LOW` display.\n\n    HIGH -> red\n \n    LOW -> gray"
     },
@@ -2559,6 +2559,76 @@ var json=[
       },
       {
         "name": "shape_designer.filter.FillColorFilter"
+      }
+    ]
+  },
+  {
+    "type": "shape_designer.figure.PolyCircle",
+    "id": "9ecebbd2-a09b-ae1b-142c-0c81b6bf3ece",
+    "x": 8021.649287499998,
+    "y": 7939.050050000001,
+    "width": 12.180999999998676,
+    "height": 12.180999999998676,
+    "alpha": 1,
+    "angle": 0,
+    "userData": {
+      "name": "led_power"
+    },
+    "cssClass": "shape_designer_figure_PolyCircle",
+    "ports": [],
+    "bgColor": "#FF3C00",
+    "color": "#1B1B1B",
+    "stroke": 1,
+    "radius": 0,
+    "dasharray": null,
+    "blur": 0,
+    "filters": [
+      {
+        "name": "shape_designer.filter.PositionFilter"
+      },
+      {
+        "name": "shape_designer.filter.SizeFilter"
+      },
+      {
+        "name": "shape_designer.filter.FillColorFilter"
+      },
+      {
+        "name": "shape_designer.filter.StrokeFilter"
+      }
+    ]
+  },
+  {
+    "type": "shape_designer.figure.PolyCircle",
+    "id": "ce456901-1d35-ac42-3365-852cd6b83986",
+    "x": 8006.2423874999995,
+    "y": 7939.050050000001,
+    "width": 12.180999999998676,
+    "height": 12.180999999998676,
+    "alpha": 1,
+    "angle": 0,
+    "userData": {
+      "name": "led_d13"
+    },
+    "cssClass": "shape_designer_figure_PolyCircle",
+    "ports": [],
+    "bgColor": "#33DE09",
+    "color": "#1B1B1B",
+    "stroke": 1,
+    "radius": 0,
+    "dasharray": null,
+    "blur": 0,
+    "filters": [
+      {
+        "name": "shape_designer.filter.PositionFilter"
+      },
+      {
+        "name": "shape_designer.filter.SizeFilter"
+      },
+      {
+        "name": "shape_designer.filter.FillColorFilter"
+      },
+      {
+        "name": "shape_designer.filter.StrokeFilter"
       }
     ]
   }
