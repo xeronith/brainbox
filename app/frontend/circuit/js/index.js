@@ -58,7 +58,7 @@ $(window).load(function () {
     $("#leftTabStrip .editor").click()
     $("#fileOpen, #editorFileOpen").remove();
     $("#fileSave, #editorFileSave").remove();
-   // $("#files_tab").remove()
+    $("#statusRaspi").addClass("disabled")
 
     // patch the URL for the backedn to deliver predefined files
     // for the static website with a nodeJS backend

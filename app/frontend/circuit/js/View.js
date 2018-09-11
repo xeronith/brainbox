@@ -118,8 +118,6 @@ export default draw2d.Canvas.extend({
       }
       return false
     })
-
-
     Mousetrap.bindGlobal(['left'], function (event) {
       let diff = _this.getZoom() < 0.5 ? 0.5 : 1
       _this.getSelection().each(function (i, f) {
@@ -181,14 +179,21 @@ export default draw2d.Canvas.extend({
     hardware.raspi.on("connect", this.hardwareChanged.bind(this));
 
 
-    $('#statusWebUSB').on("click", () =>{
-      if (hardware.arduino.connected) {
-        hardware.arduino.disconnect()
-      }
-      else {
-        hardware.arduino.connect()
-      }
-    })
+    let isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+    if(isChrome){
+      $('#statusWebUSB').on("click", () => {
+        if (hardware.arduino.connected) {
+          hardware.arduino.disconnect()
+        }
+        else {
+          hardware.arduino.connect()
+        }
+      })
+    }
+    else {
+      $('#statusWebUSB').addClass("disabled")
+    }
+
 
 
     this.deleteSelectionCallback = function () {
@@ -511,18 +516,6 @@ export default draw2d.Canvas.extend({
     }
 
     this.hardwareChanged()
-    /*
-    else{
-      $(".arduinoRequired").addClass("hidden")
-    }
-
-    if(raspiRequired){
-      $(".raspiRequired").removeClass("hidden")
-    }
-    else{
-      $(".raspiRequired").addClass("hidden")
-    }
-    */
   },
 
   hardwareChanged: function(){

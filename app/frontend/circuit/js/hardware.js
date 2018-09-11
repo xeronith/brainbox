@@ -39,10 +39,7 @@ export default {
     // Init the WEBUSB stuff
     //
     serial.getPorts().then(ports => {
-      if (ports.length == 0) {
-        console.log('No device found.')
-      } else {
-        console.log('Connecting...')
+      if (ports.length !== 0) {
         this.arduino.connectPort(ports[0])
       }
     })

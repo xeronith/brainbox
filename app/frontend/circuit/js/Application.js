@@ -66,7 +66,12 @@ class Application {
     let file = this.getParam("file")
     if (file) {
       $("#leftTabStrip .editor").click()
-      this._load(file)
+      this._load(file).then(()=>{
+        this.checkForTutorialMode();
+      })
+    }
+    else{
+      this.checkForTutorialMode()
     }
 
     // listen on the history object to load files
@@ -81,7 +86,7 @@ class Application {
   }
 
   _load(file) {
-    storage.loadFile(file)
+    return storage.loadFile(file)
       .then((content) => {
         storage.currentFile = file
         this.view.clear()
@@ -97,6 +102,27 @@ class Application {
       console.log(JSON.stringify(json, undefined, 2))
     })
   }
+
+
+  checkForTutorialMode(){
+    /*
+     new Anno({
+      target : '#editConnections',
+      content: 'Click here to pair your USB device',
+      onShow: function (anno, $target, $annoElem) {
+         let handler = function(e){
+           if(e.target.id === 'editConnections') e.stopPropagation() // filters out #button1
+         }
+         $target[0].addEventListener('click', handler, true) // `true` is essential
+         return handler
+       },
+       onHide: function(anno, $target, $annoElem, handler) {
+         $target[0].removeEventListener('click', handler, true)
+       }
+    }).show()
+    */
+  }
+
 
   getParam(name) {
     name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]")
