@@ -12,6 +12,27 @@ import FileSave from "./dialog/FileSave"
 import storage from './io/BackendStorage'
 import conf from "./Configuration"
 
+
+/**
+ * wait asyn that an DOM element is present
+ * Usage: checkElement("<selector>").then(function(){alert("element found")})
+ *
+ * @returns {Promise<any>}
+ */
+function rafAsync() {
+  return new Promise(resolve => {
+    requestAnimationFrame(resolve); //faster than set time out
+  });
+}
+function checkElement(selector) {
+  if (document.querySelector(selector) === null) {
+    return rafAsync().then(() => checkElement(selector));
+  } else {
+    return Promise.resolve(true);
+  }
+}
+
+
 class Application {
 
   /**
@@ -63,15 +84,18 @@ class Application {
     // check if the user has added a "file" parameter. In this case we load the shape from
     // the draw2d.shape github repository
     //
-    let file = this.getParam("file")
-    if (file) {
-      $("#leftTabStrip .editor").click()
-      this._load(file).then(()=>{
-        this.checkForTutorialMode();
-      })
+    let tutorial = this.getParam("tutorial")
+    if(tutorial) {
+        this.checkForTutorialMode()
     }
     else{
-      this.checkForTutorialMode()
+      let file = this.getParam("file")
+      if (file) {
+        $("#leftTabStrip .editor").click()
+        this._load(file).then(() => {
+          this.checkForTutorialMode()
+        })
+      }
     }
 
     // listen on the history object to load files
@@ -93,6 +117,7 @@ class Application {
         new draw2d.io.json.Reader().unmarshal(this.view, content)
         this.view.getCommandStack().markSaveLocation()
         this.view.centerDocument()
+        return content
       })
   }
 
@@ -104,24 +129,40 @@ class Application {
   }
 
 
-  checkForTutorialMode(){
-    /*
-     new Anno({
-      target : '#editConnections',
-      content: 'Click here to pair your USB device',
-      onShow: function (anno, $target, $annoElem) {
-         let handler = function(e){
-           if(e.target.id === 'editConnections') e.stopPropagation() // filters out #button1
-         }
-         $target[0].addEventListener('click', handler, true) // `true` is essential
-         return handler
-       },
-       onHide: function(anno, $target, $annoElem, handler) {
-         $target[0].removeEventListener('click', handler, true)
-       }
-    }).show()
-    */
+  checkForTutorialMode() {
+    let tutorial = this.getParam("tutorial")
+    if (!tutorial || tutorial === '') {
+      return
+    }
+
+    switch (tutorial) {
+      case "pairWebUSB":
+        $("#leftTabStrip .editor").click()
+          console.log("dddddd")
+        this._load("tutorial_pairWebUSB.brain").then(()=>{
+          checkElement("#paletteElementsScroll").then( ()=>{
+            let anno = new Anno([
+              {
+                target: '#editConnections',
+                content: 'Click here to pair your USB device...'
+              },
+              {
+                target: "#simulationStartStop",
+                position: 'left',
+                content: '..and press start to see how the LED is blinking.<br>'+
+                  'Check the buildin LED of the connected Arduino on the USB port'
+              }
+            ])
+            anno.show()
+          })
+        })
+        break
+      default:
+        break
+    }
   }
+
+
 
 
   getParam(name) {
@@ -157,7 +198,7 @@ class Application {
       storage.currentFile = storage.sanitize(fileName)
     }
     else {
-      storage.currentFile = "CircuitDiagram"+conf.fileSuffix
+      storage.currentFile = "CircuitDiagram" + conf.fileSuffix
     }
     this.view.centerDocument()
   }

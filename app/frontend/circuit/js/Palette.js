@@ -17,7 +17,7 @@ export default class Palette
      */
     constructor()
     {
-        var $grid = $("#paletteElements");
+        let $grid = $("#paletteElements");
 
         $.getJSON(conf.shapes.url+ "index.json", function(data) {
 

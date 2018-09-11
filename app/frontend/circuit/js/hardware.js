@@ -122,7 +122,16 @@ export default {
           this.emit("disconnect")
         }
       }, error => {
-        console.log(error)
+        let msg = error.message
+        switch(error.message){
+          case "Unable to claim interface.":
+            msg = "Unable to claim USB interface."+
+                  "<br>Maybe it is already paired by another browser window"
+            break;
+          default:
+            break;
+        }
+        $.notify({ message: msg},{ type: 'danger'});
         this.emit("disconnect")
       })
     }

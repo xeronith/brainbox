@@ -98,6 +98,7 @@ class BackendStorage {
 
         if (content.draw2d)
           return content.draw2d
+        
         return content
       })
   }
