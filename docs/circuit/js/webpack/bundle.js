@@ -226,10 +226,9 @@ var Application = function () {
     $("#fileNew").on("click", function () {
       _this.fileNew();
     });
+
     $("#fileSave, #editorFileSave").on("click", function () {
-      new _FileSave2.default().show(_this.view, function () {
-        _this.filePane.render();
-      });
+      new _FileSave2.default().show(_this.view);
     });
 
     $("#appHelp").on("click", function () {
@@ -1025,11 +1024,13 @@ var Files = function () {
 
       _BackendStorage2.default.getFiles("").then(function (files) {
         files = files.map(function (file) {
-          return _extends({}, file, { title: file.name.replace(_Configuration2.default.fileSuffix, "") });
+          return _extends({}, file, {
+            title: file.name.replace(_Configuration2.default.fileSuffix, ""),
+            path: _Configuration2.default.backend.file.image()
+          });
         });
 
-        var compiled = _hogan2.default.compile('<div class="col-lg-3 col-md-4 col-xs-6 thumbAdd">' + '    <div class="img-responsive ion-ios-plus-outline"></div>' + '    <h4>New</h4>' + '</div>' + '{{#files}}' + '<div class="col-lg-3 col-md-4 col-xs-6 thumb">' + '  <img class="deleteIcon svg"  data-toggle="confirmation"  data-name="{{name}}" src="./images/toolbar_delete.svg"/>' + '  <a class="thumbnail" data-name="{{name}}">' + '    <img class="img-responsive" src="' + _Configuration2.default.backend.file.image() + '{{name}}" data-name="{{name}}">' + '    <h4>{{title}}</h4>' + '  </a>' + '</div>' + '{{/files}}');
-
+        var compiled = _hogan2.default.compile($("#filesTemplate").html());
         var output = compiled.render({
           files: files
         });
@@ -1040,7 +1041,7 @@ var Files = function () {
           var $el = $(event.currentTarget);
           var name = $el.data("name");
           _BackendStorage2.default.deleteFile(name).then(function () {
-            var parent = $el.parent();
+            var parent = $el.closest(".list-group-item");
             parent.hide('slow', function () {
               return parent.remove();
             });
@@ -1053,10 +1054,10 @@ var Files = function () {
           placement: "bottom" // (top, right, bottom, left)
         });
 
-        $("#files .container .thumbnail h4").on("click", function (event) {
+        $("#files .list-group-item h4").on("click", function (event) {
           Mousetrap.pause();
           var $el = $(event.currentTarget);
-          var name = $el.parent().data("name");
+          var name = $el.closest(".list-group-item").data("name");
           var $replaceWith = $('<input type="input" class="filenameInplaceEdit" value="' + name.replace(_Configuration2.default.fileSuffix, "") + '" />');
           $el.hide();
           $el.after($replaceWith);
@@ -1096,9 +1097,11 @@ var Files = function () {
           });
         });
 
-        $("#files .container .thumbnail img").on("click", function (event) {
+        $("#files .list-group-item .thumbnail").on("click", function (event) {
           var $el = $(event.currentTarget);
-          var name = $el.parent().data("name");
+          var parent = $el.closest(".list-group-item");
+          var name = parent.data("name");
+          parent.addClass("spinner");
           _BackendStorage2.default.loadFile(name).then(function (content) {
             $("#leftTabStrip .editor").click();
             _BackendStorage2.default.currentFile = name;
@@ -1106,6 +1109,7 @@ var Files = function () {
             new draw2d.io.json.Reader().unmarshal(app.view, content);
             app.view.getCommandStack().markSaveLocation();
             app.view.centerDocument();
+            parent.removeClass("spinner");
           });
         });
 
@@ -1118,7 +1122,7 @@ var Files = function () {
           if (preview.length === 0) {
             _this.render();
           } else {
-            $("a[data-name='" + msg.filePath + "'] img").attr({ src: _Configuration2.default.backend.file.image + "?filePath=" + msg.filePath + "&timestamp=" + new Date().getTime() });
+            $("a[data-name='" + msg.filePath + "'] img").attr({ src: _Configuration2.default.backend.file.image() + msg.filePath + "&timestamp=" + new Date().getTime() });
           }
         });
       });
@@ -1913,7 +1917,8 @@ exports.default = draw2d.Canvas.extend({
     _hardware2.default.raspi.on("connect", this.hardwareChanged.bind(this));
 
     var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-    if (isChrome) {
+    var isHTTPS = location.protocol === 'https:';
+    if (isChrome && isHTTPS) {
       $('#statusWebUSB').on("click", function () {
         if (_hardware2.default.arduino.connected) {
           _hardware2.default.arduino.disconnect();
@@ -1997,9 +2002,9 @@ exports.default = draw2d.Canvas.extend({
           "label": { name: "Attach Label", icon: "x ion-ios-pricetag-outline" },
           "delete": { name: "Delete", icon: "x ion-ios-close-outline" },
           "sep1": "---------",
-          "design": { name: "Customize Shape", icon: "x ion-ios-compose-outline" },
+          "design": { name: "Edit Shape", icon: "x ion-ios-compose-outline" },
           "code": { name: "Show Custom Code", icon: "x ion-code" },
-          "help": { name: "About", icon: "x ion-ios-information-outline" }
+          "help": { name: "Info", icon: "x ion-ios-information-outline" }
         };
 
         $.contextMenu({
@@ -2314,7 +2319,7 @@ exports.default = draw2d.Canvas.extend({
       // into the center of the canvas. Scroll to the top left corner after them
       //
       var bb = this.getBoundingBox();
-      this.scrollTo(bb.y - c.height() / 2, bb.x - c.width() / 2);
+      this.scrollTo(bb.y - c.height() / 2 + bb.h / 2, bb.x - c.width() / 2 + bb.w / 2);
     } else {
       var _bb = {
         x: this.getWidth() / 2,

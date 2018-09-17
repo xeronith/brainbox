@@ -84,8 +84,7 @@
         <div class="col-sm-8 col-md-8">
           <div class="title"><img src="./images/favicon_64x64.svg"/>BrainBox</div>
           <div class="slogan">
-            Dive inside your device. Use a simple programming language to connect, control, and play
-            with all the sensors and tools.
+            Brainbox is a free and open source digital logic circuit design and simulation software
           </div>
         </div>
       </div>
@@ -101,6 +100,15 @@
       </div>
 
       <div class="introText">
+
+        <div class="paragraph">
+          <h3>Who is this intended for?</h3>
+          It is primarily intended for educational use by students and teachers, but is suitable for anyone,
+          from children to adults alike, wanting to have a go at creating and simulating their own digital
+          logic circuits.
+        </div>
+
+
         <div class="paragraph">
           <h3>Building Hardware was always cool</h3>
           Physical things are great. Hardware companies like Apple,
@@ -110,25 +118,6 @@
           <br>
           Hobbyists can create some of these fun circuits and run them on an RaspberryPi or just
           in your browser with our virtual instruments to test and measure appropriate signals.
-        </div>
-
-
-        <div class="paragraph">
-          <h3>Getting Started on Hackster.io</h3>
-          <div class="container">
-            <div class="row">
-              <div class="col-md-5">
-                <iframe frameborder='0' height='327.5' scrolling='no' src='https://www.hackster.io/draw2dtouch/getting-started-with-brainbox-and-raspberry-pi-5d56a1/embed' width='350'></iframe>
-              </div>
-              <div class="col-md-7">
-                One function that makes the Internet of Things the Internet of Things is remote control
-                of devices, being able to trigger action from a remote location.
-                With <span class="branding">BrainBox</span> you can edit and run your digital circuit simulation
-                designs online on RPi, PC, Mac, thin clients, tablets within your browser and trigger any
-                physical device.
-              </div>
-            </div>
-          </div>
         </div>
 
         <div class="paragraph">
@@ -213,7 +202,7 @@
                           <span>WebUSB</span>
                           <span class="connected">connected</span>
                           <span class="disconnected">disconnected</span>
-                          <span class="notSupported">Chrome Only</span>
+                          <span class="notSupported">Chrome with<br>HTTPS required</span>
                         </label>
 
                         <label class="statusIndicator" id="statusRaspi" >
@@ -285,6 +274,27 @@
        </div>
     </div>
 {{/shapes}}
+
+</script>
+
+<script id="filesTemplate" type="text/x-jsrender">
+<ul class="list-group col-lg-10 col-md-10 col-xs-10 ">
+{{#files}}
+  <li class="list-group-item"  data-name="{{name}}">
+    <div class="media">
+       <a class="thumbnail media-left" data-name="{{name}}">
+        <div style="width: 64px; height: 64px">
+          <img style="width:100%; height:auto;"  data-name="{{name}}"  src="{{path}}{{name}}">
+        </div>
+      </a>
+      <div class="media-body">
+        <h4 class="media-heading">{{title}}</h4>
+        <img class="deleteIcon svg"  data-toggle="confirmation"  data-name="{{name}}" src="./images/toolbar_delete.svg"/>
+      </div>
+    </div>
+  </li>
+{{/files}}
+</ul>
 
 </script>
 

@@ -51,11 +51,11 @@ class Application {
     $("#fileNew").on("click", () => {
       this.fileNew()
     })
+
     $("#fileSave, #editorFileSave").on("click", () => {
-      new FileSave().show(this.view, () => {
-        this.filePane.render()
-      })
+      new FileSave().show(this.view)
     })
+
 
     $("#appHelp").on("click", () => {
       $("#leftTabStrip .gitbook").click()

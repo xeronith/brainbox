@@ -23,24 +23,15 @@ export default class Files {
 
   render() {
     storage.getFiles("").then((files) => {
-      files = files.map(file => { return { ...file, title: file.name.replace(conf.fileSuffix,"")} });
+      files = files.map(file => {
+        return {
+          ...file,
+          title: file.name.replace(conf.fileSuffix, ""),
+          path: conf.backend.file.image()
+        }
+      })
 
-      let compiled = Hogan.compile(
-        '<div class="col-lg-3 col-md-4 col-xs-6 thumbAdd">' +
-        '    <div class="img-responsive ion-ios-plus-outline"></div>' +
-        '    <h4>New</h4>' +
-        '</div>'+
-        '{{#files}}' +
-        '<div class="col-lg-3 col-md-4 col-xs-6 thumb">' +
-        '  <img class="deleteIcon svg"  data-toggle="confirmation"  data-name="{{name}}" src="./images/toolbar_delete.svg"/>' +
-        '  <a class="thumbnail" data-name="{{name}}">' +
-        '    <img class="img-responsive" src="' + conf.backend.file.image() + '{{name}}" data-name="{{name}}">' +
-        '    <h4>{{title}}</h4>' +
-        '  </a>' +
-        '</div>' +
-        '{{/files}}'
-      )
-
+      let compiled = Hogan.compile($("#filesTemplate").html())
       let output = compiled.render({
         files: files
       })
@@ -50,9 +41,9 @@ export default class Files {
       $("#files .container .deleteIcon").on("click", (event) => {
         let $el = $(event.currentTarget)
         let name = $el.data("name")
-        storage.deleteFile(name).then( () => {
-          let parent = $el.parent()
-          parent.hide('slow', () =>  parent.remove())
+        storage.deleteFile(name).then(() => {
+          let parent = $el.closest(".list-group-item")
+          parent.hide('slow', () => parent.remove())
         })
       })
 
@@ -63,16 +54,16 @@ export default class Files {
       })
 
 
-      $("#files .container .thumbnail h4").on("click", (event) =>{
+      $("#files .list-group-item h4").on("click", (event) => {
         Mousetrap.pause()
         let $el = $(event.currentTarget)
-        let name = $el.parent().data("name")
-        let $replaceWith = $('<input type="input" class="filenameInplaceEdit" value="' + name.replace(conf.fileSuffix,"") + '" />')
+        let name = $el.closest(".list-group-item").data("name")
+        let $replaceWith = $('<input type="input" class="filenameInplaceEdit" value="' + name.replace(conf.fileSuffix, "") + '" />')
         $el.hide()
         $el.after($replaceWith)
         $replaceWith.focus()
 
-        let fire = () =>{
+        let fire = () => {
           Mousetrap.unpause()
           let newName = $replaceWith.val()
           if (newName !== "") {
@@ -87,11 +78,11 @@ export default class Files {
                   to: newName
                 }
               }
-            ).then( () =>{
+            ).then(() => {
               $replaceWith.remove()
-              $el.html(newName.replace(conf.fileSuffix,""))
+              $el.html(newName.replace(conf.fileSuffix, ""))
               $el.show()
-              $el.parent().parent().find("[data-name='"+name+"']" ).data("name", newName)
+              $el.parent().parent().find("[data-name='" + name + "']").data("name", newName)
             })
           }
           else {
@@ -101,16 +92,18 @@ export default class Files {
           }
         }
         $replaceWith.blur(fire)
-        $replaceWith.keypress( (e) =>{
+        $replaceWith.keypress((e) => {
           if (e.which === 13) {
             fire()
           }
         })
       })
 
-      $("#files .container .thumbnail img").on("click", (event) =>{
+      $("#files .list-group-item .thumbnail").on("click", (event) => {
         let $el = $(event.currentTarget)
-        let name = $el.parent().data("name")
+        let parent = $el.closest(".list-group-item")
+        let name = parent.data("name")
+        parent.addClass("spinner")
         storage.loadFile(name)
           .then((content) => {
             $("#leftTabStrip .editor").click()
@@ -119,22 +112,23 @@ export default class Files {
             new draw2d.io.json.Reader().unmarshal(app.view, content)
             app.view.getCommandStack().markSaveLocation()
             app.view.centerDocument()
+            parent.removeClass("spinner")
           })
       })
 
-      $("#files .thumbAdd").on("click",  () =>{
+      $("#files .thumbAdd").on("click", () => {
         new FileNew().show()
       })
 
-      socket.on("brain:generated",  msg => {
-        let preview = $("a[data-name='"+msg.filePath+"'] img")
-        if(preview.length===0){
+      socket.on("brain:generated", msg => {
+        let preview = $("a[data-name='" + msg.filePath + "'] img")
+        if (preview.length === 0) {
           this.render()
         }
         else {
-          $("a[data-name='" + msg.filePath + "'] img").attr({src: conf.backend.file.image + "?filePath=" + msg.filePath + "&timestamp=" + new Date().getTime()})
+          $("a[data-name='" + msg.filePath + "'] img").attr({src: conf.backend.file.image()  + msg.filePath + "&timestamp=" + new Date().getTime()})
         }
-      });
+      })
     })
   }
 }

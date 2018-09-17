@@ -173,14 +173,15 @@ export default draw2d.Canvas.extend({
       setZoom(_this.getZoom() * 0.8)
     })
 
-    hardware.arduino.on("disconnect", this.hardwareChanged.bind(this));
-    hardware.arduino.on("connect", this.hardwareChanged.bind(this));
-    hardware.raspi.on("disconnect", this.hardwareChanged.bind(this));
-    hardware.raspi.on("connect", this.hardwareChanged.bind(this));
+    hardware.arduino.on("disconnect", this.hardwareChanged.bind(this))
+    hardware.arduino.on("connect", this.hardwareChanged.bind(this))
+    hardware.raspi.on("disconnect", this.hardwareChanged.bind(this))
+    hardware.raspi.on("connect", this.hardwareChanged.bind(this))
 
 
-    let isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-    if(isChrome){
+    let isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)
+    let isHTTPS = location.protocol === 'https:'
+    if (isChrome && isHTTPS) {
       $('#statusWebUSB').on("click", () => {
         if (hardware.arduino.connected) {
           hardware.arduino.disconnect()
@@ -193,7 +194,6 @@ export default draw2d.Canvas.extend({
     else {
       $('#statusWebUSB').addClass("disabled")
     }
-
 
 
     this.deleteSelectionCallback = function () {
@@ -271,9 +271,9 @@ export default draw2d.Canvas.extend({
           "label": {name: "Attach Label", icon: "x ion-ios-pricetag-outline"},
           "delete": {name: "Delete", icon: "x ion-ios-close-outline"},
           "sep1": "---------",
-          "design": {name: "Customize Shape", icon: "x ion-ios-compose-outline"},
+          "design": {name: "Edit Shape", icon: "x ion-ios-compose-outline"},
           "code": {name: "Show Custom Code", icon: "x ion-code"},
-          "help": {name: "About", icon: "x ion-ios-information-outline"}
+          "help": {name: "Info", icon: "x ion-ios-information-outline"}
         }
 
         $.contextMenu({
@@ -438,7 +438,7 @@ export default draw2d.Canvas.extend({
 
     $("#simulationStartStop").addClass("pause")
     $("#simulationStartStop").removeClass("play")
-    $(".editBase").fadeOut("slow", ()=>{
+    $(".editBase").fadeOut("slow", () => {
       $(".simulationBase").fadeIn("slow")
     })
     $("#paletteElementsOverlay").fadeIn("fast")
@@ -459,7 +459,7 @@ export default draw2d.Canvas.extend({
 
     $("#simulationStartStop").addClass("play")
     $("#simulationStartStop").removeClass("pause")
-    $(".simulationBase").fadeOut("slow", ()=>{
+    $(".simulationBase").fadeOut("slow", () => {
       $(".editBase").fadeIn("slow")
     })
     $("#paletteElementsOverlay").fadeOut("fast")
@@ -518,7 +518,7 @@ export default draw2d.Canvas.extend({
     this.hardwareChanged()
   },
 
-  hardwareChanged: function(){
+  hardwareChanged: function () {
     // check if a new element is added which requires or provides special hardware
     // support. In this case we can update the UI with some status indicator
     //
@@ -526,36 +526,36 @@ export default draw2d.Canvas.extend({
     elements = elements.filter(element => element.getRequiredHardware)
     let arduinoRequired = elements.reduce((sum, cur) => sum || cur.getRequiredHardware().arduino, false)
     let raspiRequired = elements.reduce((sum, cur) => sum || cur.getRequiredHardware().raspi, false)
-    let raspiConnected =  hardware.raspi.connected
+    let raspiConnected = hardware.raspi.connected
     let arduinoConnected = hardware.arduino.connected
 
     // Det the status of top button for the pulldown menu.
     //
-    if(arduinoRequired===false && raspiRequired==false){
+    if (arduinoRequired === false && raspiRequired == false) {
       $("#editConnections").attr("src", imgConnectionStatusNeutral)
     }
-    else{
+    else {
       let error =
-        (raspiRequired===true && raspiConnected===false ) ||
-        (arduinoRequired===true && arduinoConnected===false )
-      $("#editConnections").attr("src", error?imgConnectionStatusFalse:imgConnectionStatusTrue)
+        (raspiRequired === true && raspiConnected === false) ||
+        (arduinoRequired === true && arduinoConnected === false)
+      $("#editConnections").attr("src", error ? imgConnectionStatusFalse : imgConnectionStatusTrue)
     }
 
     // set the status indicator for the arduino webusb connections
     //
-    if(arduinoConnected){
+    if (arduinoConnected) {
       $("#statusWebUSB").removeClass("error")
     }
-    else{
+    else {
       $("#statusWebUSB").addClass("error")
     }
 
     // set the status indicator for the arduino webusb connections
     //
-    if(raspiConnected){
+    if (raspiConnected) {
       $("#statusRaspi").removeClass("error")
     }
-    else{
+    else {
       $("#statusRaspi").addClass("error")
     }
   },
@@ -592,7 +592,7 @@ export default draw2d.Canvas.extend({
       // into the center of the canvas. Scroll to the top left corner after them
       //
       let bb = this.getBoundingBox()
-      this.scrollTo(bb.y - c.height() / 2, bb.x - c.width() / 2)
+      this.scrollTo(bb.y - c.height()/2 + bb.h/2, bb.x - c.width()/2 + bb.w/2)
     }
     else {
       let bb = {
