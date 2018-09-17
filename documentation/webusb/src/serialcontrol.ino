@@ -1,5 +1,4 @@
-// http://forums.trossenrobotics.com/tutorials/how-to-diy-128/complete-control-of-an-arduino-via-serial-3300/
-/*
+/* credits to http://forums.trossenrobotics.com/tutorials/how-to-diy-128/complete-control-of-an-arduino-via-serial-3300/
  * 1 = Wright:
  *     1 = analog:
  *         "pin number"
@@ -15,14 +14,18 @@
  *         "pin number"
  *
  *  '1/2/7/1/' will turn pin 7 on HIGH
- *  '1/2/7/0/' would turn pin 7 off
+ *  '1/2/7/0/' would turn pin 7 to LOW
  *  '1/1/7/255/' would turn pin 7 on at a analog rate of 255 or full power
  *
  */
 
 #include <WebUSB.h>
 
-WebUSB WebUSBSerial(0, "localhost:7400/circuit/");
+// for local testing
+//WebUSB WebUSBSerial(0, "localhost:7400/circuit/?tutorial=pairWebUSB");
+
+// for productive
+WebUSB WebUSBSerial(1, "freegroup.github.io/brainbox/circuit/?tutorial=pairWebUSB");
 #define Serial WebUSBSerial
 
 unsigned long serialdata;
@@ -39,6 +42,7 @@ int digitalState;
 void setup(){
   while (!Serial) {;}
   Serial.begin(9600);
+  Serial.println("Arduino with Brainbox sketch up and running");
 }
 
 void loop(){
