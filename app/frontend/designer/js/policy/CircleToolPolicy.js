@@ -5,8 +5,6 @@ import cursor from "../../images/cursors/cursor_circle.png"
 export default AbstractToolPolicy.extend({
 
   TITLE: "Circle",
-  MESSAGE_STEP1: "Select center of the circle",
-  MESSAGE_STEP2: "Select outer bound",
 
   init: function () {
     this._super()
@@ -18,7 +16,6 @@ export default AbstractToolPolicy.extend({
 
 
   onInstall: function (canvas) {
-    this.setToolText(this.MESSAGE_STEP1)
     canvas.setCursor(cursor)
   },
 
@@ -43,24 +40,7 @@ export default AbstractToolPolicy.extend({
    * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
    */
   onMouseDown: function (canvas, x, y, shiftKey, ctrlKey) {
-
-  },
-
-  /**
-   * @method
-   *
-   * @param {draw2d.Canvas} canvas
-   * @param {Number} x the x-coordinate of the mouse event
-   * @param {Number} y the y-coordinate of the mouse event
-   * @template
-   */
-  onMouseMove: function (canvas, x, y) {
-
-    if (this.boundingBoxFigure1 !== null) {
-      var dx = Math.abs(this.center.x - x)
-      this.boundingBoxFigure1.setRadius(dx)
-      this.boundingBoxFigure2.setRadius(dx)
-    }
+    this.center = new draw2d.geo.Point(x, y)
   },
 
 
@@ -74,7 +54,26 @@ export default AbstractToolPolicy.extend({
    * @param {Number} dy2 The y diff since the last call of this dragging operation
    * @template
    */
-  onMouseDrag: function (canvas, dx, dy, dx2, dy2) {
+  onMouseDrag: function (canvas, dx, dy, dx2, dy2, shiftKey, ctrlKey) {
+    let r = Math.sqrt(dx * dx + dy * dy)
+    if (this.boundingBoxFigure1 !== null) {
+      this.boundingBoxFigure1.setRadius(Math.abs(r))
+      this.boundingBoxFigure2.setRadius(Math.abs(r))
+    }
+    else {
+      this.boundingBoxFigure1 = new draw2d.shape.basic.Circle({radius: 1})
+      this.boundingBoxFigure1.setCenter(this.center)
+      this.boundingBoxFigure1.setCanvas(canvas)
+      this.boundingBoxFigure1.setBackgroundColor("#333333")
+      this.boundingBoxFigure1.setAlpha(0.1)
+
+      this.boundingBoxFigure2 = new draw2d.shape.basic.Circle({radius: 1})
+      this.boundingBoxFigure2.setCenter(this.center)
+      this.boundingBoxFigure2.setCanvas(canvas)
+      this.boundingBoxFigure2.setStroke(1)
+      this.boundingBoxFigure2.setColor(new draw2d.util.Color("#333333"))
+      this.boundingBoxFigure2.setBackgroundColor(null)
+    }
   },
 
   /**
@@ -86,39 +85,24 @@ export default AbstractToolPolicy.extend({
    * @template
    */
   onMouseUp: function (canvas, x, y) {
-    if (this.center === null) {
-      this.center = new draw2d.geo.Point(x, y)
-      this.setToolText(this.MESSAGE_STEP2)
-
-      this.boundingBoxFigure1 = new draw2d.shape.basic.Circle({radius: 1})
-      this.boundingBoxFigure1.setCenter(x, y)
-      this.boundingBoxFigure1.setCanvas(canvas)
-      this.boundingBoxFigure1.setBackgroundColor("#333333")
-      this.boundingBoxFigure1.setAlpha(0.1)
-
-      this.boundingBoxFigure2 = new draw2d.shape.basic.Circle({radius: 1})
-      this.boundingBoxFigure2.setCenter(x, y)
-      this.boundingBoxFigure2.setCanvas(canvas)
-      this.boundingBoxFigure2.setStroke(1)
-      this.boundingBoxFigure2.setColor(new draw2d.util.Color("#333333"))
-      this.boundingBoxFigure2.setBackgroundColor(null)
-    }
-    else {
-      var dx = Math.abs(this.center.x - x)
-      var rect = new shape_designer.figure.PolyCircle(this.center, dx)
-      var command = new draw2d.command.CommandAdd(canvas, rect, rect.getX(), rect.getY())
+    let dx = Math.abs(this.center.x - x)
+    let dy = Math.abs(this.center.y - y)
+    let r = Math.sqrt(dx * dx + dy * dy)
+    if (r > 3) {
+      let circle = new shape_designer.figure.PolyCircle(this.center, r)
+      let command = new draw2d.command.CommandAdd(canvas, circle, circle.getX(), circle.getY())
       canvas.getCommandStack().execute(command)
-      canvas.setCurrentSelection(rect)
-      this.center = null
-      this.setToolText(this.MESSAGE_STEP1)
+      canvas.setCurrentSelection(circle)
+    }
 
+    this.center = null
+    if (this.boundingBoxFigure1 !== null) {
       this.boundingBoxFigure1.setCanvas(null)
       this.boundingBoxFigure1 = null
       this.boundingBoxFigure2.setCanvas(null)
       this.boundingBoxFigure2 = null
-
-      this.executed()
     }
+    this.executed()
   }
 })
 

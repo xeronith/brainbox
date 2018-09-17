@@ -38,29 +38,8 @@ export default AbstractToolPolicy.extend({
    * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
    */
   onMouseDown: function (canvas, x, y, shiftKey, ctrlKey) {
-
+    this.topLeftPoint = new draw2d.geo.Point(x, y)
   },
-
-  /**
-   * @method
-   *
-   * @param {draw2d.Canvas} canvas
-   * @param {Number} x the x-coordinate of the mouse event
-   * @param {Number} y the y-coordinate of the mouse event
-   * @template
-   */
-  onMouseMove: function (canvas, x, y) {
-
-    if (this.boundingBoxFigure1 !== null) {
-      let dx = this.topLeftPoint.x - x
-      let dy = this.topLeftPoint.y - y
-      this.boundingBoxFigure1.setDimension(Math.abs(dx), Math.abs(dy))
-      this.boundingBoxFigure1.setPosition(x + Math.min(0, dx), y + Math.min(0, dy))
-      this.boundingBoxFigure2.setDimension(Math.abs(dx), Math.abs(dy))
-      this.boundingBoxFigure2.setPosition(x + Math.min(0, dx), y + Math.min(0, dy))
-    }
-  },
-
 
   /**
    * @method
@@ -72,7 +51,38 @@ export default AbstractToolPolicy.extend({
    * @param {Number} dy2 The y diff since the last call of this dragging operation
    * @template
    */
-  onMouseDrag: function (canvas, dx, dy, dx2, dy2) {
+  onMouseDrag: function (canvas, dx, dy, dx2, dy2, shiftKey, ctrlKey) {
+
+    if (this.boundingBoxFigure1 === null) {
+      this.boundingBoxFigure1 = new draw2d.shape.basic.Rectangle({
+        width: 1,
+        height: 1,
+        x: this.topLeftPoint.x,
+        y: this.topLeftPoint.y,
+        bgColor: "#d4d1d4",
+        alpha: 0.1
+      });
+      this.boundingBoxFigure1.setCanvas(canvas);
+
+      this.boundingBoxFigure2 = new draw2d.shape.basic.Rectangle({
+        width: 1,
+        height: 1,
+        x: this.topLeftPoint.x,
+        y: this.topLeftPoint.y,
+        dash: "--..",
+        stroke: 0.5,
+        color: "#37a8ff",
+        bgColor: null
+      });
+      this.boundingBoxFigure2.setCanvas(canvas);
+    }
+
+    if (this.boundingBoxFigure1 !== null) {
+      this.boundingBoxFigure1.setDimension(Math.abs(dx), Math.abs(dy));
+      this.boundingBoxFigure1.setPosition(this.topLeftPoint.x + Math.min(0, dx), this.topLeftPoint.y + Math.min(0, dy));
+      this.boundingBoxFigure2.setDimension(Math.abs(dx), Math.abs(dy));
+      this.boundingBoxFigure2.setPosition(this.topLeftPoint.x + Math.min(0, dx), this.topLeftPoint.y + Math.min(0, dy));
+    }
   },
 
   /**
@@ -84,40 +94,22 @@ export default AbstractToolPolicy.extend({
    * @template
    */
   onMouseUp: function (canvas, x, y) {
-    if (this.topLeftPoint === null) {
-      this.topLeftPoint = new draw2d.geo.Point(x, y)
-      this.setToolText("Select second corner of rectangle")
-
-      this.boundingBoxFigure1 = new draw2d.shape.basic.Rectangle({width: 1, height: 1})
-      this.boundingBoxFigure1.setPosition(x, y)
-      this.boundingBoxFigure1.setCanvas(canvas)
-      this.boundingBoxFigure1.setBackgroundColor("#333333")
-      this.boundingBoxFigure1.setAlpha(0.1)
-
-      this.boundingBoxFigure2 = new draw2d.shape.basic.Rectangle({width: 1, height: 1})
-      this.boundingBoxFigure2.setPosition(x, y)
-      this.boundingBoxFigure2.setCanvas(canvas)
-      // this.boundingBoxFigure2.setDashArray("- ");
-      this.boundingBoxFigure2.setStroke(1)
-      this.boundingBoxFigure2.setColor(new draw2d.util.Color("#333333"))
-      this.boundingBoxFigure2.setBackgroundColor(null)
+    if (this.boundingBoxFigure1 !== null) {
+      this.boundingBoxFigure1.setCanvas(null);
+      this.boundingBoxFigure1 = null;
+      this.boundingBoxFigure2.setCanvas(null);
+      this.boundingBoxFigure2 = null;
     }
-    else {
-      let bottomRight = new draw2d.geo.Point(x, y)
+
+    let bottomRight = new draw2d.geo.Point(x, y)
+    if (this.topLeftPoint.distance(bottomRight) > 3) {
       let rect = new PolyRect(this.topLeftPoint, bottomRight)
       let command = new draw2d.command.CommandAdd(canvas, rect, rect.getX(), rect.getY())
       canvas.getCommandStack().execute(command)
       canvas.setCurrentSelection(rect)
-      this.topLeftPoint = null
-      this.setToolText("Select first corner of rectangle")
-
-      this.boundingBoxFigure1.setCanvas(null)
-      this.boundingBoxFigure1 = null
-      this.boundingBoxFigure2.setCanvas(null)
-      this.boundingBoxFigure2 = null
-
-      this.executed()
     }
+    this.executed()
+    this.topLeftPoint = null
   }
 })
 

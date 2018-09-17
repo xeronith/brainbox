@@ -817,6 +817,7 @@ var Toolbar = function () {
     // of the Delete Button
     //
     view.on("select", this.onSelectionChanged.bind(this));
+    view.on("unselect", this.onSelectionChanged.bind(this));
 
     this.fileName = null;
 
@@ -944,7 +945,7 @@ var Toolbar = function () {
     });
 
     Mousetrap.bindGlobal(["R", "r"], function () {
-      $('.policyRectangleToolPolicy1').click();
+      $('.policyRectangleToolPolicy').click();
       return false;
     });
     Mousetrap.bindGlobal(["C", "c"], function () {
@@ -964,9 +965,9 @@ var Toolbar = function () {
       return false;
     });
 
-    this.unionButton = $('<img data-toggle="tooltip" class="icon" title="Polygon Union <span class=\'highlight\'> [ U ]</span>" src="./images/toolbar_geo_union.svg"/>');
+    this.unionButton = $('<img id="toolUnion" data-toggle="tooltip" class="disabled icon" title="Polygon Union <span class=\'highlight\'> [ U ]</span>" src="./images/toolbar_geo_union.svg"/>');
     buttonGroup.append(this.unionButton);
-    this.unionButton.on("click", function () {
+    $("#toolbar").delegate("#toolUnion:not(.disabled)", "click", function () {
       var selection = _this.view.getSelection().getAll();
       var p = new _GeoUnionToolPolicy2.default();
       p.executed = function () {
@@ -980,9 +981,9 @@ var Toolbar = function () {
       return false;
     });
 
-    this.differenceButton = $('<img data-toggle="tooltip" class="icon" title="Polygon Difference <span class=\'highlight\'> [ D ]</span>" src="./images/toolbar_geo_subtract.svg"/>');
+    this.differenceButton = $('<img id="toolDifference" data-toggle="tooltip" class="disabled icon" title="Polygon Difference <span class=\'highlight\'> [ D ]</span>" src="./images/toolbar_geo_subtract.svg"/>');
     buttonGroup.append(this.differenceButton);
-    this.differenceButton.on("click", function () {
+    $("#toolbar").delegate("#toolDifference:not(.disabled)", "click", function () {
       _this.view.installEditPolicy(new _GeoDifferenceToolPolicy2.default());
     });
     Mousetrap.bindGlobal(["D", "d"], function () {
@@ -990,9 +991,9 @@ var Toolbar = function () {
       return false;
     });
 
-    this.intersectionButton = $('<img data-toggle="tooltip" class="icon" title="Polygon Intersection <span class=\'highlight\'> [ I ]</span>" src="./images/toolbar_geo_intersect.svg"/>');
+    this.intersectionButton = $('<img id="toolIntersection" data-toggle="tooltip" class="disabled icon" title="Polygon Intersection <span class=\'highlight\'> [ I ]</span>" src="./images/toolbar_geo_intersect.svg"/>');
     buttonGroup.append(this.intersectionButton);
-    this.intersectionButton.on("click", function () {
+    $("#toolbar").delegate("#toolIntersection:not(.disabled)", "click", function () {
       _this.view.installEditPolicy(new _GeoIntersectionToolPolicy2.default());
     });
     Mousetrap.bindGlobal(["I", "i"], function () {
@@ -1048,10 +1049,24 @@ var Toolbar = function () {
   _createClass(Toolbar, [{
     key: "onSelectionChanged",
     value: function onSelectionChanged(emitter, event) {
+      console.log(event);
       if (event.figure === null) {
         $("#editDelete").addClass("disabled");
       } else {
         $("#editDelete").removeClass("disabled");
+      }
+
+      // available in BoundBox selection event
+      if (event.selection) {
+        if (event.selection.getSize() >= 2) {
+          $("#toolUnion").removeClass("disabled");
+          $("#toolDifference").removeClass("disabled");
+          $("#toolIntersection").removeClass("disabled");
+        } else {
+          $("#toolUnion").addClass("disabled");
+          $("#toolDifference").addClass("disabled");
+          $("#toolIntersection").addClass("disabled");
+        }
       }
     }
 
@@ -5692,8 +5707,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 exports.default = _AbstractToolPolicy2.default.extend({
 
   TITLE: "Circle",
-  MESSAGE_STEP1: "Select center of the circle",
-  MESSAGE_STEP2: "Select outer bound",
 
   init: function init() {
     this._super();
@@ -5704,7 +5717,6 @@ exports.default = _AbstractToolPolicy2.default.extend({
   },
 
   onInstall: function onInstall(canvas) {
-    this.setToolText(this.MESSAGE_STEP1);
     canvas.setCursor(_cursor_circle2.default);
   },
 
@@ -5727,23 +5739,8 @@ exports.default = _AbstractToolPolicy2.default.extend({
    * @param {Boolean} shiftKey true if the shift key has been pressed during this event
    * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
    */
-  onMouseDown: function onMouseDown(canvas, x, y, shiftKey, ctrlKey) {},
-
-  /**
-   * @method
-   *
-   * @param {draw2d.Canvas} canvas
-   * @param {Number} x the x-coordinate of the mouse event
-   * @param {Number} y the y-coordinate of the mouse event
-   * @template
-   */
-  onMouseMove: function onMouseMove(canvas, x, y) {
-
-    if (this.boundingBoxFigure1 !== null) {
-      var dx = Math.abs(this.center.x - x);
-      this.boundingBoxFigure1.setRadius(dx);
-      this.boundingBoxFigure2.setRadius(dx);
-    }
+  onMouseDown: function onMouseDown(canvas, x, y, shiftKey, ctrlKey) {
+    this.center = new draw2d.geo.Point(x, y);
   },
 
   /**
@@ -5756,7 +5753,26 @@ exports.default = _AbstractToolPolicy2.default.extend({
    * @param {Number} dy2 The y diff since the last call of this dragging operation
    * @template
    */
-  onMouseDrag: function onMouseDrag(canvas, dx, dy, dx2, dy2) {},
+  onMouseDrag: function onMouseDrag(canvas, dx, dy, dx2, dy2, shiftKey, ctrlKey) {
+    var r = Math.sqrt(dx * dx + dy * dy);
+    if (this.boundingBoxFigure1 !== null) {
+      this.boundingBoxFigure1.setRadius(Math.abs(r));
+      this.boundingBoxFigure2.setRadius(Math.abs(r));
+    } else {
+      this.boundingBoxFigure1 = new draw2d.shape.basic.Circle({ radius: 1 });
+      this.boundingBoxFigure1.setCenter(this.center);
+      this.boundingBoxFigure1.setCanvas(canvas);
+      this.boundingBoxFigure1.setBackgroundColor("#333333");
+      this.boundingBoxFigure1.setAlpha(0.1);
+
+      this.boundingBoxFigure2 = new draw2d.shape.basic.Circle({ radius: 1 });
+      this.boundingBoxFigure2.setCenter(this.center);
+      this.boundingBoxFigure2.setCanvas(canvas);
+      this.boundingBoxFigure2.setStroke(1);
+      this.boundingBoxFigure2.setColor(new draw2d.util.Color("#333333"));
+      this.boundingBoxFigure2.setBackgroundColor(null);
+    }
+  },
 
   /**
    * @method
@@ -5767,38 +5783,24 @@ exports.default = _AbstractToolPolicy2.default.extend({
    * @template
    */
   onMouseUp: function onMouseUp(canvas, x, y) {
-    if (this.center === null) {
-      this.center = new draw2d.geo.Point(x, y);
-      this.setToolText(this.MESSAGE_STEP2);
-
-      this.boundingBoxFigure1 = new draw2d.shape.basic.Circle({ radius: 1 });
-      this.boundingBoxFigure1.setCenter(x, y);
-      this.boundingBoxFigure1.setCanvas(canvas);
-      this.boundingBoxFigure1.setBackgroundColor("#333333");
-      this.boundingBoxFigure1.setAlpha(0.1);
-
-      this.boundingBoxFigure2 = new draw2d.shape.basic.Circle({ radius: 1 });
-      this.boundingBoxFigure2.setCenter(x, y);
-      this.boundingBoxFigure2.setCanvas(canvas);
-      this.boundingBoxFigure2.setStroke(1);
-      this.boundingBoxFigure2.setColor(new draw2d.util.Color("#333333"));
-      this.boundingBoxFigure2.setBackgroundColor(null);
-    } else {
-      var dx = Math.abs(this.center.x - x);
-      var rect = new shape_designer.figure.PolyCircle(this.center, dx);
-      var command = new draw2d.command.CommandAdd(canvas, rect, rect.getX(), rect.getY());
+    var dx = Math.abs(this.center.x - x);
+    var dy = Math.abs(this.center.y - y);
+    var r = Math.sqrt(dx * dx + dy * dy);
+    if (r > 3) {
+      var circle = new shape_designer.figure.PolyCircle(this.center, r);
+      var command = new draw2d.command.CommandAdd(canvas, circle, circle.getX(), circle.getY());
       canvas.getCommandStack().execute(command);
-      canvas.setCurrentSelection(rect);
-      this.center = null;
-      this.setToolText(this.MESSAGE_STEP1);
+      canvas.setCurrentSelection(circle);
+    }
 
+    this.center = null;
+    if (this.boundingBoxFigure1 !== null) {
       this.boundingBoxFigure1.setCanvas(null);
       this.boundingBoxFigure1 = null;
       this.boundingBoxFigure2.setCanvas(null);
       this.boundingBoxFigure2 = null;
-
-      this.executed();
     }
+    this.executed();
   }
 });
 module.exports = exports["default"];
@@ -5867,7 +5869,6 @@ exports.default = _AbstractGeoToolPolicy2.default.extend({
       }
     }
   }
-
 });
 module.exports = exports["default"];
 
@@ -6303,26 +6304,8 @@ exports.default = _AbstractToolPolicy2.default.extend({
    * @param {Boolean} shiftKey true if the shift key has been pressed during this event
    * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
    */
-  onMouseDown: function onMouseDown(canvas, x, y, shiftKey, ctrlKey) {},
-
-  /**
-   * @method
-   *
-   * @param {draw2d.Canvas} canvas
-   * @param {Number} x the x-coordinate of the mouse event
-   * @param {Number} y the y-coordinate of the mouse event
-   * @template
-   */
-  onMouseMove: function onMouseMove(canvas, x, y) {
-
-    if (this.boundingBoxFigure1 !== null) {
-      var dx = this.topLeftPoint.x - x;
-      var dy = this.topLeftPoint.y - y;
-      this.boundingBoxFigure1.setDimension(Math.abs(dx), Math.abs(dy));
-      this.boundingBoxFigure1.setPosition(x + Math.min(0, dx), y + Math.min(0, dy));
-      this.boundingBoxFigure2.setDimension(Math.abs(dx), Math.abs(dy));
-      this.boundingBoxFigure2.setPosition(x + Math.min(0, dx), y + Math.min(0, dy));
-    }
+  onMouseDown: function onMouseDown(canvas, x, y, shiftKey, ctrlKey) {
+    this.topLeftPoint = new draw2d.geo.Point(x, y);
   },
 
   /**
@@ -6335,7 +6318,39 @@ exports.default = _AbstractToolPolicy2.default.extend({
    * @param {Number} dy2 The y diff since the last call of this dragging operation
    * @template
    */
-  onMouseDrag: function onMouseDrag(canvas, dx, dy, dx2, dy2) {},
+  onMouseDrag: function onMouseDrag(canvas, dx, dy, dx2, dy2, shiftKey, ctrlKey) {
+
+    if (this.boundingBoxFigure1 === null) {
+      this.boundingBoxFigure1 = new draw2d.shape.basic.Rectangle({
+        width: 1,
+        height: 1,
+        x: this.topLeftPoint.x,
+        y: this.topLeftPoint.y,
+        bgColor: "#d4d1d4",
+        alpha: 0.1
+      });
+      this.boundingBoxFigure1.setCanvas(canvas);
+
+      this.boundingBoxFigure2 = new draw2d.shape.basic.Rectangle({
+        width: 1,
+        height: 1,
+        x: this.topLeftPoint.x,
+        y: this.topLeftPoint.y,
+        dash: "--..",
+        stroke: 0.5,
+        color: "#37a8ff",
+        bgColor: null
+      });
+      this.boundingBoxFigure2.setCanvas(canvas);
+    }
+
+    if (this.boundingBoxFigure1 !== null) {
+      this.boundingBoxFigure1.setDimension(Math.abs(dx), Math.abs(dy));
+      this.boundingBoxFigure1.setPosition(this.topLeftPoint.x + Math.min(0, dx), this.topLeftPoint.y + Math.min(0, dy));
+      this.boundingBoxFigure2.setDimension(Math.abs(dx), Math.abs(dy));
+      this.boundingBoxFigure2.setPosition(this.topLeftPoint.x + Math.min(0, dx), this.topLeftPoint.y + Math.min(0, dy));
+    }
+  },
 
   /**
    * @method
@@ -6346,39 +6361,22 @@ exports.default = _AbstractToolPolicy2.default.extend({
    * @template
    */
   onMouseUp: function onMouseUp(canvas, x, y) {
-    if (this.topLeftPoint === null) {
-      this.topLeftPoint = new draw2d.geo.Point(x, y);
-      this.setToolText("Select second corner of rectangle");
-
-      this.boundingBoxFigure1 = new draw2d.shape.basic.Rectangle({ width: 1, height: 1 });
-      this.boundingBoxFigure1.setPosition(x, y);
-      this.boundingBoxFigure1.setCanvas(canvas);
-      this.boundingBoxFigure1.setBackgroundColor("#333333");
-      this.boundingBoxFigure1.setAlpha(0.1);
-
-      this.boundingBoxFigure2 = new draw2d.shape.basic.Rectangle({ width: 1, height: 1 });
-      this.boundingBoxFigure2.setPosition(x, y);
-      this.boundingBoxFigure2.setCanvas(canvas);
-      // this.boundingBoxFigure2.setDashArray("- ");
-      this.boundingBoxFigure2.setStroke(1);
-      this.boundingBoxFigure2.setColor(new draw2d.util.Color("#333333"));
-      this.boundingBoxFigure2.setBackgroundColor(null);
-    } else {
-      var bottomRight = new draw2d.geo.Point(x, y);
-      var rect = new _PolyRect2.default(this.topLeftPoint, bottomRight);
-      var command = new draw2d.command.CommandAdd(canvas, rect, rect.getX(), rect.getY());
-      canvas.getCommandStack().execute(command);
-      canvas.setCurrentSelection(rect);
-      this.topLeftPoint = null;
-      this.setToolText("Select first corner of rectangle");
-
+    if (this.boundingBoxFigure1 !== null) {
       this.boundingBoxFigure1.setCanvas(null);
       this.boundingBoxFigure1 = null;
       this.boundingBoxFigure2.setCanvas(null);
       this.boundingBoxFigure2 = null;
-
-      this.executed();
     }
+
+    var bottomRight = new draw2d.geo.Point(x, y);
+    if (this.topLeftPoint.distance(bottomRight) > 3) {
+      var rect = new _PolyRect2.default(this.topLeftPoint, bottomRight);
+      var command = new draw2d.command.CommandAdd(canvas, rect, rect.getX(), rect.getY());
+      canvas.getCommandStack().execute(command);
+      canvas.setCurrentSelection(rect);
+    }
+    this.executed();
+    this.topLeftPoint = null;
   }
 });
 module.exports = exports["default"];

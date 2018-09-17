@@ -6734,10 +6734,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                                                                                                                                                                                                      *
                                                                                                                                                                                                      *      $(window).load(function () {
                                                                                                                                                                                                      *
-                                                                                                                                                                                                     *          var canvas = new draw2d.Canvas("gfx_holder");
+                                                                                                                                                                                                     *          let canvas = new draw2d.Canvas("gfx_holder");
                                                                                                                                                                                                      *
-                                                                                                                                                                                                     *          var figure1 = new draw2d.shape.basic.Oval();
-                                                                                                                                                                                                     *          var figure2 = new draw2d.shape.basic.Rectangle();
+                                                                                                                                                                                                     *          let figure1 = new draw2d.shape.basic.Oval();
+                                                                                                                                                                                                     *          let figure2 = new draw2d.shape.basic.Rectangle();
                                                                                                                                                                                                      *          canvas.add(figure1,100,100);
                                                                                                                                                                                                      *          canvas.add(figure2,120,150);
                                                                                                                                                                                                      *      });
@@ -6848,7 +6848,6 @@ _packages2.default.Canvas = Class.extend({
     this.figures = new _packages2.default.util.ArrayList();
     this.lines = new _packages2.default.util.ArrayList(); // crap - why are connections not just figures. Design by accident
     this.commonPorts = new _packages2.default.util.ArrayList();
-    this.dropTargets = new _packages2.default.util.ArrayList();
 
     // all visible resize handles which can be drag&drop around. Selection handles like AntRectangleSelectionFeedback
     // are not part of this collection. Required for hitTest only
@@ -7141,7 +7140,6 @@ _packages2.default.Canvas = Class.extend({
     this.figures = new _packages2.default.util.ArrayList();
     this.lines = new _packages2.default.util.ArrayList();
     this.commonPorts = new _packages2.default.util.ArrayList();
-    this.dropTargets = new _packages2.default.util.ArrayList();
 
     this.commandStack.markSaveLocation();
 
@@ -7187,18 +7185,24 @@ _packages2.default.Canvas = Class.extend({
    * @private
    */
   calculateConnectionIntersection: function calculateConnectionIntersection() {
-    var _this = this;
+    var _this2 = this;
+
     this.lineIntersections = new _packages2.default.util.ArrayList();
     var lines = this.getLines().clone();
-    while (lines.getSize() > 0) {
+
+    var _loop = function _loop() {
       var l1 = lines.removeElementAt(0);
       lines.each(function (ii, l2) {
         var partInter = l1.intersection(l2);
         if (partInter.getSize() > 0) {
-          _this.lineIntersections.add({ line: l1, other: l2, intersection: partInter });
-          _this.lineIntersections.add({ line: l2, other: l1, intersection: partInter });
+          _this2.lineIntersections.add({ line: l1, other: l2, intersection: partInter });
+          _this2.lineIntersections.add({ line: l2, other: l1, intersection: partInter });
         }
       });
+    };
+
+    while (lines.getSize() > 0) {
+      _loop();
     }
 
     return this;
@@ -7213,7 +7217,8 @@ _packages2.default.Canvas = Class.extend({
    * @param {draw2d.policy.EditPolicy} policy
    */
   installEditPolicy: function installEditPolicy(policy) {
-    var _this = this;
+    var _this3 = this;
+
     // a canvas can handle only one selection policy
     //
     if (policy instanceof _packages2.default.policy.canvas.SelectionPolicy) {
@@ -7226,7 +7231,7 @@ _packages2.default.Canvas = Class.extend({
       this.editPolicy.grep(function (p) {
         var stay = !(p instanceof _packages2.default.policy.canvas.SelectionPolicy);
         if (stay === false) {
-          p.onUninstall(_this);
+          p.onUninstall(_this3);
         }
         return stay;
       });
@@ -7238,7 +7243,7 @@ _packages2.default.Canvas = Class.extend({
         this.editPolicy.grep(function (p) {
           var stay = !(p instanceof _packages2.default.policy.canvas.ZoomPolicy);
           if (stay === false) {
-            p.onUninstall(_this);
+            p.onUninstall(_this3);
           }
           return stay;
         });
@@ -7248,7 +7253,7 @@ _packages2.default.Canvas = Class.extend({
         this.editPolicy.grep(function (p) {
           var stay = !(p instanceof _packages2.default.policy.connection.ConnectionCreatePolicy);
           if (stay === false) {
-            p.onUninstall(_this);
+            p.onUninstall(_this3);
           }
           return stay;
         });
@@ -7890,14 +7895,14 @@ _packages2.default.Canvas = Class.extend({
    * @param {draw2d.Figure| draw2d.util.ArrayList} object The figure or list of figures to select.
    **/
   setCurrentSelection: function setCurrentSelection(object) {
-    var _this = this;
+    var _this4 = this;
 
     // deselect the current selected figures
     //
     this.selection.each(function (i, e) {
-      _this.editPolicy.each(function (i, policy) {
+      _this4.editPolicy.each(function (i, policy) {
         if (typeof policy.unselect === "function") {
-          policy.unselect(_this, e);
+          policy.unselect(_this4, e);
         }
       });
     });
@@ -7997,7 +8002,7 @@ _packages2.default.Canvas = Class.extend({
 
     // ResizeHandles
     //
-    var len;
+    var len = void 0;
     for (var i = 0, _len2 = this.resizeHandles.getSize(); i < _len2; i++) {
       testFigure = this.resizeHandles.get(i);
       if (testFigure.isVisible() && testFigure.hitTest(x, y) && !isInBlacklist(testFigure) && isInWhitelist(testFigure)) {
@@ -8586,787 +8591,785 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  */
 
 _packages2.default.Connection = _packages2.default.shape.basic.PolyLine.extend({
-  NAME: "draw2d.Connection",
-
-  /**
-   * @constructor
-   * Creates a new figure element which are not assigned to any canvas.
-   *
-   * @param {Object} [attr] the configuration of the shape
-   */
-  init: function init(attr, setter, getter) {
-    this.sourcePort = null;
-    this.targetPort = null;
-
-    this.oldPoint = null;
-
-    this.sourceDecorator = null;
-    /*:draw2d.ConnectionDecorator*/
-    this.targetDecorator = null;
-    /*:draw2d.ConnectionDecorator*/
-
-    // decoration of the polyline
-    //
-    this.sourceDecoratorNode = null;
-    this.targetDecoratorNode = null;
-
-    // helper var to restore the initial visual representation if the user drag&drop
-    // the port outside of the browser window. In this case some events get lost and
-    // I can restore the initial state of the connection if the mouse comes in the browser window
-    // again.
-    this.isMoving = false;
-
-    var _this = this;
-    this.moveListener = function (figure) {
-      if (figure === _this.sourcePort) {
-        _this.setStartPoint(_this.sourcePort.getAbsoluteX(), _this.sourcePort.getAbsoluteY());
-      } else {
-        _this.setEndPoint(_this.targetPort.getAbsoluteX(), _this.targetPort.getAbsoluteY());
-      }
-    };
-
-    this._super((0, _extend2.default)({
-      color: "#129CE4",
-      stroke: 2,
-      //    outlineStroke:1,
-      //    outlineColor:"#ffffff",
-      radius: 3
-    }, attr), (0, _extend2.default)({
-      sourceDecorator: this.setSourceDecorator,
-      targetDecorator: this.setTargetDecorator,
-      source: this.setSource,
-      target: this.setTarget
-    }, setter), (0, _extend2.default)({
-      sourceDecorator: this.getSourceDecorator,
-      targetDecorator: this.getTargetDecorator,
-      source: this.getSource,
-      target: this.getTarget
-    }, getter));
-  },
-
-  /**
-   * @private
-   **/
-  disconnect: function disconnect() {
-    if (this.sourcePort !== null) {
-      this.sourcePort.off(this.moveListener);
-      this.sourcePort.connections.remove(this);
-
-      // fire the events to all listener
-      this.sourcePort.fireEvent("disconnect", { port: this.sourcePort, connection: this });
-      if (this.canvas !== null) {
-        this.canvas.fireEvent("disconnect", { "port": this.sourcePort, "connection": this });
-      }
-      this.sourcePort.onDisconnect(this);
-
-      this.fireSourcePortRouteEvent();
-    }
-
-    if (this.targetPort !== null) {
-      this.targetPort.off(this.moveListener);
-      this.targetPort.connections.remove(this);
-
-      // fire the events to all listener
-      this.targetPort.fireEvent("disconnect", { port: this.targetPort, connection: this });
-      if (this.canvas !== null) {
-        this.canvas.fireEvent("disconnect", { "port": this.targetPort, "connection": this });
-      }
-      this.targetPort.onDisconnect(this);
-
-      this.fireTargetPortRouteEvent();
-    }
-  },
-
-  /**
-   * @private
-   **/
-  reconnect: function reconnect() {
-    if (this.sourcePort !== null) {
-      this.sourcePort.on("move", this.moveListener);
-      this.sourcePort.connections.add(this);
-
-      // fire the events to all listener
-      this.sourcePort.fireEvent("connect", { port: this.sourcePort, connection: this });
-      if (this.canvas !== null) {
-        this.canvas.fireEvent("connect", { "port": this.sourcePort, "connection": this });
-      }
-      this.sourcePort.onConnect(this);
-
-      this.fireSourcePortRouteEvent();
-    }
-
-    if (this.targetPort !== null) {
-      this.targetPort.on("move", this.moveListener);
-      this.targetPort.connections.add(this);
-
-      // fire the events to all listener
-      this.targetPort.fireEvent("connect", { port: this.targetPort, connection: this });
-      if (this.canvas !== null) {
-        this.canvas.fireEvent("connect", { "port": this.targetPort, "connection": this });
-      }
-      this.targetPort.onConnect(this);
-
-      this.fireTargetPortRouteEvent();
-    }
-    this.routingRequired = true;
-    this.repaint();
-  },
-
-  /**
-   * You can't drag&drop the resize handles of a connector.
-   * @type boolean
-   **/
-  isResizeable: function isResizeable() {
-    return this.isDraggable();
-  },
-
-  /**
-   * @method
-   * Add a child figure to the Connection. The hands over figure doesn't support drag&drop
-   * operations. It's only a decorator for the connection.<br>
-   * Mainly for labels or other fancy decorations :-)
-   *
-   * @param {draw2d.Figure} child the figure to add as decoration to the connection.
-   * @param {draw2d.layout.locator.ConnectionLocator} locator the locator for the child.
-   * @param {Number} [index] optional index where to insert the figure
-   **/
-  add: function add(child, locator, index) {
-    // just to ensure the right interface for the locator.
-    // The base class needs only 'draw2d.layout.locator.Locator'.
-    if (!(locator instanceof _packages2.default.layout.locator.ConnectionLocator)) {
-      throw "Locator must implement the class draw2d.layout.locator.ConnectionLocator";
-    }
-
-    this._super(child, locator, index);
-  },
-
-  /**
-   * @method
-   * Set the ConnectionDecorator for this object.
-   *
-   * @param {draw2d.decoration.connection.Decorator} decorator the new source decorator for the connection
-   **/
-  setSourceDecorator: function setSourceDecorator(decorator) {
-    this.sourceDecorator = decorator;
-    this.routingRequired = true;
-    if (this.sourceDecoratorNode !== null) {
-      this.sourceDecoratorNode.remove();
-      this.sourceDecoratorNode = null;
-    }
-    this.repaint();
-  },
-
-  /**
-   * @method
-   * Get the current source ConnectionDecorator for this object.
-   *
-   * @returns draw2d.decoration.connection.Decorator
-   **/
-  getSourceDecorator: function getSourceDecorator() {
-    return this.sourceDecorator;
-  },
-
-  /**
-   * @method
-   * Set the ConnectionDecorator for this object.
-   *
-   * @param {draw2d.decoration.connection.Decorator} decorator the new target decorator for the connection
-   **/
-  setTargetDecorator: function setTargetDecorator(decorator) {
-    this.targetDecorator = decorator;
-    this.routingRequired = true;
-    if (this.targetDecoratorNode !== null) {
-      this.targetDecoratorNode.remove();
-      this.targetDecoratorNode = null;
-    }
-    this.repaint();
-  },
-
-  /**
-   * @method
-   * Get the current target ConnectionDecorator for this object.
-   *
-   * @returns draw2d.decoration.connection.Decorator
-   **/
-  getTargetDecorator: function getTargetDecorator() {
-    return this.targetDecorator;
-  },
-
-  /**
-   * @method
-   * Calculate the path of the polyline.
-   *
-   * @param {Object} routingHints some helper attributes for the router
-   * @param {Boolean} routingHints.startMoved is true if just the start location has moved
-   * @param {Boolean} routingHints.destMoved is true if the destination location has changed
-   * @private
-   */
-  calculatePath: function calculatePath(routingHints) {
-
-    if (this.sourcePort === null || this.targetPort === null) {
-      return this;
-    }
-
-    this._super(routingHints);
-
-    if (this.shape !== null) {
-      var z1 = this.sourcePort.getZOrder();
-      var z2 = this.targetPort.getZOrder();
-      z1 < z2 ? this.toBack(this.sourcePort) : this.toBack(this.targetPort);
-    }
-
-    return this;
-  },
-
-  /**
-   * @private
-   **/
-  repaint: function repaint(attributes) {
-    if (this.repaintBlocked === true || this.shape === null) {
-      return;
-    }
-
-    if (this.sourcePort === null || this.targetPort === null) {
-      return;
-    }
-
-    this._super(attributes);
-
-    // paint the decorator if any exists
-    //
-    if (this.targetDecorator !== null && this.targetDecoratorNode === null) {
-      this.targetDecoratorNode = this.targetDecorator.paint(this.getCanvas().paper);
-    }
-
-    if (this.sourceDecorator !== null && this.sourceDecoratorNode === null) {
-      this.sourceDecoratorNode = this.sourceDecorator.paint(this.getCanvas().paper);
-    }
-
-    var _this = this;
-
-    // translate/transform the decorations to the end/start of the connection
-    // and rotate them as well
-    //
-    if (this.sourceDecoratorNode !== null) {
-      var start = this.getVertices().first();
-      this.sourceDecoratorNode.transform("r" + this.getStartAngle() + "," + start.x + "," + start.y + " t" + start.x + "," + start.y);
-      // propagate the color and the opacity to the decoration as well
-      this.sourceDecoratorNode.attr({ "stroke": "#" + this.lineColor.hex(), opacity: this.alpha });
-      this.sourceDecoratorNode.forEach(function (shape) {
-        shape.node.setAttribute("class", _this.cssClass !== null ? _this.cssClass : "");
-      });
-    }
-
-    if (this.targetDecoratorNode !== null) {
-      var end = this.getVertices().last();
-      this.targetDecoratorNode.transform("r" + this.getEndAngle() + "," + end.x + "," + end.y + " t" + end.x + "," + end.y);
-      this.targetDecoratorNode.attr({ "stroke": "#" + this.lineColor.hex(), opacity: this.alpha });
-      this.targetDecoratorNode.forEach(function (shape) {
-        shape.node.setAttribute("class", _this.cssClass !== null ? _this.cssClass : "");
-      });
-    }
-  },
-
-  /**
-   * @method
-   * The x-offset related to the canvas.
-   * Didn't provided by a connection. Return always '0'. This is required
-   * for children position calculation. (e.g. Label decoration)
-   *
-   * @return {Number} the x-offset to the parent figure
-   **/
-  getAbsoluteX: function getAbsoluteX() {
-    return 0;
-  },
-
-  /**
-   * @method
-   * The y-offset related to the canvas.
-   * Didn't provided by a connection. Return always '0'. This is required
-   * for children position calculation. (e.g. Label decoration)
-   *
-   * @return {Number} The y-offset to the parent figure.
-   **/
-  getAbsoluteY: function getAbsoluteY() {
-    return 0;
-  },
-
-  postProcess: function postProcess(postProcessCache) {
-    this.router.postProcess(this, this.getCanvas(), postProcessCache);
-  },
-
-  /**
-   * @method
-   * Don't call them manually. This will be done by the framework.<br>
-   * Will be called if the object are moved via drag and drop.
-   * Sub classes can override this method to implement additional stuff. Don't forget to call
-   * the super implementation via <code>this._super(dx, dy, dx2, dy2);</code>
-   * @private
-   * @param {Number} dx the x difference between the start of the drag drop operation and now
-   * @param {Number} dy the y difference between the start of the drag drop operation and now
-   * @param {Number} dx2 The x diff since the last call of this dragging operation
-   * @param {Number} dy2 The y diff since the last call of this dragging operation
-   **/
-  onDrag: function onDrag(dx, dy, dx2, dy2) {
-    if (this.command === null) {
-      return;
-    }
-
-    // Delegate the drag&drop operation to the router. The router has
-    // all the meta information how to update start/end vertices
-    //
-    this.router.onDrag(this, dx, dy, dx2, dy2);
-
-    this.command.updateVertices(this.getVertices().clone());
-
-    var _this = this;
-
-    // notify all installed policies
-    //
-    this.editPolicy.each(function (i, e) {
-      if (e instanceof _packages2.default.policy.figure.DragDropEditPolicy) {
-        e.onDrag(_this.canvas, _this);
-      }
-    });
-
-    this.svgPathString = null;
-    this.repaint();
-
-    // Update the resize handles if the user change the position of the
-    // element via an API call.
-    //
-    this.editPolicy.each(function (i, e) {
-      if (e instanceof _packages2.default.policy.figure.DragDropEditPolicy) {
-        e.moved(_this.canvas, _this);
-      }
-    });
-
-    this.fireEvent("move", { figure: this, dx: dx, dy: dx });
-  },
-
-  /**
-   * @method
-   * Moves the element so it is the closest to the viewer’s eyes, on top of other elements. Additional
-   * the internal model changed as well.
-   *
-   * Optional: Inserts current object in front of the given one.
-   *
-   * @param {draw2d.Figure} [figure] move current object in front of the given one.
-   * @since 3.0.0
-   */
-  toFront: function toFront(figure) {
-    this._super(figure);
-
-    // ensure that the decoration is always in front of the connection
-    //
-    if (this.shape !== null) {
-      if (this.targetDecoratorNode !== null) {
-        this.targetDecoratorNode.insertAfter(this.shape);
-      }
-      if (this.sourceDecoratorNode !== null) {
-        this.sourceDecoratorNode.insertAfter(this.shape);
-      }
-    }
-
-    return this;
-  },
-
-  /**
-   * @method
-   * Moves the element to the background. Additional
-   * the internal model changed as well.
-   *
-   * @param {draw2d.Figure} [figure] move this object behind of the 'figure'.
-   * @since 4.7.2
-   */
-  toBack: function toBack(figure) {
-    this._super(figure);
-
-    if (this.shape !== null) {
-      if (this.targetDecoratorNode !== null) {
-        this.targetDecoratorNode.insertAfter(this.shape);
-      }
-      if (this.sourceDecoratorNode !== null) {
-        this.sourceDecoratorNode.insertAfter(this.shape);
-      }
-    }
-
-    return this;
-  },
-
-  /**
-   * @method
-   * Return the recalculated position of the start point with the usage of
-   * the installed connection anchor locator.
-   *
-   * @return {draw2d.geo.Point}
-   **/
-  getStartPoint: function getStartPoint(refPoint) {
-    if (this.isMoving === false) {
-      if (refPoint) {
-        return this.sourcePort.getConnectionAnchorLocation(refPoint, this);
-      }
-      return this.sourcePort.getConnectionAnchorLocation(this.targetPort.getConnectionAnchorReferencePoint(this), this);
-    }
-
-    return this._super();
-  },
-
-  /**
-   * @method
-   * Return the recalculated position of the start point with the usage of
-   * the installed connection anchor locator.
-   *
-   * @return {draw2d.geo.Point}
-   **/
-  getEndPoint: function getEndPoint(refPoint) {
-    if (this.isMoving === false) {
-      if (refPoint) {
-        return this.targetPort.getConnectionAnchorLocation(refPoint, this);
-      }
-      return this.targetPort.getConnectionAnchorLocation(this.sourcePort.getConnectionAnchorReferencePoint(this), this);
-    }
-
-    return this._super();
-  },
-
-  /**
-   * @method
-   * Set the new source port of this connection. This enforce a repaint of the connection.
-   *
-   * @param {draw2d.Port} port The new source port of this connection.
-   *
-   **/
-  setSource: function setSource(port) {
-    if (this.sourcePort !== null) {
-      this.sourcePort.off(this.moveListener);
-      this.sourcePort.connections.remove(this);
-      this.sourcePort.fireEvent("disconnect", { port: this.sourcePort, connection: this });
-      // it is possible that a connection has already a port but is not assigned to
-      // a canvas. In this case we must check if the canvas set correct before we fire this event
-      if (this.canvas !== null) {
-        this.canvas.fireEvent("disconnect", { "port": this.sourcePort, "connection": this });
-      }
-      this.sourcePort.onDisconnect(this);
-    }
-
-    this.sourcePort = port;
-    if (this.sourcePort === null) {
-      return;
-    }
-
-    this.routingRequired = true;
-    this.fireSourcePortRouteEvent();
-    this.sourcePort.connections.add(this);
-    this.sourcePort.on("move", this.moveListener);
-    if (this.canvas !== null) {
-      this.canvas.fireEvent("connect", { "port": this.sourcePort, "connection": this });
-    }
-    this.sourcePort.fireEvent("connect", { port: this.sourcePort, connection: this });
-    this.sourcePort.onConnect(this);
-
-    this.setStartPoint(port.getAbsoluteX(), port.getAbsoluteY());
-    this.fireEvent("connect", { "port": this.sourcePort, "connection": this });
-  },
-
-  /**
-   * @method
-   * Returns the source port of this connection.
-   *
-   * @return {draw2d.Port}
-   **/
-  getSource: function getSource() {
-    return this.sourcePort;
-  },
-
-  /**
-   * @method
-   * Set the target port of this connection. This enforce a repaint of the connection.
-   *
-   * @param {draw2d.Port} port The new target port of this connection
-   **/
-  setTarget: function setTarget(port) {
-    if (this.targetPort !== null) {
-      this.targetPort.off(this.moveListener);
-      this.targetPort.connections.remove(this);
-      this.targetPort.fireEvent("disconnect", { port: this.targetPort, connection: this });
-      // it is possible that a connection has already a port but is not assigned to
-      // a canvas. In this case we must check if the canvas set correct before we fire this event
-      if (this.canvas !== null) {
-        this.canvas.fireEvent("disconnect", { "port": this.targetPort, "connection": this });
-      }
-      this.targetPort.onDisconnect(this);
-    }
-
-    this.targetPort = port;
-    if (this.targetPort === null) {
-      return;
-    }
-
-    this.routingRequired = true;
-    this.fireTargetPortRouteEvent();
-    this.targetPort.connections.add(this);
-    this.targetPort.on("move", this.moveListener);
-    if (this.canvas !== null) {
-      this.canvas.fireEvent("connect", { "port": this.targetPort, "connection": this });
-    }
-    this.targetPort.fireEvent("connect", { port: this.targetPort, connection: this });
-    this.targetPort.onConnect(this);
-
-    this.setEndPoint(port.getAbsoluteX(), port.getAbsoluteY());
-    this.fireEvent("connect", { "port": this.targetPort, "connection": this });
-  },
-
-  /**
-   * @method
-   * Returns the target port of this connection.
-   *
-   * @returns {draw2d.Port}
-   **/
-  getTarget: function getTarget() {
-    return this.targetPort;
-  },
-
-  /**
-   * @method
-   * Method returns true if the connection has at least one common draw2d.Port with the given connection.
-   *
-   * @param {draw2d.Connection} other
-   *
-   * @returns {Boolean}
-   */
-  sharingPorts: function sharingPorts(other) {
-    return this.sourcePort == other.sourcePort || this.sourcePort == other.targetPort || this.targetPort == other.sourcePort || this.targetPort == other.targetPort;
-  },
-
-  /**
-   * @method
-   * Set the canvas element of this figures.
-   *
-   * @param {draw2d.Canvas} canvas the new parent of the figure or null
-   */
-  setCanvas: function setCanvas(canvas) {
-    if (this.canvas === canvas) {
-      return; // nothing to do
-    }
-
-    var notiCanvas = this.canvas == null ? canvas : this.canvas;
-
-    this._super(canvas);
-
-    if (canvas !== null && _packages2.default.Connection.DROP_FILTER === null) {
-      _packages2.default.Connection.DROP_FILTER = canvas.paper.createFilter();
-      _packages2.default.Connection.DROP_FILTER.element.setAttribute("width", "250%");
-      _packages2.default.Connection.DROP_FILTER.element.setAttribute("height", "250%");
-      _packages2.default.Connection.DROP_FILTER.createShadow(1, 1, 2, 0.3);
-    }
-
-    if (this.sourceDecoratorNode !== null) {
-      this.sourceDecoratorNode.remove();
-      this.sourceDecoratorNode = null;
-    }
-
-    if (this.targetDecoratorNode !== null) {
-      this.targetDecoratorNode.remove();
-      this.targetDecoratorNode = null;
-    }
-
-    if (this.canvas === null) {
-      if (this.sourcePort !== null) {
-        this.sourcePort.off(this.moveListener);
-        notiCanvas.fireEvent("disconnect", { "port": this.sourcePort, "connection": this });
-        this.sourcePort.onDisconnect(this);
-      }
-      if (this.targetPort !== null) {
-        this.targetPort.off(this.moveListener);
-        notiCanvas.fireEvent("disconnect", { "port": this.targetPort, "connection": this });
-        this.targetPort.onDisconnect(this);
-      }
-    } else {
-      this.shape.items[0].filter(_packages2.default.Connection.DROP_FILTER);
-
-      if (this.sourcePort !== null) {
+    NAME: "draw2d.Connection",
+
+    /**
+     * @constructor
+     * Creates a new figure element which are not assigned to any canvas.
+     *
+     * @param {Object} [attr] the configuration of the shape
+     */
+    init: function init(attr, setter, getter) {
+        this.sourcePort = null;
+        this.targetPort = null;
+
+        this.oldPoint = null;
+
+        this.sourceDecorator = null; /*:draw2d.ConnectionDecorator*/
+        this.targetDecorator = null; /*:draw2d.ConnectionDecorator*/
+
+        // decoration of the polyline
+        //
+        this.sourceDecoratorNode = null;
+        this.targetDecoratorNode = null;
+
+        // helper var to restore the initial visual representation if the user drag&drop
+        // the port outside of the browser window. In this case some events get lost and
+        // I can restore the initial state of the connection if the mouse comes in the browser window
+        // again.
+        this.isMoving = false;
+
+        var _this = this;
+        this.moveListener = function (figure) {
+            if (figure === _this.sourcePort) {
+                _this.setStartPoint(_this.sourcePort.getAbsoluteX(), _this.sourcePort.getAbsoluteY());
+            } else {
+                _this.setEndPoint(_this.targetPort.getAbsoluteX(), _this.targetPort.getAbsoluteY());
+            }
+        };
+
+        this._super((0, _extend2.default)({
+            color: "#129CE4",
+            stroke: 2,
+            //    outlineStroke:1,
+            //    outlineColor:"#ffffff",
+            radius: 3
+        }, attr), (0, _extend2.default)({
+            sourceDecorator: this.setSourceDecorator,
+            targetDecorator: this.setTargetDecorator,
+            source: this.setSource,
+            target: this.setTarget
+        }, setter), (0, _extend2.default)({
+            sourceDecorator: this.getSourceDecorator,
+            targetDecorator: this.getTargetDecorator,
+            source: this.getSource,
+            target: this.getTarget
+        }, getter));
+    },
+
+    /**
+     * @private
+     **/
+    disconnect: function disconnect() {
+        if (this.sourcePort !== null) {
+            this.sourcePort.off(this.moveListener);
+            this.sourcePort.connections.remove(this);
+
+            // fire the events to all listener
+            this.sourcePort.fireEvent("disconnect", { port: this.sourcePort, connection: this });
+            if (this.canvas !== null) {
+                this.canvas.fireEvent("disconnect", { "port": this.sourcePort, "connection": this });
+            }
+            this.sourcePort.onDisconnect(this);
+
+            this.fireSourcePortRouteEvent();
+        }
+
+        if (this.targetPort !== null) {
+            this.targetPort.off(this.moveListener);
+            this.targetPort.connections.remove(this);
+
+            // fire the events to all listener
+            this.targetPort.fireEvent("disconnect", { port: this.targetPort, connection: this });
+            if (this.canvas !== null) {
+                this.canvas.fireEvent("disconnect", { "port": this.targetPort, "connection": this });
+            }
+            this.targetPort.onDisconnect(this);
+
+            this.fireTargetPortRouteEvent();
+        }
+    },
+
+    /**
+     * @private
+     **/
+    reconnect: function reconnect() {
+        if (this.sourcePort !== null) {
+            this.sourcePort.on("move", this.moveListener);
+            this.sourcePort.connections.add(this);
+
+            // fire the events to all listener
+            this.sourcePort.fireEvent("connect", { port: this.sourcePort, connection: this });
+            if (this.canvas !== null) {
+                this.canvas.fireEvent("connect", { "port": this.sourcePort, "connection": this });
+            }
+            this.sourcePort.onConnect(this);
+
+            this.fireSourcePortRouteEvent();
+        }
+
+        if (this.targetPort !== null) {
+            this.targetPort.on("move", this.moveListener);
+            this.targetPort.connections.add(this);
+
+            // fire the events to all listener
+            this.targetPort.fireEvent("connect", { port: this.targetPort, connection: this });
+            if (this.canvas !== null) {
+                this.canvas.fireEvent("connect", { "port": this.targetPort, "connection": this });
+            }
+            this.targetPort.onConnect(this);
+
+            this.fireTargetPortRouteEvent();
+        }
+        this.routingRequired = true;
+        this.repaint();
+    },
+
+    /**
+     * You can't drag&drop the resize handles of a connector.
+     * @type boolean
+     **/
+    isResizeable: function isResizeable() {
+        return this.isDraggable();
+    },
+
+    /**
+     * @method
+     * Add a child figure to the Connection. The hands over figure doesn't support drag&drop
+     * operations. It's only a decorator for the connection.<br>
+     * Mainly for labels or other fancy decorations :-)
+     *
+     * @param {draw2d.Figure} child the figure to add as decoration to the connection.
+     * @param {draw2d.layout.locator.ConnectionLocator} locator the locator for the child.
+     * @param {Number} [index] optional index where to insert the figure
+    **/
+    add: function add(child, locator, index) {
+        // just to ensure the right interface for the locator.
+        // The base class needs only 'draw2d.layout.locator.Locator'.
+        if (!(locator instanceof _packages2.default.layout.locator.ConnectionLocator)) {
+            throw "Locator must implement the class draw2d.layout.locator.ConnectionLocator";
+        }
+
+        this._super(child, locator, index);
+    },
+
+    /**
+     * @method
+     * Set the ConnectionDecorator for this object.
+     *
+     * @param {draw2d.decoration.connection.Decorator} decorator the new source decorator for the connection
+     **/
+    setSourceDecorator: function setSourceDecorator(decorator) {
+        this.sourceDecorator = decorator;
+        this.routingRequired = true;
+        if (this.sourceDecoratorNode !== null) {
+            this.sourceDecoratorNode.remove();
+            this.sourceDecoratorNode = null;
+        }
+        this.repaint();
+    },
+
+    /**
+     * @method
+     * Get the current source ConnectionDecorator for this object.
+     *
+     * @returns draw2d.decoration.connection.Decorator
+     **/
+    getSourceDecorator: function getSourceDecorator() {
+        return this.sourceDecorator;
+    },
+
+    /**
+     * @method
+     * Set the ConnectionDecorator for this object.
+     *
+     * @param {draw2d.decoration.connection.Decorator} decorator the new target decorator for the connection
+     **/
+    setTargetDecorator: function setTargetDecorator(decorator) {
+        this.targetDecorator = decorator;
+        this.routingRequired = true;
+        if (this.targetDecoratorNode !== null) {
+            this.targetDecoratorNode.remove();
+            this.targetDecoratorNode = null;
+        }
+        this.repaint();
+    },
+
+    /**
+     * @method
+     * Get the current target ConnectionDecorator for this object.
+     *
+     * @returns draw2d.decoration.connection.Decorator
+     **/
+    getTargetDecorator: function getTargetDecorator() {
+        return this.targetDecorator;
+    },
+
+    /**
+     * @method
+     * Calculate the path of the polyline.
+     *
+     * @param {Object} routingHints some helper attributes for the router
+     * @param {Boolean} routingHints.startMoved is true if just the start location has moved
+     * @param {Boolean} routingHints.destMoved is true if the destination location has changed
+     * @private
+     */
+    calculatePath: function calculatePath(routingHints) {
+
+        if (this.sourcePort === null || this.targetPort === null) {
+            return this;
+        }
+
+        this._super(routingHints);
+
+        if (this.shape !== null) {
+            var z1 = this.sourcePort.getZOrder();
+            var z2 = this.targetPort.getZOrder();
+            z1 < z2 ? this.toBack(this.sourcePort) : this.toBack(this.targetPort);
+        }
+
+        return this;
+    },
+
+    /**
+     * @private
+     **/
+    repaint: function repaint(attributes) {
+        if (this.repaintBlocked === true || this.shape === null) {
+            return;
+        }
+
+        if (this.sourcePort === null || this.targetPort === null) {
+            return;
+        }
+
+        this._super(attributes);
+
+        // paint the decorator if any exists
+        //
+        if (this.targetDecorator !== null && this.targetDecoratorNode === null) {
+            this.targetDecoratorNode = this.targetDecorator.paint(this.getCanvas().paper);
+        }
+
+        if (this.sourceDecorator !== null && this.sourceDecoratorNode === null) {
+            this.sourceDecoratorNode = this.sourceDecorator.paint(this.getCanvas().paper);
+        }
+
+        var _this = this;
+
+        // translate/transform the decorations to the end/start of the connection
+        // and rotate them as well
+        //
+        if (this.sourceDecoratorNode !== null) {
+            var start = this.getVertices().first();
+            this.sourceDecoratorNode.transform("r" + this.getStartAngle() + "," + start.x + "," + start.y + " t" + start.x + "," + start.y);
+            // propagate the color and the opacity to the decoration as well
+            this.sourceDecoratorNode.attr({ "stroke": "#" + this.lineColor.hex(), opacity: this.alpha });
+            this.sourceDecoratorNode.forEach(function (shape) {
+                shape.node.setAttribute("class", _this.cssClass !== null ? _this.cssClass : "");
+            });
+        }
+
+        if (this.targetDecoratorNode !== null) {
+            var end = this.getVertices().last();
+            this.targetDecoratorNode.transform("r" + this.getEndAngle() + "," + end.x + "," + end.y + " t" + end.x + "," + end.y);
+            this.targetDecoratorNode.attr({ "stroke": "#" + this.lineColor.hex(), opacity: this.alpha });
+            this.targetDecoratorNode.forEach(function (shape) {
+                shape.node.setAttribute("class", _this.cssClass !== null ? _this.cssClass : "");
+            });
+        }
+    },
+
+    /**
+     * @method
+     * The x-offset related to the canvas.
+     * Didn't provided by a connection. Return always '0'. This is required
+     * for children position calculation. (e.g. Label decoration)
+     *
+     * @return {Number} the x-offset to the parent figure
+     **/
+    getAbsoluteX: function getAbsoluteX() {
+        return 0;
+    },
+
+    /**
+     * @method
+     * The y-offset related to the canvas.
+     * Didn't provided by a connection. Return always '0'. This is required
+     * for children position calculation. (e.g. Label decoration)
+     *
+     * @return {Number} The y-offset to the parent figure.
+     **/
+    getAbsoluteY: function getAbsoluteY() {
+        return 0;
+    },
+
+    postProcess: function postProcess(postProcessCache) {
+        this.router.postProcess(this, this.getCanvas(), postProcessCache);
+    },
+
+    /**
+     * @method
+     * Don't call them manually. This will be done by the framework.<br>
+     * Will be called if the object are moved via drag and drop.
+     * Sub classes can override this method to implement additional stuff. Don't forget to call
+     * the super implementation via <code>this._super(dx, dy, dx2, dy2);</code>
+     * @private
+     * @param {Number} dx the x difference between the start of the drag drop operation and now
+     * @param {Number} dy the y difference between the start of the drag drop operation and now
+     * @param {Number} dx2 The x diff since the last call of this dragging operation
+     * @param {Number} dy2 The y diff since the last call of this dragging operation
+     **/
+    onDrag: function onDrag(dx, dy, dx2, dy2) {
+        if (this.command === null) {
+            return;
+        }
+
+        // Delegate the drag&drop operation to the router. The router has
+        // all the meta information how to update start/end vertices
+        //
+        this.router.onDrag(this, dx, dy, dx2, dy2);
+
+        this.command.updateVertices(this.getVertices().clone());
+
+        var _this = this;
+
+        // notify all installed policies
+        //
+        this.editPolicy.each(function (i, e) {
+            if (e instanceof _packages2.default.policy.figure.DragDropEditPolicy) {
+                e.onDrag(_this.canvas, _this);
+            }
+        });
+
+        this.svgPathString = null;
+        this.repaint();
+
+        // Update the resize handles if the user change the position of the
+        // element via an API call.
+        //
+        this.editPolicy.each(function (i, e) {
+            if (e instanceof _packages2.default.policy.figure.DragDropEditPolicy) {
+                e.moved(_this.canvas, _this);
+            }
+        });
+
+        this.fireEvent("move", { figure: this, dx: dx, dy: dx });
+    },
+
+    /**
+     * @method
+     * Moves the element so it is the closest to the viewer’s eyes, on top of other elements. Additional
+     * the internal model changed as well.
+     *
+     * Optional: Inserts current object in front of the given one.
+     *
+     * @param {draw2d.Figure} [figure] move current object in front of the given one.
+     * @since 3.0.0
+     */
+    toFront: function toFront(figure) {
+        this._super(figure);
+
+        // ensure that the decoration is always in front of the connection
+        //
+        if (this.shape !== null) {
+            if (this.targetDecoratorNode !== null) {
+                this.targetDecoratorNode.insertAfter(this.shape);
+            }
+            if (this.sourceDecoratorNode !== null) {
+                this.sourceDecoratorNode.insertAfter(this.shape);
+            }
+        }
+
+        return this;
+    },
+
+    /**
+     * @method
+     * Moves the element to the background. Additional
+     * the internal model changed as well.
+     *
+     * @param {draw2d.Figure} [figure] move this object behind of the 'figure'.
+     * @since 4.7.2
+     */
+    toBack: function toBack(figure) {
+        this._super(figure);
+
+        if (this.shape !== null) {
+            if (this.targetDecoratorNode !== null) {
+                this.targetDecoratorNode.insertAfter(this.shape);
+            }
+            if (this.sourceDecoratorNode !== null) {
+                this.sourceDecoratorNode.insertAfter(this.shape);
+            }
+        }
+
+        return this;
+    },
+
+    /**
+     * @method
+     * Return the recalculated position of the start point with the usage of
+     * the installed connection anchor locator.
+     *
+     * @return {draw2d.geo.Point}
+     **/
+    getStartPoint: function getStartPoint(refPoint) {
+        if (this.isMoving === false) {
+            if (refPoint) {
+                return this.sourcePort.getConnectionAnchorLocation(refPoint, this);
+            }
+            return this.sourcePort.getConnectionAnchorLocation(this.targetPort.getConnectionAnchorReferencePoint(this), this);
+        }
+
+        return this._super();
+    },
+
+    /**
+     * @method
+     * Return the recalculated position of the start point with the usage of
+     * the installed connection anchor locator.
+     *
+     * @return {draw2d.geo.Point}
+     **/
+    getEndPoint: function getEndPoint(refPoint) {
+        if (this.isMoving === false) {
+            if (refPoint) {
+                return this.targetPort.getConnectionAnchorLocation(refPoint, this);
+            }
+            return this.targetPort.getConnectionAnchorLocation(this.sourcePort.getConnectionAnchorReferencePoint(this), this);
+        }
+
+        return this._super();
+    },
+
+    /**
+     * @method
+     * Set the new source port of this connection. This enforce a repaint of the connection.
+     *
+     * @param {draw2d.Port} port The new source port of this connection.
+     *
+     **/
+    setSource: function setSource(port) {
+        if (this.sourcePort !== null) {
+            this.sourcePort.off(this.moveListener);
+            this.sourcePort.connections.remove(this);
+            this.sourcePort.fireEvent("disconnect", { port: this.sourcePort, connection: this });
+            // it is possible that a connection has already a port but is not assigned to
+            // a canvas. In this case we must check if the canvas set correct before we fire this event
+            if (this.canvas !== null) {
+                this.canvas.fireEvent("disconnect", { "port": this.sourcePort, "connection": this });
+            }
+            this.sourcePort.onDisconnect(this);
+        }
+
+        this.sourcePort = port;
+        if (this.sourcePort === null) {
+            return;
+        }
+
+        this.routingRequired = true;
+        this.fireSourcePortRouteEvent();
+        this.sourcePort.connections.add(this);
         this.sourcePort.on("move", this.moveListener);
-        this.canvas.fireEvent("connect", { "port": this.sourcePort, "connection": this });
+        if (this.canvas !== null) {
+            this.canvas.fireEvent("connect", { "port": this.sourcePort, "connection": this });
+        }
+        this.sourcePort.fireEvent("connect", { port: this.sourcePort, connection: this });
         this.sourcePort.onConnect(this);
-      }
-      if (this.targetPort !== null) {
+
+        this.setStartPoint(port.getAbsoluteX(), port.getAbsoluteY());
+        this.fireEvent("connect", { "port": this.sourcePort, "connection": this });
+    },
+
+    /**
+     * @method
+     * Returns the source port of this connection.
+     *
+     * @return {draw2d.Port}
+     **/
+    getSource: function getSource() {
+        return this.sourcePort;
+    },
+
+    /**
+     * @method
+     * Set the target port of this connection. This enforce a repaint of the connection.
+     *
+     * @param {draw2d.Port} port The new target port of this connection
+     **/
+    setTarget: function setTarget(port) {
+        if (this.targetPort !== null) {
+            this.targetPort.off(this.moveListener);
+            this.targetPort.connections.remove(this);
+            this.targetPort.fireEvent("disconnect", { port: this.targetPort, connection: this });
+            // it is possible that a connection has already a port but is not assigned to
+            // a canvas. In this case we must check if the canvas set correct before we fire this event
+            if (this.canvas !== null) {
+                this.canvas.fireEvent("disconnect", { "port": this.targetPort, "connection": this });
+            }
+            this.targetPort.onDisconnect(this);
+        }
+
+        this.targetPort = port;
+        if (this.targetPort === null) {
+            return;
+        }
+
+        this.routingRequired = true;
+        this.fireTargetPortRouteEvent();
+        this.targetPort.connections.add(this);
         this.targetPort.on("move", this.moveListener);
-        this.canvas.fireEvent("connect", { "port": this.targetPort, "connection": this });
+        if (this.canvas !== null) {
+            this.canvas.fireEvent("connect", { "port": this.targetPort, "connection": this });
+        }
+        this.targetPort.fireEvent("connect", { port: this.targetPort, connection: this });
         this.targetPort.onConnect(this);
-      }
+
+        this.setEndPoint(port.getAbsoluteX(), port.getAbsoluteY());
+        this.fireEvent("connect", { "port": this.targetPort, "connection": this });
+    },
+
+    /**
+     * @method
+     * Returns the target port of this connection.
+     *
+     * @returns {draw2d.Port}
+     **/
+    getTarget: function getTarget() {
+        return this.targetPort;
+    },
+
+    /**
+     * @method
+     * Method returns true if the connection has at least one common draw2d.Port with the given connection.
+     *
+     * @param {draw2d.Connection} other
+     *
+     * @returns {Boolean}
+     */
+    sharingPorts: function sharingPorts(other) {
+        return this.sourcePort == other.sourcePort || this.sourcePort == other.targetPort || this.targetPort == other.sourcePort || this.targetPort == other.targetPort;
+    },
+
+    /**
+     * @method
+     * Set the canvas element of this figures.
+     *
+     * @param {draw2d.Canvas} canvas the new parent of the figure or null
+     */
+    setCanvas: function setCanvas(canvas) {
+        if (this.canvas === canvas) {
+            return; // nothing to do
+        }
+
+        var notiCanvas = this.canvas == null ? canvas : this.canvas;
+
+        this._super(canvas);
+
+        if (canvas !== null && _packages2.default.Connection.DROP_FILTER === null) {
+            _packages2.default.Connection.DROP_FILTER = canvas.paper.createFilter();
+            _packages2.default.Connection.DROP_FILTER.element.setAttribute("width", "250%");
+            _packages2.default.Connection.DROP_FILTER.element.setAttribute("height", "250%");
+            _packages2.default.Connection.DROP_FILTER.createShadow(1, 1, 2, 0.3);
+        }
+
+        if (this.sourceDecoratorNode !== null) {
+            this.sourceDecoratorNode.remove();
+            this.sourceDecoratorNode = null;
+        }
+
+        if (this.targetDecoratorNode !== null) {
+            this.targetDecoratorNode.remove();
+            this.targetDecoratorNode = null;
+        }
+
+        if (this.canvas === null) {
+            if (this.sourcePort !== null) {
+                this.sourcePort.off(this.moveListener);
+                notiCanvas.fireEvent("disconnect", { "port": this.sourcePort, "connection": this });
+                this.sourcePort.onDisconnect(this);
+            }
+            if (this.targetPort !== null) {
+                this.targetPort.off(this.moveListener);
+                notiCanvas.fireEvent("disconnect", { "port": this.targetPort, "connection": this });
+                this.targetPort.onDisconnect(this);
+            }
+        } else {
+            this.shape.items[0].filter(_packages2.default.Connection.DROP_FILTER);
+
+            if (this.sourcePort !== null) {
+                this.sourcePort.on("move", this.moveListener);
+                this.canvas.fireEvent("connect", { "port": this.sourcePort, "connection": this });
+                this.sourcePort.onConnect(this);
+            }
+            if (this.targetPort !== null) {
+                this.targetPort.on("move", this.moveListener);
+                this.canvas.fireEvent("connect", { "port": this.targetPort, "connection": this });
+                this.targetPort.onConnect(this);
+            }
+        }
+    },
+
+    /**
+     * Returns the angle of the connection at the output port (source)
+     *
+     **/
+    getStartAngle: function getStartAngle() {
+        // return a good default value if the connection is not routed at the
+        //  moment
+        if (this.lineSegments.getSize() === 0) {
+            return 0;
+        }
+
+        var p1 = this.lineSegments.get(0).start;
+        var p2 = this.lineSegments.get(0).end;
+        if (this.router instanceof _packages2.default.layout.connection.SplineConnectionRouter) {
+            p2 = this.lineSegments.get(5).end;
+        }
+        var length = Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+        var angle = -(180 / Math.PI) * Math.asin((p1.y - p2.y) / length);
+
+        if (angle < 0) {
+            if (p2.x < p1.x) {
+                angle = Math.abs(angle) + 180;
+            } else {
+                angle = 360 - Math.abs(angle);
+            }
+        } else {
+            if (p2.x < p1.x) {
+                angle = 180 - angle;
+            }
+        }
+        return angle;
+    },
+
+    getEndAngle: function getEndAngle() {
+        // return a good default value if the connection is not routed at the
+        //  moment
+        if (this.lineSegments.getSize() === 0) {
+            return 90;
+        }
+
+        var p1 = this.lineSegments.get(this.lineSegments.getSize() - 1).end;
+        var p2 = this.lineSegments.get(this.lineSegments.getSize() - 1).start;
+        if (this.router instanceof _packages2.default.layout.connection.SplineConnectionRouter) {
+            p2 = this.lineSegments.get(this.lineSegments.getSize() - 5).end;
+        }
+        var length = Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+        var angle = -(180 / Math.PI) * Math.asin((p1.y - p2.y) / length);
+
+        if (angle < 0) {
+            if (p2.x < p1.x) {
+                angle = Math.abs(angle) + 180;
+            } else {
+                angle = 360 - Math.abs(angle);
+            }
+        } else {
+            if (p2.x < p1.x) {
+                angle = 180 - angle;
+            }
+        }
+        return angle;
+    },
+
+    /**
+     * @private
+     **/
+    fireSourcePortRouteEvent: function fireSourcePortRouteEvent() {
+        this.sourcePort.getConnections().each(function (i, conn) {
+            conn.routingRequired = true;
+            conn.repaint();
+        });
+    },
+
+    /**
+     * @private
+     **/
+    fireTargetPortRouteEvent: function fireTargetPortRouteEvent() {
+        // enforce a repaint of all connections which are related to this port
+        // this is required for a "FanConnectionRouter" or "ShortesPathConnectionRouter"
+        //
+        this.targetPort.getConnections().each(function (i, conn) {
+            conn.routingRequired = true;
+            conn.repaint();
+        });
+    },
+
+    /**
+     * @method
+     * Returns the Command to perform the specified Request or null.
+     *
+     * @param {draw2d.command.CommandType} request describes the Command being requested
+     *
+     * @return {draw2d.command.Command} null or a Command
+     **/
+    createCommand: function createCommand(request) {
+        if (request.getPolicy() === _packages2.default.command.CommandType.MOVE) {
+            if (this.isDraggable()) {
+                return new _packages2.default.command.CommandMoveVertices(this);
+            }
+        }
+
+        if (request.getPolicy() === _packages2.default.command.CommandType.MOVE_BASEPOINT) {
+            // DragDrop of a connection doesn't create a undo command at this point. This will be done in
+            // the onDrop method
+            return new _packages2.default.command.CommandReconnect(this);
+        }
+
+        return this._super(request);
+    },
+
+    /**
+     * @method
+     * Return an objects with all important attributes for XML or JSON serialization
+     *
+     * @returns {Object}
+     */
+    getPersistentAttributes: function getPersistentAttributes() {
+        var memento = this._super();
+
+        var parentNode = this.getSource().getParent();
+        while (parentNode.getParent() !== null) {
+            parentNode = parentNode.getParent();
+        }
+        memento.source = {
+            node: parentNode.getId(),
+            port: this.getSource().getName()
+        };
+
+        parentNode = this.getTarget().getParent();
+        while (parentNode.getParent() !== null) {
+            parentNode = parentNode.getParent();
+        }
+        memento.target = {
+            node: parentNode.getId(),
+            port: this.getTarget().getName()
+        };
+
+        if (this.sourceDecorator !== null) {
+            memento.source.decoration = this.sourceDecorator.NAME;
+        }
+
+        if (this.targetDecorator !== null) {
+            memento.target.decoration = this.targetDecorator.NAME;
+        }
+
+        return memento;
+    },
+
+    /**
+     * @method
+     * Read all attributes from the serialized properties and transfer them into the shape.
+     *
+     * @param {Object} memento
+     * @returns
+     */
+    setPersistentAttributes: function setPersistentAttributes(memento) {
+        this._super(memento);
+
+        // nothing to to for the connection creation. This will be done in the draw2d.io.Reader
+        // implementation
+        //
+        // restore your custom attributes here
+        if (typeof memento.target.decoration !== "undefined" && memento.target.decoration != null) {
+            this.setTargetDecorator(eval("new " + memento.target.decoration));
+        }
+
+        if (typeof memento.source.decoration !== "undefined" && memento.source.decoration != null) {
+            this.setSourceDecorator(eval("new " + memento.source.decoration));
+        }
     }
-  },
-
-  /**
-   * Returns the angle of the connection at the output port (source)
-   *
-   **/
-  getStartAngle: function getStartAngle() {
-    // return a good default value if the connection is not routed at the
-    //  moment
-    if (this.lineSegments.getSize() === 0) {
-      return 0;
-    }
-
-    var p1 = this.lineSegments.get(0).start;
-    var p2 = this.lineSegments.get(0).end;
-    if (this.router instanceof _packages2.default.layout.connection.SplineConnectionRouter) {
-      p2 = this.lineSegments.get(5).end;
-    }
-    var length = Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
-    var angle = -(180 / Math.PI) * Math.asin((p1.y - p2.y) / length);
-
-    if (angle < 0) {
-      if (p2.x < p1.x) {
-        angle = Math.abs(angle) + 180;
-      } else {
-        angle = 360 - Math.abs(angle);
-      }
-    } else {
-      if (p2.x < p1.x) {
-        angle = 180 - angle;
-      }
-    }
-    return angle;
-  },
-
-  getEndAngle: function getEndAngle() {
-    // return a good default value if the connection is not routed at the
-    //  moment
-    if (this.lineSegments.getSize() === 0) {
-      return 90;
-    }
-
-    var p1 = this.lineSegments.get(this.lineSegments.getSize() - 1).end;
-    var p2 = this.lineSegments.get(this.lineSegments.getSize() - 1).start;
-    if (this.router instanceof _packages2.default.layout.connection.SplineConnectionRouter) {
-      p2 = this.lineSegments.get(this.lineSegments.getSize() - 5).end;
-    }
-    var length = Math.sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
-    var angle = -(180 / Math.PI) * Math.asin((p1.y - p2.y) / length);
-
-    if (angle < 0) {
-      if (p2.x < p1.x) {
-        angle = Math.abs(angle) + 180;
-      } else {
-        angle = 360 - Math.abs(angle);
-      }
-    } else {
-      if (p2.x < p1.x) {
-        angle = 180 - angle;
-      }
-    }
-    return angle;
-  },
-
-  /**
-   * @private
-   **/
-  fireSourcePortRouteEvent: function fireSourcePortRouteEvent() {
-    this.sourcePort.getConnections().each(function (i, conn) {
-      conn.routingRequired = true;
-      conn.repaint();
-    });
-  },
-
-  /**
-   * @private
-   **/
-  fireTargetPortRouteEvent: function fireTargetPortRouteEvent() {
-    // enforce a repaint of all connections which are related to this port
-    // this is required for a "FanConnectionRouter" or "ShortesPathConnectionRouter"
-    //
-    this.targetPort.getConnections().each(function (i, conn) {
-      conn.routingRequired = true;
-      conn.repaint();
-    });
-  },
-
-  /**
-   * @method
-   * Returns the Command to perform the specified Request or null.
-   *
-   * @param {draw2d.command.CommandType} request describes the Command being requested
-   *
-   * @return {draw2d.command.Command} null or a Command
-   **/
-  createCommand: function createCommand(request) {
-    if (request.getPolicy() === _packages2.default.command.CommandType.MOVE) {
-      if (this.isDraggable()) {
-        return new _packages2.default.command.CommandMoveVertices(this);
-      }
-    }
-
-    if (request.getPolicy() === _packages2.default.command.CommandType.MOVE_BASEPOINT) {
-      // DragDrop of a connection doesn't create a undo command at this point. This will be done in
-      // the onDrop method
-      return new _packages2.default.command.CommandReconnect(this);
-    }
-
-    return this._super(request);
-  },
-
-  /**
-   * @method
-   * Return an objects with all important attributes for XML or JSON serialization
-   *
-   * @returns {Object}
-   */
-  getPersistentAttributes: function getPersistentAttributes() {
-    var memento = this._super();
-
-    var parentNode = this.getSource().getParent();
-    while (parentNode.getParent() !== null) {
-      parentNode = parentNode.getParent();
-    }
-    memento.source = {
-      node: parentNode.getId(),
-      port: this.getSource().getName()
-    };
-
-    parentNode = this.getTarget().getParent();
-    while (parentNode.getParent() !== null) {
-      parentNode = parentNode.getParent();
-    }
-    memento.target = {
-      node: parentNode.getId(),
-      port: this.getTarget().getName()
-    };
-
-    if (this.sourceDecorator !== null) {
-      memento.source.decoration = this.sourceDecorator.NAME;
-    }
-
-    if (this.targetDecorator !== null) {
-      memento.target.decoration = this.targetDecorator.NAME;
-    }
-
-    return memento;
-  },
-
-  /**
-   * @method
-   * Read all attributes from the serialized properties and transfer them into the shape.
-   *
-   * @param {Object} memento
-   * @returns
-   */
-  setPersistentAttributes: function setPersistentAttributes(memento) {
-    this._super(memento);
-
-    // nothing to to for the connection creation. This will be done in the draw2d.io.Reader
-    // implementation
-    //
-    // restore your custom attributes here
-    if (typeof memento.target.decoration !== "undefined" && memento.target.decoration != null) {
-      this.setTargetDecorator(eval("new " + memento.target.decoration));
-    }
-
-    if (typeof memento.source.decoration !== "undefined" && memento.source.decoration != null) {
-      this.setSourceDecorator(eval("new " + memento.source.decoration));
-    }
-  }
 });
 
 _packages2.default.Connection.DROP_FILTER = null;
@@ -12138,7 +12141,6 @@ _packages2.default.HeadlessCanvas = Class.extend({
         this.figures = new _packages2.default.util.ArrayList();
         this.lines = new _packages2.default.util.ArrayList(); // crap - why are connections not just figures. Design by accident
         this.commonPorts = new _packages2.default.util.ArrayList();
-        this.dropTargets = new _packages2.default.util.ArrayList();
 
         this.eventSubscriptions = {};
 
@@ -12160,7 +12162,6 @@ _packages2.default.HeadlessCanvas = Class.extend({
         this.figures = new _packages2.default.util.ArrayList();
         this.lines = new _packages2.default.util.ArrayList();
         this.commonPorts = new _packages2.default.util.ArrayList();
-        this.dropTargets = new _packages2.default.util.ArrayList();
 
         this.commandStack.markSaveLocation();
 
@@ -12636,624 +12637,619 @@ var _packages2 = _interopRequireDefault(_packages);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 _packages2.default.Port = _packages2.default.shape.basic.Circle.extend({
-  NAME: "draw2d.Port",
-
-  DEFAULT_BORDER_COLOR: new _packages2.default.util.Color("#1B1B1B"),
-
-  MAX_SAFE_INTEGER: 9007199254740991,
-
-  /**
-   * @constructor
-   * Creates a new Node element which are not assigned to any canvas.
-   *
-   * @param {Object} [attr] the configuration of the shape
-   */
-  init: function init(attr, setter, getter) {
-    var _this = this;
-
-    this.locator = null;
-    this.lighterBgColor = null;
-    this.name = null;
-
-    this._super(extend({
-      bgColor: "#4f6870",
-      stroke: 1,
-      diameter: _packages2.default.isTouchDevice ? 25 : 10,
-      color: "#1B1B1B",
-      selectable: false
-    }, attr), setter, getter);
-
-    // status var for user interaction
-    //
-    this.ox = this.x;
-    this.oy = this.y;
-    this.coronaWidth = 5; // the corona width for the hitTest method. Useful during drag&drop of ports. Better SnapTo behavior.
-    this.corona = null; // draw2d.shape.basic.Circle
-    this.useGradient = true;
-
-    this.preferredConnectionDirection = null;
-
-    // current attached connections
-    this.connections = new _packages2.default.util.ArrayList();
-
-    this.moveListener = function (emitter, event) {
-      _this.repaint();
-      // Falls sich der parent bewegt hat, dann muss der Port dies seinen
-      // Connections mitteilen
-      _this.fireEvent("move", { figure: _this, dx: 0, dy: 0 });
-    };
-
-    this.connectionAnchor = new _packages2.default.layout.anchor.ConnectionAnchor(this);
-
-    // for dynamic diagrams. A Port can have a value which is set by a connector
-    //
-    this.value = null;
-    this.maxFanOut = this.MAX_SAFE_INTEGER;
-
-    this.setCanSnapToHelper(false);
-
-    // uninstall all default selection policies. This is not required for Ports
-    this.editPolicy.each(function (i, policy) {
-      _this.uninstallEditPolicy(policy);
-    });
-
-    this.installEditPolicy(new _packages2.default.policy.port.IntrusivePortsFeedbackPolicy());
-    //    this.installEditPolicy(new draw2d.policy.port.ElasticStrapFeedbackPolicy());
-
-    // a port handles the selection handling always by its own regardless if
-    // the port is part of an composite, node, group or whatever.
-    this.portSelectionAdapter = function () {
-      return _this;
-    };
-  },
-
-  getSelectionAdapter: function getSelectionAdapter() {
-    return this.portSelectionAdapter;
-  },
-
-  /**
-   * @method
-   * set the maximal possible count of connections for this port.<br>
-   * This method din't delete any connection if you reduce the number and a bunch of
-   * connection are bounded already.
-   *
-   * @param {Number} count the maximal number of connection related to this port
-   */
-  setMaxFanOut: function setMaxFanOut(count) {
-    this.maxFanOut = Math.max(1, count);
-    this.fireEvent("change:maxFanOut", { value: this.maxFanOut });
-
-    return this;
-  },
-
-  /**
-   * @method
-   * return the maximal possible connections (in+out) for this port.
-   *
-   * @return {Number}
-   */
-  getMaxFanOut: function getMaxFanOut() {
-    return this.maxFanOut;
-  },
-
-  /**
-   * @method
-   * Set the Anchor for this object. An anchor is responsible for the endpoint calculation
-   * of an connection. just visible representation.
-   *
-   * @param {draw2d.layout.anchor.ConnectionAnchor} [anchor] the new source anchor for the connection or "null" to use the default anchor.
-   **/
-  setConnectionAnchor: function setConnectionAnchor(anchor) {
-    // set some good defaults.
-    if (typeof anchor === "undefined" || anchor === null) {
-      anchor = new _packages2.default.layout.anchor.ConnectionAnchor();
-    }
-
-    this.connectionAnchor = anchor;
-    this.connectionAnchor.setOwner(this);
-
-    // the anchor has changed. In this case all connections needs an change event to recalculate
-    // the anchor and the routing itself
-    this.fireEvent("move", { figure: this, dx: 0, dy: 0 });
-
-    return this;
-  },
-
-  getConnectionAnchorLocation: function getConnectionAnchorLocation(referencePoint, inquiringConnection) {
-    return this.connectionAnchor.getLocation(referencePoint, inquiringConnection);
-  },
-
-  getConnectionAnchorReferencePoint: function getConnectionAnchorReferencePoint(inquiringConnection) {
-    return this.connectionAnchor.getReferencePoint(inquiringConnection);
-  },
-
-  /**
-   * @method
-   * Returns the **direction** for the connection in relation to the given port and it's parent.
-   *
-   * <p>
-   * Possible values:
-   * <ul>
-   *   <li>draw2d.geo.Rectangle.DIRECTION_UP</li>
-   *   <li>draw2d.geo.Rectangle.DIRECTION_RIGHT</li>
-   *   <li>draw2d.geo.Rectangle.DIRECTION_DOWN</li>
-   *   <li>draw2d.geo.Rectangle.DIRECTION_LEFT</li>
-   * </ul>
-   * <p>
-   *
-   * @param {draw2d.Port} peerPort the counterpart port
-   *
-   * @return {Number} the direction.
-   */
-  getConnectionDirection: function getConnectionDirection(peerPort) {
-    // return the calculated connection direction if the port didn't have set any
-    //
-    if (typeof this.preferredConnectionDirection === "undefined" || this.preferredConnectionDirection === null) {
-      return this.getParent().getBoundingBox().getDirection(this.getAbsolutePosition());
-    }
-
-    return this.preferredConnectionDirection;
-  },
-
-  /**
-   * @method
-   * Set the **direction** for the connection in relation to the given port and it's parent.
-   *
-   * <p>
-   * Possible values:
-   * <ul>
-   *   <li>up -&gt; 0</li>
-   *   <li>right -&gt; 1</li>
-   *   <li>down -&gt; 2</li>
-   *   <li>left -&gt; 3</li>
-   *   <li>calculated -&gt; null</li>
-   * </ul>
-   * <p>
-   *
-   * @since 5.2.1
-   * @param {Number} direction the preferred connection direction.
-   */
-  setConnectionDirection: function setConnectionDirection(direction) {
-    this.preferredConnectionDirection = direction;
-
-    // needs an change event to recalculate the route
-    this.fireEvent("move", { figure: this, dx: 0, dy: 0 });
-
-    return this;
-  },
-
-  /**
-   * @method
-   * Set the locator/layouter of the port. A locator is responsive for the x/y arrangement of the
-   * port in relation to the parent node.
-   *
-   * @param {draw2d.layout.locator.Locator} locator
-   */
-  setLocator: function setLocator(locator) {
-    this.locator = locator;
-
-    return this;
-  },
-
-  /**
-   * @method
-   * Get the locator/layouter of the port. A locator is responsive for the x/y arrangement of the
-   * port in relation to the parent node.
-   *
-   * @since 4.2.0
-   */
-  getLocator: function getLocator() {
-    return this.locator;
-  },
-
-  /**
-   * @method
-   * Set the new background color of the figure. It is possible to hands over
-   * <code>null</code> to set the background transparent.
-   *
-   * @param {draw2d.util.Color|String} color The new background color of the figure
-   **/
-  setBackgroundColor: function setBackgroundColor(color) {
-    this._super(color);
-    this.lighterBgColor = this.bgColor.lighter(0.3).hash();
-
-    return this;
-  },
-
-  /**
-   * @method
-   * Set a value for the port. This is useful for interactive/dynamic diagrams like circuits, simulator,...
-   *
-   * @param {Object} value the new value for the port
-   */
-  setValue: function setValue(value) {
-
-    if (value === this.value) {
-      return this;
-    }
-    var old = this.value;
-    this.value = value;
-    if (this.getParent() !== null) {
-      this.getParent().onPortValueChanged(this);
-    }
-    this.fireEvent("change:value", { value: this.value, old: old });
-
-    return this;
-  },
-
-  /**
-   * @method
-   * Return the user defined value of the port.
-   *
-   * @returns {Object}
-   */
-  getValue: function getValue() {
-    return this.value;
-  },
-
-  /**
-   * @inheritdoc
-   */
-  repaint: function repaint(attributes) {
-    if (this.repaintBlocked === true || this.shape === null) {
-      return;
-    }
-
-    attributes = attributes || {};
-
-    // a port did have the 0/0 coordinate in the center and not in the top/left corner
-    //
-    attributes.cx = this.getAbsoluteX();
-    attributes.cy = this.getAbsoluteY();
-    attributes.rx = this.width / 2;
-    attributes.ry = attributes.rx;
-    attributes.cursor = "move";
-
-    if (this.getAlpha() < 0.9 || this.useGradient === false) {
-      attributes.fill = this.bgColor.hash();
-    } else {
-      attributes.fill = ["90", this.bgColor.hash(), this.lighterBgColor].join("-");
-    }
-
-    this._super(attributes);
-  },
-
-  /**
-   * @inheritdoc
-   *
-   **/
-  onMouseEnter: function onMouseEnter() {
-    this._oldstroke = this.getStroke();
-    this.setStroke(2);
-  },
-
-  /**
-   * @inheritdoc
-   *
-   **/
-  onMouseLeave: function onMouseLeave() {
-    this.setStroke(this._oldstroke);
-  },
-
-  /**
-   * @method
-   * Returns a {@link draw2d.util.ArrayList} of {@link draw2d.Connection}s of all related connections to this port.
-   *
-   * @return {draw2d.util.ArrayList}
-   **/
-  getConnections: function getConnections() {
-    return this.connections;
-  },
-
-  /**
-   * @inheritdoc
-   */
-  setParent: function setParent(parent) {
-    if (this.parent !== null) {
-      this.parent.off(this.moveListener);
-    }
-
-    this._super(parent);
-
-    if (this.parent !== null) {
-      this.parent.on("move", this.moveListener);
-    }
-  },
-
-  /**
-   * @method
-   * Returns the corona width of the Port. The corona width will be used during the
-   * drag&drop of a port.
-   *
-   * @return {Number}
-   **/
-  getCoronaWidth: function getCoronaWidth() {
-    return this.coronaWidth;
-  },
-
-  /**
-   * @method
-   * Set the corona width of the Port. The corona width will be used during the
-   * drag&drop of a port. You can drop a port in the corona of this port to create
-   * a connection. It is not neccessary to drop exactly on the port.
-   *
-   * @param {Number} width The new corona width of the port
-   **/
-  setCoronaWidth: function setCoronaWidth(width) {
-    this.coronaWidth = width;
-  },
-
-  /**
-   * @inheritdoc
-   *
-   * @param {Number} x the x-coordinate of the mouse event
-   * @param {Number} y the y-coordinate of the mouse event
-   * @param {Boolean} shiftKey true if the shift key has been pressed during this event
-   * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
-   *
-   * @return {Boolean}
-   * @private
-   **/
-  onDragStart: function onDragStart(x, y, shiftKey, ctrlKey) {
-    // just allow the DragOperation if the port didn't have reached the max fanOut
-    // limit.
-    if (this.getConnections().getSize() >= this.maxFanOut) {
-      return false;
-    }
-
-    var _this = this;
-
-    //        this.getShapeElement().insertAfter(this.parent.getShapeElement());
-    // don't call the super method. This creates a command and this is not necessary for a port
-    this.ox = this.x;
-    this.oy = this.y;
-
-    var canStartDrag = true;
-
-    // notify all installed policies
-    //
-    this.editPolicy.each(function (i, e) {
-      if (e instanceof _packages2.default.policy.figure.DragDropEditPolicy) {
-        // DragStart operation can send a veto for the dragStart
-        // @since 6.1.0
-        canStartDrag = canStartDrag && e.onDragStart(_this.canvas, _this, x, y, shiftKey, ctrlKey);
-      }
-    });
-
-    return canStartDrag;
-  },
-
-  /**
-   * @inheritdoc
-   *
-   * @param {Number} dx the x difference between the start of the drag drop operation and now
-   * @param {Number} dy the y difference between the start of the drag drop operation and now
-   * @param {Number} dx2 The x diff since the last call of this dragging operation
-   * @param {Number} dy2 The y diff since the last call of this dragging operation
-   *
-   * @private
-   **/
-  onDrag: function onDrag(dx, dy, dx2, dy2, shiftKey, ctrlKey) {
-    // TODO: warum wurde diese methode überschrieben?!
-    this._super(dx, dy);
-  },
-
-  /**
-   * @param {Number} x the x-coordinate of the mouse event
-   * @param {Number} y the y-coordinate of the mouse event
-   * @param {Boolean} shiftKey true if the shift key has been pressed during this event
-   * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
-   *
-   * @private
-   **/
-  onDragEnd: function onDragEnd(x, y, shiftKey, ctrlKey) {
-    // Don't call the parent implementation. This will create an CommandMove object
-    // and store them o the CommandStack for the undo operation. This makes no sense for a
-    // port.
-    // draw2d.shape.basic.Rectangle.prototype.onDragEnd.call(this); DON'T call the super implementation!!!
-
-    this.setAlpha(1.0);
-
-    // 1.) Restore the old Position of the node
-    //
-    this.setPosition(this.ox, this.oy);
-  },
-
-  /**
-   * @method
-   * Called if the user drop this element onto the dropTarget
-   *
-   * @param {draw2d.Figure} dropTarget The drop target.
-   * @param {Number} x the x-coordinate of the mouse up event
-   * @param {Number} y the y-coordinate of the mouse up event
-   * @param {Boolean} shiftKey true if the shift key has been pressed during this event
-   * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
-   *
-   * @@private
-   **/
-  onDrop: function onDrop(dropTarget, x, y, shiftKey, ctrlKey) {},
-
-  /**
-   * @method
-   * Callback method if a new connection has created with this port
-   *
-   *      // Alternatively you register for this event with:
-   *      port.on("connect", function(emitterPort, connection){
-   *          alert("port connected");
-   *      });
-   *
-   * @param {draw2d.Connection} connection The connection which has been created
-   * @since 2.5.1
-   *
-   * @template
-   **/
-  onConnect: function onConnect(connection) {},
-
-  /**
-   * @method
-   * Callback method if a new connection has created with this port
-   *
-   *      // Alternatively you register for this event with:
-   *      port.on("connect", function(emitterPort, connection){
-   *          alert("port disconnected");
-   *      });
-   *
-   * @param {draw2d.Connection} connection The connection which has been deleted
-   * @since 2.5.1
-   *
-   * @template
-   **/
-  onDisconnect: function onDisconnect(connection) {},
-
-  /**
-   * @method
-   * Return the name of this port.
-   *
-   * @return {String}
-   **/
-  getName: function getName() {
-    return this.name;
-  },
-
-  /**
-   * @method
-   * Set the name of this port. The name of the port can be referenced by the lookup of
-   * ports in the node.
-   *
-   *
-   * @param {String} name The new name of this port.
-   **/
-  setName: function setName(name) {
-    this.name = name;
-  },
-
-  /**
-   * @method
-   * Hit test for ports. This method respect the corona diameter of the port for the hit test.
-   * The corona width can be set with {@link draw2d.Port#setCoronaWidth}
-   * @param {Number} iX
-   * @param {Number} iY
-   * @param {Number} [corona]
-   * @return {Boolean}
-   */
-  hitTest: function hitTest(iX, iY, corona) {
-    var x = this.getAbsoluteX() - this.coronaWidth - this.getWidth() / 2;
-    var y = this.getAbsoluteY() - this.coronaWidth - this.getHeight() / 2;
-    var iX2 = x + this.getWidth() + this.coronaWidth * 2;
-    var iY2 = y + this.getHeight() + this.coronaWidth * 2;
-
-    return iX >= x && iX <= iX2 && iY >= y && iY <= iY2;
-  },
-
-  /**
-   * @method
-   * Highlight this port
-   *
-   * @param {Boolean} flag indicator if the figure should glow.
-   */
-  setGlow: function setGlow(flag) {
-    if (flag === true && this.corona === null) {
-      this.corona = new _packages2.default.Corona();
-      this.corona.setDimension(this.getWidth() + this.getCoronaWidth() * 2, this.getWidth() + this.getCoronaWidth() * 2);
-      this.corona.setPosition(this.getAbsoluteX() - this.getCoronaWidth() - this.getWidth() / 2, this.getAbsoluteY() - this.getCoronaWidth() - this.getHeight() / 2);
-
-      this.corona.setCanvas(this.getCanvas());
-
-      // important inital
-      this.corona.getShapeElement();
-      this.corona.repaint();
-    } else if (flag === false && this.corona !== null) {
-      this.corona.setCanvas(null);
-      this.corona = null;
-    }
-
-    return this;
-  },
-
-  /**
-   * @inheritdoc
-   */
-  createCommand: function createCommand(request) {
-    // the port has its own implementation of the CommandMove
-    //
-    if (request.getPolicy() === _packages2.default.command.CommandType.MOVE) {
-      if (!this.isDraggable()) {
+    NAME: "draw2d.Port",
+
+    DEFAULT_BORDER_COLOR: new _packages2.default.util.Color("#1B1B1B"),
+
+    MAX_SAFE_INTEGER: 9007199254740991,
+
+    /**
+     * @constructor
+     * Creates a new Node element which are not assigned to any canvas.
+     *
+     * @param {Object} [attr] the configuration of the shape
+     */
+    init: function init(attr, setter, getter) {
+        var _this = this;
+
+        this.locator = null;
+        this.lighterBgColor = null;
+        this.name = null;
+
+        this._super(extend({
+            bgColor: "#4f6870",
+            stroke: 1,
+            diameter: _packages2.default.isTouchDevice ? 25 : 10,
+            color: "#1B1B1B",
+            selectable: false
+        }, attr), setter, getter);
+
+        // status var for user interaction
+        //
+        this.ox = this.x;
+        this.oy = this.y;
+        this.coronaWidth = 5; // the corona width for the hitTest method. Useful during drag&drop of ports. Better SnapTo behavior.
+        this.corona = null; // draw2d.shape.basic.Circle
+        this.useGradient = true;
+
+        this.preferredConnectionDirection = null;
+
+        // current attached connections
+        this.connections = new _packages2.default.util.ArrayList();
+
+        this.moveListener = function (emitter, event) {
+            _this.repaint();
+            // Falls sich der parent bewegt hat, dann muss der Port dies seinen
+            // Connections mitteilen
+            _this.fireEvent("move", { figure: _this, dx: 0, dy: 0 });
+        };
+
+        this.connectionAnchor = new _packages2.default.layout.anchor.ConnectionAnchor(this);
+
+        // for dynamic diagrams. A Port can have a value which is set by a connector
+        //
+        this.value = null;
+        this.maxFanOut = this.MAX_SAFE_INTEGER;
+
+        this.setCanSnapToHelper(false);
+
+        // uninstall all default selection policies. This is not required for Ports
+        this.editPolicy.each(function (i, policy) {
+            _this.uninstallEditPolicy(policy);
+        });
+
+        this.installEditPolicy(new _packages2.default.policy.port.IntrusivePortsFeedbackPolicy());
+        //    this.installEditPolicy(new draw2d.policy.port.ElasticStrapFeedbackPolicy());
+
+        // a port handles the selection handling always by its own regardless if
+        // the port is part of an composite, node, group or whatever.
+        this.portSelectionAdapter = function () {
+            return _this;
+        };
+    },
+
+    getSelectionAdapter: function getSelectionAdapter() {
+        return this.portSelectionAdapter;
+    },
+
+    /**
+     * @method
+     * set the maximal possible count of connections for this port.<br>
+     * This method din't delete any connection if you reduce the number and a bunch of
+     * connection are bounded already.
+     *
+     * @param {Number} count the maximal number of connection related to this port
+     */
+    setMaxFanOut: function setMaxFanOut(count) {
+        this.maxFanOut = Math.max(1, count);
+        this.fireEvent("change:maxFanOut", { value: this.maxFanOut });
+
+        return this;
+    },
+
+    /**
+     * @method
+     * return the maximal possible connections (in+out) for this port.
+     *
+     * @return {Number}
+     */
+    getMaxFanOut: function getMaxFanOut() {
+        return this.maxFanOut;
+    },
+
+    /**
+     * @method
+     * Set the Anchor for this object. An anchor is responsible for the endpoint calculation
+     * of an connection. just visible representation.
+     *
+     * @param {draw2d.layout.anchor.ConnectionAnchor} [anchor] the new source anchor for the connection or "null" to use the default anchor.
+     **/
+    setConnectionAnchor: function setConnectionAnchor(anchor) {
+        // set some good defaults.
+        if (typeof anchor === "undefined" || anchor === null) {
+            anchor = new _packages2.default.layout.anchor.ConnectionAnchor();
+        }
+
+        this.connectionAnchor = anchor;
+        this.connectionAnchor.setOwner(this);
+
+        // the anchor has changed. In this case all connections needs an change event to recalculate
+        // the anchor and the routing itself
+        this.fireEvent("move", { figure: this, dx: 0, dy: 0 });
+
+        return this;
+    },
+
+    getConnectionAnchorLocation: function getConnectionAnchorLocation(referencePoint, inquiringConnection) {
+        return this.connectionAnchor.getLocation(referencePoint, inquiringConnection);
+    },
+
+    getConnectionAnchorReferencePoint: function getConnectionAnchorReferencePoint(inquiringConnection) {
+        return this.connectionAnchor.getReferencePoint(inquiringConnection);
+    },
+
+    /**
+     * @method
+     * Returns the **direction** for the connection in relation to the given port and it's parent.
+     *
+     * <p>
+     * Possible values:
+     * <ul>
+     *   <li>draw2d.geo.Rectangle.DIRECTION_UP</li>
+     *   <li>draw2d.geo.Rectangle.DIRECTION_RIGHT</li>
+     *   <li>draw2d.geo.Rectangle.DIRECTION_DOWN</li>
+     *   <li>draw2d.geo.Rectangle.DIRECTION_LEFT</li>
+     * </ul>
+     * <p>
+     *
+     * @param {draw2d.Port} peerPort the counterpart port
+     *
+     * @return {Number} the direction.
+     */
+    getConnectionDirection: function getConnectionDirection(peerPort) {
+        // return the calculated connection direction if the port didn't have set any
+        //
+        if (typeof this.preferredConnectionDirection === "undefined" || this.preferredConnectionDirection === null) {
+            return this.getParent().getBoundingBox().getDirection(this.getAbsolutePosition());
+        }
+
+        return this.preferredConnectionDirection;
+    },
+
+    /**
+     * @method
+     * Set the **direction** for the connection in relation to the given port and it's parent.
+     *
+     * <p>
+     * Possible values:
+     * <ul>
+     *   <li>up -&gt; 0</li>
+     *   <li>right -&gt; 1</li>
+     *   <li>down -&gt; 2</li>
+     *   <li>left -&gt; 3</li>
+     *   <li>calculated -&gt; null</li>
+     * </ul>
+     * <p>
+     *
+     * @since 5.2.1
+     * @param {Number} direction the preferred connection direction.
+     */
+    setConnectionDirection: function setConnectionDirection(direction) {
+        this.preferredConnectionDirection = direction;
+
+        // needs an change event to recalculate the route
+        this.fireEvent("move", { figure: this, dx: 0, dy: 0 });
+
+        return this;
+    },
+
+    /**
+     * @method
+     * Set the locator/layouter of the port. A locator is responsive for the x/y arrangement of the
+     * port in relation to the parent node.
+     *
+     * @param {draw2d.layout.locator.Locator} locator
+     */
+    setLocator: function setLocator(locator) {
+        this.locator = locator;
+
+        return this;
+    },
+
+    /**
+     * @method
+     * Get the locator/layouter of the port. A locator is responsive for the x/y arrangement of the
+     * port in relation to the parent node.
+     *
+     * @since 4.2.0
+     */
+    getLocator: function getLocator() {
+        return this.locator;
+    },
+
+    /**
+     * @method
+     * Set the new background color of the figure. It is possible to hands over
+     * <code>null</code> to set the background transparent.
+     *
+     * @param {draw2d.util.Color|String} color The new background color of the figure
+     **/
+    setBackgroundColor: function setBackgroundColor(color) {
+        this._super(color);
+        this.lighterBgColor = this.bgColor.lighter(0.3).hash();
+
+        return this;
+    },
+
+    /**
+     * @method
+     * Set a value for the port. This is useful for interactive/dynamic diagrams like circuits, simulator,...
+     *
+     * @param {Object} value the new value for the port
+     */
+    setValue: function setValue(value) {
+        this.value = value;
+        if (this.getParent() !== null) {
+            this.getParent().onPortValueChanged(this);
+        }
+        this.fireEvent("change:value", { value: this.value });
+
+        return this;
+    },
+
+    /**
+     * @method
+     * Return the user defined value of the port.
+     *
+     * @returns {Object}
+     */
+    getValue: function getValue() {
+        return this.value;
+    },
+
+    /**
+     * @inheritdoc
+     */
+    repaint: function repaint(attributes) {
+        if (this.repaintBlocked === true || this.shape === null) {
+            return;
+        }
+
+        attributes = attributes || {};
+
+        // a port did have the 0/0 coordinate in the center and not in the top/left corner
+        //
+        attributes.cx = this.getAbsoluteX();
+        attributes.cy = this.getAbsoluteY();
+        attributes.rx = this.width / 2;
+        attributes.ry = attributes.rx;
+        attributes.cursor = "move";
+
+        if (this.getAlpha() < 0.9 || this.useGradient === false) {
+            attributes.fill = this.bgColor.hash();
+        } else {
+            attributes.fill = ["90", this.bgColor.hash(), this.lighterBgColor].join("-");
+        }
+
+        this._super(attributes);
+    },
+
+    /**
+     * @inheritdoc
+     *
+     **/
+    onMouseEnter: function onMouseEnter() {
+        this._oldstroke = this.getStroke();
+        this.setStroke(2);
+    },
+
+    /**
+     * @inheritdoc
+     *
+     **/
+    onMouseLeave: function onMouseLeave() {
+        this.setStroke(this._oldstroke);
+    },
+
+    /**
+     * @method
+     * Returns a {@link draw2d.util.ArrayList} of {@link draw2d.Connection}s of all related connections to this port.
+     *
+     * @return {draw2d.util.ArrayList}
+     **/
+    getConnections: function getConnections() {
+        return this.connections;
+    },
+
+    /**
+     * @inheritdoc
+     */
+    setParent: function setParent(parent) {
+        if (this.parent !== null) {
+            this.parent.off(this.moveListener);
+        }
+
+        this._super(parent);
+
+        if (this.parent !== null) {
+            this.parent.on("move", this.moveListener);
+        }
+    },
+
+    /**
+     * @method
+     * Returns the corona width of the Port. The corona width will be used during the
+     * drag&drop of a port.
+     *
+     * @return {Number}
+     **/
+    getCoronaWidth: function getCoronaWidth() {
+        return this.coronaWidth;
+    },
+
+    /**
+     * @method
+     * Set the corona width of the Port. The corona width will be used during the
+     * drag&drop of a port. You can drop a port in the corona of this port to create
+     * a connection. It is not neccessary to drop exactly on the port.
+     *
+     * @param {Number} width The new corona width of the port
+     **/
+    setCoronaWidth: function setCoronaWidth(width) {
+        this.coronaWidth = width;
+    },
+
+    /**
+     * @inheritdoc
+     *
+     * @param {Number} x the x-coordinate of the mouse event
+     * @param {Number} y the y-coordinate of the mouse event
+     * @param {Boolean} shiftKey true if the shift key has been pressed during this event
+     * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
+     *
+     * @return {Boolean}
+     * @private
+     **/
+    onDragStart: function onDragStart(x, y, shiftKey, ctrlKey) {
+        // just allow the DragOperation if the port didn't have reached the max fanOut
+        // limit.
+        if (this.getConnections().getSize() >= this.maxFanOut) {
+            return false;
+        }
+
+        var _this = this;
+
+        //        this.getShapeElement().insertAfter(this.parent.getShapeElement());
+        // don't call the super method. This creates a command and this is not necessary for a port
+        this.ox = this.x;
+        this.oy = this.y;
+
+        var canStartDrag = true;
+
+        // notify all installed policies
+        //
+        this.editPolicy.each(function (i, e) {
+            if (e instanceof _packages2.default.policy.figure.DragDropEditPolicy) {
+                // DragStart operation can send a veto for the dragStart
+                // @since 6.1.0
+                canStartDrag = canStartDrag && e.onDragStart(_this.canvas, _this, x, y, shiftKey, ctrlKey);
+            }
+        });
+
+        return canStartDrag;
+    },
+
+    /**
+     * @inheritdoc
+     *
+     * @param {Number} dx the x difference between the start of the drag drop operation and now
+     * @param {Number} dy the y difference between the start of the drag drop operation and now
+     * @param {Number} dx2 The x diff since the last call of this dragging operation
+     * @param {Number} dy2 The y diff since the last call of this dragging operation
+     *
+     * @private
+     **/
+    onDrag: function onDrag(dx, dy, dx2, dy2, shiftKey, ctrlKey) {
+        // TODO: warum wurde diese methode überschrieben?!
+        this._super(dx, dy);
+    },
+
+    /**
+     * @param {Number} x the x-coordinate of the mouse event
+     * @param {Number} y the y-coordinate of the mouse event
+     * @param {Boolean} shiftKey true if the shift key has been pressed during this event
+     * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
+     *
+     * @private
+     **/
+    onDragEnd: function onDragEnd(x, y, shiftKey, ctrlKey) {
+        // Don't call the parent implementation. This will create an CommandMove object
+        // and store them o the CommandStack for the undo operation. This makes no sense for a
+        // port.
+        // draw2d.shape.basic.Rectangle.prototype.onDragEnd.call(this); DON'T call the super implementation!!!
+
+        this.setAlpha(1.0);
+
+        // 1.) Restore the old Position of the node
+        //
+        this.setPosition(this.ox, this.oy);
+    },
+
+    /**
+     * @method
+     * Called if the user drop this element onto the dropTarget
+     *
+     * @param {draw2d.Figure} dropTarget The drop target.
+     * @param {Number} x the x-coordinate of the mouse up event
+     * @param {Number} y the y-coordinate of the mouse up event
+     * @param {Boolean} shiftKey true if the shift key has been pressed during this event
+     * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
+     *
+     * @@private
+     **/
+    onDrop: function onDrop(dropTarget, x, y, shiftKey, ctrlKey) {},
+
+    /**
+     * @method
+     * Callback method if a new connection has created with this port
+     *
+     *      // Alternatively you register for this event with:
+     *      port.on("connect", function(emitterPort, connection){
+     *          alert("port connected");
+     *      });
+     *
+     * @param {draw2d.Connection} connection The connection which has been created
+     * @since 2.5.1
+     *
+     * @template
+     **/
+    onConnect: function onConnect(connection) {},
+
+    /**
+     * @method
+     * Callback method if a new connection has created with this port
+     *
+     *      // Alternatively you register for this event with:
+     *      port.on("connect", function(emitterPort, connection){
+     *          alert("port disconnected");
+     *      });
+     *
+     * @param {draw2d.Connection} connection The connection which has been deleted
+     * @since 2.5.1
+     *
+     * @template
+     **/
+    onDisconnect: function onDisconnect(connection) {},
+
+    /**
+     * @method
+     * Return the name of this port.
+     *
+     * @return {String}
+     **/
+    getName: function getName() {
+        return this.name;
+    },
+
+    /**
+     * @method
+     * Set the name of this port. The name of the port can be referenced by the lookup of
+     * ports in the node.
+     *
+     *
+     * @param {String} name The new name of this port.
+     **/
+    setName: function setName(name) {
+        this.name = name;
+    },
+
+    /**
+     * @method
+     * Hit test for ports. This method respect the corona diameter of the port for the hit test.
+     * The corona width can be set with {@link draw2d.Port#setCoronaWidth}
+     * @param {Number} iX
+     * @param {Number} iY
+     * @param {Number} [corona]
+     * @return {Boolean}
+     */
+    hitTest: function hitTest(iX, iY, corona) {
+        var x = this.getAbsoluteX() - this.coronaWidth - this.getWidth() / 2;
+        var y = this.getAbsoluteY() - this.coronaWidth - this.getHeight() / 2;
+        var iX2 = x + this.getWidth() + this.coronaWidth * 2;
+        var iY2 = y + this.getHeight() + this.coronaWidth * 2;
+
+        return iX >= x && iX <= iX2 && iY >= y && iY <= iY2;
+    },
+
+    /**
+     * @method
+     * Highlight this port
+     *
+     * @param {Boolean} flag indicator if the figure should glow.
+     */
+    setGlow: function setGlow(flag) {
+        if (flag === true && this.corona === null) {
+            this.corona = new _packages2.default.Corona();
+            this.corona.setDimension(this.getWidth() + this.getCoronaWidth() * 2, this.getWidth() + this.getCoronaWidth() * 2);
+            this.corona.setPosition(this.getAbsoluteX() - this.getCoronaWidth() - this.getWidth() / 2, this.getAbsoluteY() - this.getCoronaWidth() - this.getHeight() / 2);
+
+            this.corona.setCanvas(this.getCanvas());
+
+            // important inital
+            this.corona.getShapeElement();
+            this.corona.repaint();
+        } else if (flag === false && this.corona !== null) {
+            this.corona.setCanvas(null);
+            this.corona = null;
+        }
+
+        return this;
+    },
+
+    /**
+     * @inheritdoc
+     */
+    createCommand: function createCommand(request) {
+        // the port has its own implementation of the CommandMove
+        //
+        if (request.getPolicy() === _packages2.default.command.CommandType.MOVE) {
+            if (!this.isDraggable()) {
+                return null;
+            }
+            return new _packages2.default.command.CommandMovePort(this);
+        }
+
         return null;
-      }
-      return new _packages2.default.command.CommandMovePort(this);
+    },
+
+    /**
+     * @method
+     * Called from the figure itself when any position changes happens. All listener
+     * will be informed.
+     * <br>
+     * DON'T fire this event if the Port is during a Drag&Drop operation. This can happen
+     * if we try to connect two ports
+     **/
+    fireEvent: function fireEvent(event, args) {
+        if (this.isInDragDrop === true && event !== "drag") {
+            return;
+        }
+
+        this._super(event, args);
+    },
+
+    /**
+     * @method
+     * Return an objects with all important attributes for XML or JSON serialization
+     *
+     * @return
+     */
+    getPersistentAttributes: function getPersistentAttributes() {
+        var memento = this._super();
+
+        memento.maxFanOut = this.maxFanOut;
+        memento.name = this.name;
+
+        // defined by the locator. Don't persist
+        //
+        delete memento.x;
+        delete memento.y;
+
+        // ports didn'T have children ports. In this case we
+        // delete this attribute as well to avoid confusions.
+        //
+        delete memento.ports;
+
+        return memento;
+    },
+
+    /**
+     * @method
+     * Read all attributes from the serialized properties and transfer them into the shape.
+     *
+     * @param {Object} memento
+     */
+    setPersistentAttributes: function setPersistentAttributes(memento) {
+        this._super(memento);
+
+        if (typeof memento.maxFanOut !== "undefined") {
+            // Big bug in the past.
+            // I used Number.MAX_VALUE as maxFanOut which is 1.7976931348623157e+308
+            // parseInt creates "1" during the reading of the JSON - which is crap.
+            // BIG BIG BUG!!! my fault.
+            // Now check if the memento.maxFanOut is a number and take this without crappy parsing.
+            if (typeof memento.maxFanOut === "number") {
+                this.maxFanOut = memento.maxFanOut;
+            } else {
+                this.maxFanOut = Math.max(1, parseInt(memento.maxFanOut));
+            }
+        }
+        if (typeof memento.name !== "undefined") {
+            this.setName(memento.name);
+        }
+
+        return this;
     }
-
-    return null;
-  },
-
-  /**
-   * @method
-   * Called from the figure itself when any position changes happens. All listener
-   * will be informed.
-   * <br>
-   * DON'T fire this event if the Port is during a Drag&Drop operation. This can happen
-   * if we try to connect two ports
-   **/
-  fireEvent: function fireEvent(event, args) {
-    if (this.isInDragDrop === true && event !== "drag") {
-      return;
-    }
-
-    this._super(event, args);
-  },
-
-  /**
-   * @method
-   * Return an objects with all important attributes for XML or JSON serialization
-   *
-   * @return
-   */
-  getPersistentAttributes: function getPersistentAttributes() {
-    var memento = this._super();
-
-    memento.maxFanOut = this.maxFanOut;
-    memento.name = this.name;
-
-    // defined by the locator. Don't persist
-    //
-    delete memento.x;
-    delete memento.y;
-
-    // ports didn'T have children ports. In this case we
-    // delete this attribute as well to avoid confusions.
-    //
-    delete memento.ports;
-
-    return memento;
-  },
-
-  /**
-   * @method
-   * Read all attributes from the serialized properties and transfer them into the shape.
-   *
-   * @param {Object} memento
-   */
-  setPersistentAttributes: function setPersistentAttributes(memento) {
-    this._super(memento);
-
-    if (typeof memento.maxFanOut !== "undefined") {
-      // Big bug in the past.
-      // I used Number.MAX_VALUE as maxFanOut which is 1.7976931348623157e+308
-      // parseInt creates "1" during the reading of the JSON - which is crap.
-      // BIG BIG BUG!!! my fault.
-      // Now check if the memento.maxFanOut is a number and take this without crappy parsing.
-      if (typeof memento.maxFanOut === "number") {
-        this.maxFanOut = memento.maxFanOut;
-      } else {
-        this.maxFanOut = Math.max(1, parseInt(memento.maxFanOut));
-      }
-    }
-    if (typeof memento.name !== "undefined") {
-      this.setName(memento.name);
-    }
-
-    return this;
-  }
 });
 
 /**
@@ -13262,6 +13258,7 @@ _packages2.default.Port = _packages2.default.shape.basic.Circle.extend({
  *
  * @extend draw2d.shape.basic.Circle
  */
+
 /**
  * @class draw2d.Port
  * A port is an object that is used to establish a connection between a node and a {@link draw2d.Connection}. The port can
@@ -13274,33 +13271,33 @@ _packages2.default.Port = _packages2.default.shape.basic.Circle.extend({
 
 _packages2.default.Corona = _packages2.default.shape.basic.Circle.extend({
 
-  /**
-   * @constructor
-   * Creates a new Node element which are not assigned to any canvas.
-   *
-   */
-  init: function init() {
-    this._super();
-    this.setAlpha(0.3);
-    this.setBackgroundColor(new _packages2.default.util.Color(178, 225, 255));
-    this.setColor(new _packages2.default.util.Color(102, 182, 252));
-  },
+    /**
+     * @constructor
+     * Creates a new Node element which are not assigned to any canvas.
+     *
+     */
+    init: function init() {
+        this._super();
+        this.setAlpha(0.3);
+        this.setBackgroundColor(new _packages2.default.util.Color(178, 225, 255));
+        this.setColor(new _packages2.default.util.Color(102, 182, 252));
+    },
 
-  /**
-   * @method
-   * the the opacity of the element.
-   *
-   * @param {Number} percent
-   */
-  setAlpha: function setAlpha(percent) {
-    this._super(Math.min(0.3, percent));
-    this.setDeleteable(false);
-    this.setDraggable(false);
-    this.setResizeable(false);
-    this.setSelectable(false);
+    /**
+     * @method
+     * the the opacity of the element.
+     *
+     * @param {Number} percent
+     */
+    setAlpha: function setAlpha(percent) {
+        this._super(Math.min(0.3, percent));
+        this.setDeleteable(false);
+        this.setDraggable(false);
+        this.setResizeable(false);
+        this.setSelectable(false);
 
-    return this;
-  }
+        return this;
+    }
 });
 
 /***/ }),
@@ -14186,168 +14183,167 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 _packages2.default.Selection = Class.extend({
 
-    NAME: "draw2d.Selection",
+  NAME: "draw2d.Selection",
 
-    /**
-     * @constructor
-     * Creates a new figure element which are not assigned to any canvas.
-     *
-     */
-    init: function init() {
-        this.primary = null;
-        this.all = new _packages2.default.util.ArrayList();
-    },
+  /**
+   * @constructor
+   * Creates a new figure element which are not assigned to any canvas.
+   *
+   */
+  init: function init() {
+    this.primary = null;
+    this.all = new _packages2.default.util.ArrayList();
+  },
 
-    /**
-     * @method
-     * Reset the current selection
-     *
-     */
-    clear: function clear() {
-        this.primary = null;
-        this.all = new _packages2.default.util.ArrayList();
+  /**
+   * @method
+   * Reset the current selection
+   *
+   */
+  clear: function clear() {
+    this.primary = null;
+    this.all = new _packages2.default.util.ArrayList();
 
-        return this;
-    },
+    return this;
+  },
 
-    /**
-     * @method
-     * Return the primary selection. This can only one figure at once.
-     *
-     * @return {draw2d.Figure} the primary selected figure
-     */
-    getPrimary: function getPrimary() {
-        return this.primary;
-    },
+  /**
+   * @method
+   * Return the primary selection. This can only one figure at once.
+   *
+   * @return {draw2d.Figure} the primary selected figure
+   */
+  getPrimary: function getPrimary() {
+    return this.primary;
+  },
 
-    /**
-     * @method
-     * Set the primary selection.
-     *
-     * @param {draw2d.Figure} figure The new primary selection
-     */
-    setPrimary: function setPrimary(figure) {
-        this.primary = figure;
-        this.add(figure);
+  /**
+   * @method
+   * Set the primary selection.
+   *
+   * @param {draw2d.Figure} figure The new primary selection
+   */
+  setPrimary: function setPrimary(figure) {
+    this.primary = figure;
+    this.add(figure);
 
-        return this;
-    },
+    return this;
+  },
 
-    /**
-     * @method
-     * Remove the given figure from the selection (primary,all)
-     *
-     * @param {draw2d.Figure} figure
-     */
-    remove: function remove(figure) {
-        this.all.remove(figure);
-        if (this.primary === figure) {
-            this.primary = null;
-        }
-
-        return this;
-    },
-
-    /**
-     * @method
-     * Add a figure to the selection. No events are fired or update the selection handle. This method just
-     * add the figure to the internal management data structure.
-     *
-     * @param figure
-     * @private
-     */
-    add: function add(figure) {
-        if (figure !== null && !this.all.contains(figure)) {
-            this.all.add(figure);
-        }
-
-        return this;
-    },
-
-    /**
-     * @method
-     * return true if the given figure part of the selection.
-     *
-     * @param {draw2d.Figure} figure The figure to check
-     * @param {Boolean} [checkDescendant] Check if the figure provided by the argument is a descendant of the selection whether it is a direct child or nested more deeply.
-     *
-     * @since 2.2.0
-     * @return {Boolean}
-     */
-    contains: function contains(figure, checkDescendant) {
-        if (checkDescendant) {
-            for (var i = 0; i < this.all.getSize(); i++) {
-                var figureToCheck = this.all.get(i);
-                if (figureToCheck === figure || figureToCheck.contains(figure)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        return this.all.contains(figure);
-    },
-
-    /**
-     * @method
-     * Return the size of the selection
-     *
-     * @since 4.8.0
-     */
-    getSize: function getSize() {
-        return this.all.getSize();
-    },
-
-    /**
-     * @method
-     * Return the complete selection - including the primary selection.
-     *
-     * @param {Boolean} [expand] expand all StrongComposite and WeakComposite to get all figures. Didn't expand any SetFigures or LayoutFigures
-     * @return {draw2d.util.ArrayList}
-     *
-     */
-    getAll: function getAll(expand) {
-        if (expand === true) {
-            var result = new _packages2.default.util.ArrayList();
-            var addRecursive = function addRecursive(figures) {
-                result.addAll(figures, true);
-                figures.each(function (index, figure) {
-                    if (figure instanceof _packages2.default.shape.composite.StrongComposite) {
-                        addRecursive(figure.getAssignedFigures());
-                    }
-                });
-            };
-            addRecursive(this.all);
-
-            return result;
-        }
-
-        return this.all.clone();
-    },
-
-    /**
-     * @method
-     * Iterates over the current selection with <b>func</b> as callback handler.
-     *
-     * @param {Function} func the callback function to call for each element
-     * @param {Number} func.i index of the element in iteration
-     * @param {Object} func.value value of the element in iteration.
-     * @param {Boolean} [reverse] optional parameter. Iterate the collection reverse if it set to <b>true</b>
-     */
-    each: function each(func, reverse) {
-        this.all.each(func, reverse);
-
-        return this;
+  /**
+   * @method
+   * Remove the given figure from the selection (primary,all)
+   *
+   * @param {draw2d.Figure} figure
+   */
+  remove: function remove(figure) {
+    this.all.remove(figure);
+    if (this.primary === figure) {
+      this.primary = null;
     }
-});
-/**
- * @class draw2d.Selection
- *
- * Represents the current selection in the canvas. The selection element is a pure passive element which
- * manage/store the selection.
- *
- *
- * @author Andreas Herz
- */
+
+    return this;
+  },
+
+  /**
+   * @method
+   * Add a figure to the selection. No events are fired or update the selection handle. This method just
+   * add the figure to the internal management data structure.
+   *
+   * @param figure
+   * @private
+   */
+  add: function add(figure) {
+    if (figure !== null && !this.all.contains(figure)) {
+      this.all.add(figure);
+    }
+
+    return this;
+  },
+
+  /**
+   * @method
+   * return true if the given figure part of the selection.
+   *
+   * @param {draw2d.Figure} figure The figure to check
+   * @param {Boolean} [checkDescendant] Check if the figure provided by the argument is a descendant of the selection whether it is a direct child or nested more deeply.
+   *
+   * @since 2.2.0
+   * @return {Boolean}
+   */
+  contains: function contains(figure, checkDescendant) {
+    if (checkDescendant) {
+      for (var i = 0; i < this.all.getSize(); i++) {
+        var figureToCheck = this.all.get(i);
+        if (figureToCheck === figure || figureToCheck.contains(figure)) {
+          return true;
+        }
+      }
+      return false;
+    }
+    return this.all.contains(figure);
+  },
+
+  /**
+   * @method
+   * Return the size of the selection
+   *
+   * @since 4.8.0
+   */
+  getSize: function getSize() {
+    return this.all.getSize();
+  },
+
+  /**
+   * @method
+   * Return the complete selection - including the primary selection.
+   *
+   * @param {Boolean} [expand] expand all StrongComposite and WeakComposite to get all figures. Didn't expand any SetFigures or LayoutFigures
+   * @return {draw2d.util.ArrayList}
+   *
+   */
+  getAll: function getAll(expand) {
+    if (expand === true) {
+      var result = new _packages2.default.util.ArrayList();
+      var addRecursive = function addRecursive(figures) {
+        result.addAll(figures, true);
+        figures.each(function (index, figure) {
+          if (figure instanceof _packages2.default.shape.composite.StrongComposite) {
+            addRecursive(figure.getAssignedFigures());
+          }
+        });
+      };
+      addRecursive(this.all);
+
+      return result;
+    }
+
+    return this.all.clone();
+  },
+
+  /**
+   * @method
+   * Iterates over the current selection with <b>func</b> as callback handler.
+   *
+   * @param {Function} func the callback function to call for each element
+   * @param {Number} func.i index of the element in iteration
+   * @param {Object} func.value value of the element in iteration.
+   * @param {Boolean} [reverse] optional parameter. Iterate the collection reverse if it set to <b>true</b>
+   */
+  each: function each(func, reverse) {
+    this.all.each(func, reverse);
+
+    return this;
+  }
+}); /**
+     * @class draw2d.Selection
+     *
+     * Represents the current selection in the canvas. The selection element is a pure passive element which
+     * manage/store the selection.
+     *
+     *
+     * @author Andreas Herz
+     */
 
 /***/ }),
 
@@ -17601,20 +17597,10 @@ _packages2.default.command.CommandStack = Class.extend({
   /**
    * @method
    * Adds a listener to the command stack, which will be notified whenever a command has been processed on the stack.
-   * @deprecated use on/off to register events
+   *
    * @param {draw2d.command.CommandStackEventListener|Function} listener the listener to add.
    */
   addEventListener: function addEventListener(listener) {
-    return this.on("change", listener);
-  },
-  /**
-   * Adds a listener to the command stack, which will be notified whenever a command has been processed on the stack.
-   * @param event
-   * @param func
-   */
-  on: function on(event, listener) {
-    if (event !== "change") throw "only event of kind 'change' is supported";
-
     if (listener instanceof _packages2.default.command.CommandStackEventListener) {
       this.eventListeners.add(listener);
     } else if (typeof listener.stackChanged === "function") {
@@ -17635,9 +17621,6 @@ _packages2.default.command.CommandStack = Class.extend({
    * @param {draw2d.command.CommandStackEventListener} listener the listener to remove.
    */
   removeEventListener: function removeEventListener(listener) {
-    this.off("change", listener);
-  },
-  off: function off(event, listener) {
     var size = this.eventListeners.getSize();
     for (var i = 0; i < size; i++) {
       var entry = this.eventListeners.get(i);
@@ -28843,6 +28826,8 @@ _packages2.default.policy.canvas.BoundingboxSelectionPolicy = _packages2.default
    * @inheritdoc
    */
   select: function select(canvas, figure) {
+    var _this = this;
+
     if (canvas.getSelection().contains(figure)) {
       return; // nothing to to
     }
@@ -28858,12 +28843,11 @@ _packages2.default.policy.canvas.BoundingboxSelectionPolicy = _packages2.default
 
       // inform all selection listeners about the new selection.
       //
-      canvas.fireEvent("select", { figure: figure });
+      canvas.fireEvent("select", { figure: figure, selection: canvas.getSelection() });
     }
 
     // adding connections to the selection of the source and target port part of the current selection
     //
-    var _this = this;
     var selection = canvas.getSelection();
     canvas.getLines().each(function (i, line) {
       if (line instanceof _packages2.default.Connection) {
@@ -28905,9 +28889,9 @@ _packages2.default.policy.canvas.BoundingboxSelectionPolicy = _packages2.default
    * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
    */
   onMouseDown: function onMouseDown(canvas, x, y, shiftKey, ctrlKey) {
-    try {
-      var _this = this;
+    var _this2 = this;
 
+    try {
       this.x = x;
       this.y = y;
 
@@ -28963,7 +28947,7 @@ _packages2.default.policy.canvas.BoundingboxSelectionPolicy = _packages2.default
       if (shiftKey === false) {
         if (this.mouseDownElement !== null && this.mouseDownElement.isResizeHandle === false && !currentSelection.contains(this.mouseDownElement)) {
           currentSelection.each(function (i, figure) {
-            _this.unselect(canvas, figure);
+            _this2.unselect(canvas, figure);
           });
         }
       }
@@ -29009,7 +28993,7 @@ _packages2.default.policy.canvas.BoundingboxSelectionPolicy = _packages2.default
           if (figure instanceof _packages2.default.shape.basic.Line) {
             // no special handling
           } else if (canDragStart === false) {
-            _this.unselect(canvas, figure);
+            _this2.unselect(canvas, figure);
           }
         });
       }
@@ -29085,13 +29069,14 @@ _packages2.default.policy.canvas.BoundingboxSelectionPolicy = _packages2.default
    * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
    */
   onMouseUp: function onMouseUp(canvas, x, y, shiftKey, ctrlKey) {
+    var _this3 = this;
+
     try {
-      var _this = this;
       // delete the current selection if you have clicked in the empty
       // canvas.
       if (this.mouseDownElement === null) {
         canvas.getSelection().getAll().each(function (i, figure) {
-          _this.unselect(canvas, figure);
+          _this3.unselect(canvas, figure);
         });
       } else if (this.mouseDownElement instanceof _packages2.default.ResizeHandle || this.mouseDownElement instanceof _packages2.default.shape.basic.LineResizeHandle) {}
       // Do nothing
@@ -29104,7 +29089,7 @@ _packages2.default.policy.canvas.BoundingboxSelectionPolicy = _packages2.default
           var sel = canvas.getSelection().getAll();
           if (!sel.contains(this.mouseDownElement)) {
             canvas.getSelection().getAll().each(function (i, figure) {
-              _this.unselect(canvas, figure);
+              _this3.unselect(canvas, figure);
             });
           }
         }
@@ -29115,7 +29100,7 @@ _packages2.default.policy.canvas.BoundingboxSelectionPolicy = _packages2.default
         //
         var selectionRect = this.boundingBoxFigure1.getBoundingBox();
         canvas.getFigures().each(function (i, figure) {
-          if (figure.isSelectable() === true && _this.decision(figure.getBoundingBox(), selectionRect)) {
+          if (figure.isSelectable() === true && _this3.decision(figure.getBoundingBox(), selectionRect)) {
             var fakeDragX = 1;
             var fakeDragY = 1;
 
@@ -29127,7 +29112,7 @@ _packages2.default.policy.canvas.BoundingboxSelectionPolicy = _packages2.default
             }
             var canDragStart = figure.onDragStart(fakeDragX, fakeDragY, shiftKey, ctrlKey);
             if (canDragStart === true) {
-              _this.select(canvas, figure, false);
+              _this3.select(canvas, figure, false);
             }
           }
         });
@@ -30604,9 +30589,6 @@ _packages2.default.policy.canvas.SelectionPolicy = _packages2.default.policy.can
 
     // @since 6.1.42
     canvas.fireEvent("unselect", { figure: figure });
-
-    // deprecated
-    canvas.fireEvent("select", { figure: null });
   }
 });
 /**
@@ -30949,309 +30931,323 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 _packages2.default.policy.canvas.SingleSelectionPolicy = _packages2.default.policy.canvas.SelectionPolicy.extend({
 
-    NAME: "draw2d.policy.canvas.SingleSelectionPolicy",
+  NAME: "draw2d.policy.canvas.SingleSelectionPolicy",
 
-    /**
-     * @constructor
-     * Creates a new Router object
-     */
-    init: function init() {
-        this._super();
-        this.mouseMovedDuringMouseDown = false;
-        this.mouseDraggingElement = null;
-        this.mouseDownElement = null;
-    },
+  /**
+   * @constructor
+   * Creates a new Router object
+   */
+  init: function init() {
+    this._super();
+    this.mouseMovedDuringMouseDown = false;
+    this.mouseDraggingElement = null;
+    this.mouseDownElement = null;
+  },
 
-    /**
-     * @inheritdoc
-     */
-    select: function select(canvas, figure) {
-        if (canvas.getSelection().contains(figure)) {
-            return; // nothing to to
-        }
-
-        var oldSelection = canvas.getSelection().getPrimary();
-        if (canvas.getSelection().getPrimary() !== null) {
-            this.unselect(canvas, canvas.getSelection().getPrimary());
-        }
-
-        if (figure !== null) {
-            figure.select(true); // primary selection
-        }
-
-        canvas.getSelection().setPrimary(figure);
-
-        // inform all selection listeners about the new selection.
-        //
-        if (oldSelection !== figure) {
-            canvas.fireEvent("select", { figure: figure });
-        }
-    },
-
-    /**
-     * @method
-     *
-     * @param {draw2d.Canvas} canvas
-     * @param {Number} x the x-coordinate of the mouse down event
-     * @param {Number} y the y-coordinate of the mouse down event
-     * @param {Boolean} shiftKey true if the shift key has been pressed during this event
-     * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
-     */
-    onMouseDown: function onMouseDown(canvas, x, y, shiftKey, ctrlKey) {
-        this.mouseMovedDuringMouseDown = false;
-        var canDragStart = true;
-
-        // ignore ports since version 6.1.0. This is handled by the ConnectionCreatePolicy
-        //
-        var figure = canvas.getBestFigure(x, y);
-
-        // may the figure is assigned to a composite. In this case the composite can
-        // override the event receiver
-        while (figure !== null) {
-            var delegate = figure.getSelectionAdapter()();
-            if (delegate === figure) {
-                break;
-            }
-            figure = delegate;
-        }
-
-        // ignore ports since version 6.1.0. This is handled by the ConnectionCreatePolicy
-        //
-        if (figure instanceof _packages2.default.Port) {
-            return; // silently
-        }
-
-        if (figure !== null && figure.isDraggable()) {
-            canDragStart = figure.onDragStart(x - figure.getAbsoluteX(), y - figure.getAbsoluteY(), shiftKey, ctrlKey);
-            // Element send a veto about the drag&drop operation
-            this.mouseDraggingElement = canDragStart === false ? null : figure;
-        }
-
-        this.mouseDownElement = figure;
-        if (this.mouseDownElement !== null) {
-            this.mouseDownElement.fireEvent("mousedown", { x: x, y: y, shiftKey: shiftKey, ctrlKey: ctrlKey });
-        }
-
-        if (figure !== canvas.getSelection().getPrimary() && figure !== null && figure.isSelectable() === true) {
-            this.select(canvas, figure);
-
-            // it's a line
-            if (figure instanceof _packages2.default.shape.basic.Line) {
-                // you can move a line with Drag&Drop...but not a connection.
-                // A Connection is fixed linked with the corresponding ports.
-                //
-                if (!(figure instanceof _packages2.default.Connection)) {
-                    canvas.draggingLineCommand = figure.createCommand(new _packages2.default.command.CommandType(_packages2.default.command.CommandType.MOVE));
-                    if (canvas.draggingLineCommand !== null) {
-                        canvas.draggingLine = figure;
-                    }
-                }
-            } else if (canDragStart === false) {
-                figure.unselect();
-            }
-        }
-    },
-
-    /**
-     * @method
-     *
-     * @param {draw2d.Canvas} canvas
-     * @param {Number} dx The x diff between start of dragging and this event
-     * @param {Number} dy The y diff between start of dragging and this event
-     * @param {Number} dx2 The x diff since the last call of this dragging operation
-     * @param {Number} dy2 The y diff since the last call of this dragging operation
-     * @param {Boolean} shiftKey true if the shift key has been pressed during this event
-     * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
-     * @template
-     */
-    onMouseDrag: function onMouseDrag(canvas, dx, dy, dx2, dy2, shiftKey, ctrlKey) {
-        this.mouseMovedDuringMouseDown = true;
-        if (this.mouseDraggingElement !== null) {
-            // Can be a ResizeHandle or a normal Figure
-            //
-            var sel = canvas.getSelection();
-            if (!sel.contains(this.mouseDraggingElement)) {
-                this.mouseDraggingElement.onDrag(dx, dy, dx2, dy2, shiftKey, ctrlKey);
-            } else {
-                sel.each(function (i, figure) {
-                    figure.onDrag(dx, dy, dx2, dy2, shiftKey, ctrlKey);
-                });
-            }
-
-            var p = canvas.fromDocumentToCanvasCoordinate(canvas.mouseDownX + dx / canvas.zoomFactor, canvas.mouseDownY + dy / canvas.zoomFactor);
-            var target = canvas.getBestFigure(p.x, p.y, this.mouseDraggingElement);
-
-            if (target !== canvas.currentDropTarget) {
-                if (canvas.currentDropTarget !== null) {
-                    canvas.currentDropTarget.onDragLeave(this.mouseDraggingElement);
-                    canvas.currentDropTarget.fireEvent("dragLeave", { draggingElement: this.mouseDraggingElement });
-                    canvas.currentDropTarget = null;
-                }
-                if (target !== null) {
-                    canvas.currentDropTarget = target.delegateTarget(this.mouseDraggingElement);
-                    // inform all listener that the element has accept the dragEnter event
-                    //
-                    if (canvas.currentDropTarget !== null) {
-                        canvas.currentDropTarget.onDragEnter(this.mouseDraggingElement); // legacy
-                        canvas.currentDropTarget.fireEvent("dragEnter", { draggingElement: this.mouseDraggingElement });
-                    }
-                }
-            }
-        }
-        // Connection didn't support panning at the moment. There is no special reason for that. Just an interaction
-        // decision.
-        //
-        else if (this.mouseDownElement !== null && !(this.mouseDownElement instanceof _packages2.default.Connection)) {
-                if (this.mouseDownElement.panningDelegate !== null) {
-                    this.mouseDownElement.panningDelegate.fireEvent("panning", { dx: dx, dy: dy, dx2: dx2, dy2: dy2, shiftKey: shiftKey, ctrlKey: ctrlKey });
-                    this.mouseDownElement.panningDelegate.onPanning(dx, dy, dx2, dy2, shiftKey, ctrlKey);
-                } else {
-                    this.mouseDownElement.fireEvent("panning", { dx: dx, dy: dy, dx2: dx2, dy2: dy2, shiftKey: shiftKey, ctrlKey: ctrlKey });
-                    this.mouseDownElement.onPanning(dx, dy, dx2, dy2, shiftKey, ctrlKey);
-                }
-            }
-    },
-
-    /**
-     * @method
-     *
-     * @param {draw2d.Figure} figure the shape below the mouse or null
-     * @param {Number} x the x-coordinate of the mouse down event
-     * @param {Number} y the y-coordinate of the mouse down event
-     * @param {Boolean} shiftKey true if the shift key has been pressed during this event
-     * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
-     */
-    onMouseUp: function onMouseUp(canvas, x, y, shiftKey, ctrlKey) {
-        if (this.mouseDraggingElement !== null) {
-            var redrawConnection = new _packages2.default.util.ArrayList();
-            if (this.mouseDraggingElement instanceof _packages2.default.shape.node.Node) {
-                // TODO: don't add the connections with to check if a repaint is required
-                //       may a moved connection didn't have an intersection with the named lines.
-                //       in this case a redraw is useless
-                canvas.lineIntersections.each(function (i, inter) {
-                    if (!redrawConnection.contains(inter.line)) redrawConnection.add(inter.line);
-                    if (!redrawConnection.contains(inter.other)) redrawConnection.add(inter.other);
-                });
-            }
-
-            // start CommandStack transaction
-            canvas.getCommandStack().startTransaction();
-
-            var sel = canvas.getSelection().getAll();
-            if (!sel.contains(this.mouseDraggingElement)) {
-                this.mouseDraggingElement.onDragEnd(x, y, shiftKey, ctrlKey);
-            } else {
-                canvas.getSelection().getAll().each(function (i, figure) {
-                    figure.onDragEnd(x, y, shiftKey, ctrlKey);
-                });
-            }
-
-            if (canvas.currentDropTarget !== null && !this.mouseDraggingElement.isResizeHandle) {
-                this.mouseDraggingElement.onDrop(canvas.currentDropTarget, x, y, shiftKey, ctrlKey);
-                canvas.currentDropTarget.onDragLeave(this.mouseDraggingElement);
-                canvas.currentDropTarget.fireEvent("dragLeave", { draggingElement: this.mouseDraggingElement });
-                canvas.currentDropTarget.onCatch(this.mouseDraggingElement, x, y, shiftKey, ctrlKey);
-                canvas.currentDropTarget = null;
-            }
-
-            // end command stack trans
-            canvas.getCommandStack().commitTransaction();
-
-            if (this.mouseDraggingElement instanceof _packages2.default.shape.node.Node) {
-                canvas.lineIntersections.each(function (i, inter) {
-                    if (!redrawConnection.contains(inter.line)) redrawConnection.add(inter.line);
-                    if (!redrawConnection.contains(inter.other)) redrawConnection.add(inter.other);
-                });
-                redrawConnection.each(function (i, line) {
-                    line.svgPathString = null;
-                    line.repaint();
-                });
-            }
-
-            this.mouseDraggingElement = null;
-        }
-        // Connection didn't support panning at the moment. There is no special reason for that. Just an interaction
-        // decision.
-        //
-        else if (this.mouseDownElement !== null && !(this.mouseDownElement instanceof _packages2.default.Connection)) {
-                if (this.mouseDownElement.panningDelegate !== null) {
-                    this.mouseDownElement.panningDelegate.fireEvent("panningEnd");
-                    this.mouseDownElement.panningDelegate.onPanningEnd();
-                } else {
-                    this.mouseDownElement.fireEvent("panningEnd");
-                    this.mouseDownElement.onPanningEnd();
-                }
-            }
-
-        // Reset the current selection if the user click in the blank canvas.
-        // Don't reset the selection if the user pan the canvas
-        //
-        if (this.mouseDownElement === null && this.mouseMovedDuringMouseDown === false) {
-            this.select(canvas, null);
-        }
-
-        if (this.mouseDownElement !== null) {
-            this.mouseDownElement.fireEvent("mouseup", { x: x, y: y, shiftKey: shiftKey, ctrlKey: ctrlKey });
-        }
-
-        this.mouseDownElement = null;
-        this.mouseMovedDuringMouseDown = false;
-    },
-
-    /**
-     * @method
-     * Called by the canvas if the user click on a figure.
-     *
-     * @param {draw2d.Figure} the figure under the click event. Can be null
-     * @param {Number} mouseX the x coordinate of the mouse during the click event
-     * @param {Number} mouseY the y coordinate of the mouse during the click event
-     * @param {Boolean} shiftKey true if the shift key has been pressed during this event
-     * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
-     *
-     * @since 3.0.0
-     */
-    onClick: function onClick(figure, mouseX, mouseY, shiftKey, ctrlKey) {
-        if (figure !== null) {
-            figure.fireEvent("click", {
-                figure: figure,
-                x: mouseX,
-                y: mouseY,
-                relX: mouseX - figure.getAbsoluteX(),
-                relY: mouseY - figure.getAbsoluteY(),
-                shiftKey: shiftKey,
-                ctrlKey: ctrlKey });
-
-            figure.onClick();
-        }
-    },
-
-    /**
-     * @method
-     * Called by the canvas if the user double click on a figure.
-     *
-     * @param {draw2d.Figure} the figure under the double click event. Can be null
-     * @param {Number} mouseX the x coordinate of the mouse during the click event
-     * @param {Number} mouseY the y coordinate of the mouse during the click event
-     * @param {Boolean} shiftKey true if the shift key has been pressed during this event
-     * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
-     *
-     * @since 4.1.0
-     */
-    onDoubleClick: function onDoubleClick(figure, mouseX, mouseY, shiftKey, ctrlKey) {
-        if (figure !== null) {
-            figure.fireEvent("dblclick", { x: mouseX, y: mouseY, shiftKey: shiftKey, ctrlKey: ctrlKey });
-            figure.onDoubleClick();
-        }
+  /**
+   * @inheritdoc
+   */
+  select: function select(canvas, figure) {
+    if (canvas.getSelection().contains(figure)) {
+      return; // nothing to to
     }
 
-});
-/**
- * @class draw2d.policy.canvas.SingleSelectionPolicy
- *
- *
- * @author Andreas Herz
- * @extends draw2d.policy.canvas.SelectionPolicy
- */
+    var oldSelection = canvas.getSelection().getPrimary();
+    if (canvas.getSelection().getPrimary() !== null) {
+      this.unselect(canvas, canvas.getSelection().getPrimary());
+    }
+
+    if (figure !== null) {
+      figure.select(true); // primary selection
+    }
+
+    canvas.getSelection().setPrimary(figure);
+
+    // inform all selection listeners about the new selection.
+    //
+    if (oldSelection !== figure) {
+      canvas.fireEvent("select", { figure: figure, selection: canvas.getSelection() });
+    }
+  },
+
+  /**
+   * @method
+   *
+   * @param {draw2d.Canvas} canvas
+   * @param {Number} x the x-coordinate of the mouse down event
+   * @param {Number} y the y-coordinate of the mouse down event
+   * @param {Boolean} shiftKey true if the shift key has been pressed during this event
+   * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
+   */
+  onMouseDown: function onMouseDown(canvas, x, y, shiftKey, ctrlKey) {
+    this.mouseMovedDuringMouseDown = false;
+    var canDragStart = true;
+
+    // ignore ports since version 6.1.0. This is handled by the ConnectionCreatePolicy
+    //
+    var figure = canvas.getBestFigure(x, y);
+
+    // may the figure is assigned to a composite. In this case the composite can
+    // override the event receiver
+    while (figure !== null) {
+      var delegate = figure.getSelectionAdapter()();
+      if (delegate === figure) {
+        break;
+      }
+      figure = delegate;
+    }
+
+    // ignore ports since version 6.1.0. This is handled by the ConnectionCreatePolicy
+    //
+    if (figure instanceof _packages2.default.Port) {
+      return; // silently
+    }
+
+    if (figure !== null && figure.isDraggable()) {
+      canDragStart = figure.onDragStart(x - figure.getAbsoluteX(), y - figure.getAbsoluteY(), shiftKey, ctrlKey);
+      // Element send a veto about the drag&drop operation
+      this.mouseDraggingElement = canDragStart === false ? null : figure;
+    }
+
+    this.mouseDownElement = figure;
+    if (this.mouseDownElement !== null) {
+      this.mouseDownElement.fireEvent("mousedown", { x: x, y: y, shiftKey: shiftKey, ctrlKey: ctrlKey });
+    }
+
+    if (figure !== canvas.getSelection().getPrimary() && figure !== null && figure.isSelectable() === true) {
+      this.select(canvas, figure);
+
+      // it's a line
+      if (figure instanceof _packages2.default.shape.basic.Line) {
+        // you can move a line with Drag&Drop...but not a connection.
+        // A Connection is fixed linked with the corresponding ports.
+        //
+        if (!(figure instanceof _packages2.default.Connection)) {
+          canvas.draggingLineCommand = figure.createCommand(new _packages2.default.command.CommandType(_packages2.default.command.CommandType.MOVE));
+          if (canvas.draggingLineCommand !== null) {
+            canvas.draggingLine = figure;
+          }
+        }
+      } else if (canDragStart === false) {
+        figure.unselect();
+      }
+    }
+  },
+
+  /**
+   * @method
+   *
+   * @param {draw2d.Canvas} canvas
+   * @param {Number} dx The x diff between start of dragging and this event
+   * @param {Number} dy The y diff between start of dragging and this event
+   * @param {Number} dx2 The x diff since the last call of this dragging operation
+   * @param {Number} dy2 The y diff since the last call of this dragging operation
+   * @param {Boolean} shiftKey true if the shift key has been pressed during this event
+   * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
+   * @template
+   */
+  onMouseDrag: function onMouseDrag(canvas, dx, dy, dx2, dy2, shiftKey, ctrlKey) {
+    this.mouseMovedDuringMouseDown = true;
+    if (this.mouseDraggingElement !== null) {
+      // Can be a ResizeHandle or a normal Figure
+      //
+      var sel = canvas.getSelection();
+      if (!sel.contains(this.mouseDraggingElement)) {
+        this.mouseDraggingElement.onDrag(dx, dy, dx2, dy2, shiftKey, ctrlKey);
+      } else {
+        sel.each(function (i, figure) {
+          figure.onDrag(dx, dy, dx2, dy2, shiftKey, ctrlKey);
+        });
+      }
+
+      var p = canvas.fromDocumentToCanvasCoordinate(canvas.mouseDownX + dx / canvas.zoomFactor, canvas.mouseDownY + dy / canvas.zoomFactor);
+      var target = canvas.getBestFigure(p.x, p.y, this.mouseDraggingElement);
+
+      if (target !== canvas.currentDropTarget) {
+        if (canvas.currentDropTarget !== null) {
+          canvas.currentDropTarget.onDragLeave(this.mouseDraggingElement);
+          canvas.currentDropTarget.fireEvent("dragLeave", { draggingElement: this.mouseDraggingElement });
+          canvas.currentDropTarget = null;
+        }
+        if (target !== null) {
+          canvas.currentDropTarget = target.delegateTarget(this.mouseDraggingElement);
+          // inform all listener that the element has accept the dragEnter event
+          //
+          if (canvas.currentDropTarget !== null) {
+            canvas.currentDropTarget.onDragEnter(this.mouseDraggingElement); // legacy
+            canvas.currentDropTarget.fireEvent("dragEnter", { draggingElement: this.mouseDraggingElement });
+          }
+        }
+      }
+    }
+    // Connection didn't support panning at the moment. There is no special reason for that. Just an interaction
+    // decision.
+    //
+    else if (this.mouseDownElement !== null && !(this.mouseDownElement instanceof _packages2.default.Connection)) {
+        if (this.mouseDownElement.panningDelegate !== null) {
+          this.mouseDownElement.panningDelegate.fireEvent("panning", {
+            dx: dx,
+            dy: dy,
+            dx2: dx2,
+            dy2: dy2,
+            shiftKey: shiftKey,
+            ctrlKey: ctrlKey
+          });
+          this.mouseDownElement.panningDelegate.onPanning(dx, dy, dx2, dy2, shiftKey, ctrlKey);
+        } else {
+          this.mouseDownElement.fireEvent("panning", {
+            dx: dx,
+            dy: dy,
+            dx2: dx2,
+            dy2: dy2,
+            shiftKey: shiftKey,
+            ctrlKey: ctrlKey
+          });
+          this.mouseDownElement.onPanning(dx, dy, dx2, dy2, shiftKey, ctrlKey);
+        }
+      }
+  },
+
+  /**
+   * @method
+   *
+   * @param {draw2d.Figure} figure the shape below the mouse or null
+   * @param {Number} x the x-coordinate of the mouse down event
+   * @param {Number} y the y-coordinate of the mouse down event
+   * @param {Boolean} shiftKey true if the shift key has been pressed during this event
+   * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
+   */
+  onMouseUp: function onMouseUp(canvas, x, y, shiftKey, ctrlKey) {
+    if (this.mouseDraggingElement !== null) {
+      var redrawConnection = new _packages2.default.util.ArrayList();
+      if (this.mouseDraggingElement instanceof _packages2.default.shape.node.Node) {
+        // TODO: don't add the connections with to check if a repaint is required
+        //       may a moved connection didn't have an intersection with the named lines.
+        //       in this case a redraw is useless
+        canvas.lineIntersections.each(function (i, inter) {
+          if (!redrawConnection.contains(inter.line)) redrawConnection.add(inter.line);
+          if (!redrawConnection.contains(inter.other)) redrawConnection.add(inter.other);
+        });
+      }
+
+      // start CommandStack transaction
+      canvas.getCommandStack().startTransaction();
+
+      var sel = canvas.getSelection().getAll();
+      if (!sel.contains(this.mouseDraggingElement)) {
+        this.mouseDraggingElement.onDragEnd(x, y, shiftKey, ctrlKey);
+      } else {
+        canvas.getSelection().getAll().each(function (i, figure) {
+          figure.onDragEnd(x, y, shiftKey, ctrlKey);
+        });
+      }
+
+      if (canvas.currentDropTarget !== null && !this.mouseDraggingElement.isResizeHandle) {
+        this.mouseDraggingElement.onDrop(canvas.currentDropTarget, x, y, shiftKey, ctrlKey);
+        canvas.currentDropTarget.onDragLeave(this.mouseDraggingElement);
+        canvas.currentDropTarget.fireEvent("dragLeave", { draggingElement: this.mouseDraggingElement });
+        canvas.currentDropTarget.onCatch(this.mouseDraggingElement, x, y, shiftKey, ctrlKey);
+        canvas.currentDropTarget = null;
+      }
+
+      // end command stack trans
+      canvas.getCommandStack().commitTransaction();
+
+      if (this.mouseDraggingElement instanceof _packages2.default.shape.node.Node) {
+        canvas.lineIntersections.each(function (i, inter) {
+          if (!redrawConnection.contains(inter.line)) redrawConnection.add(inter.line);
+          if (!redrawConnection.contains(inter.other)) redrawConnection.add(inter.other);
+        });
+        redrawConnection.each(function (i, line) {
+          line.svgPathString = null;
+          line.repaint();
+        });
+      }
+
+      this.mouseDraggingElement = null;
+    }
+    // Connection didn't support panning at the moment. There is no special reason for that. Just an interaction
+    // decision.
+    //
+    else if (this.mouseDownElement !== null && !(this.mouseDownElement instanceof _packages2.default.Connection)) {
+        if (this.mouseDownElement.panningDelegate !== null) {
+          this.mouseDownElement.panningDelegate.fireEvent("panningEnd");
+          this.mouseDownElement.panningDelegate.onPanningEnd();
+        } else {
+          this.mouseDownElement.fireEvent("panningEnd");
+          this.mouseDownElement.onPanningEnd();
+        }
+      }
+
+    // Reset the current selection if the user click in the blank canvas.
+    // Don't reset the selection if the user pan the canvas
+    //
+    if (this.mouseDownElement === null && this.mouseMovedDuringMouseDown === false) {
+      this.select(canvas, null);
+    }
+
+    if (this.mouseDownElement !== null) {
+      this.mouseDownElement.fireEvent("mouseup", { x: x, y: y, shiftKey: shiftKey, ctrlKey: ctrlKey });
+    }
+
+    this.mouseDownElement = null;
+    this.mouseMovedDuringMouseDown = false;
+  },
+
+  /**
+   * @method
+   * Called by the canvas if the user click on a figure.
+   *
+   * @param {draw2d.Figure} the figure under the click event. Can be null
+   * @param {Number} mouseX the x coordinate of the mouse during the click event
+   * @param {Number} mouseY the y coordinate of the mouse during the click event
+   * @param {Boolean} shiftKey true if the shift key has been pressed during this event
+   * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
+   *
+   * @since 3.0.0
+   */
+  onClick: function onClick(figure, mouseX, mouseY, shiftKey, ctrlKey) {
+    if (figure !== null) {
+      figure.fireEvent("click", {
+        figure: figure,
+        x: mouseX,
+        y: mouseY,
+        relX: mouseX - figure.getAbsoluteX(),
+        relY: mouseY - figure.getAbsoluteY(),
+        shiftKey: shiftKey,
+        ctrlKey: ctrlKey
+      });
+
+      figure.onClick();
+    }
+  },
+
+  /**
+   * @method
+   * Called by the canvas if the user double click on a figure.
+   *
+   * @param {draw2d.Figure} the figure under the double click event. Can be null
+   * @param {Number} mouseX the x coordinate of the mouse during the click event
+   * @param {Number} mouseY the y coordinate of the mouse during the click event
+   * @param {Boolean} shiftKey true if the shift key has been pressed during this event
+   * @param {Boolean} ctrlKey true if the ctrl key has been pressed during the event
+   *
+   * @since 4.1.0
+   */
+  onDoubleClick: function onDoubleClick(figure, mouseX, mouseY, shiftKey, ctrlKey) {
+    if (figure !== null) {
+      figure.fireEvent("dblclick", { x: mouseX, y: mouseY, shiftKey: shiftKey, ctrlKey: ctrlKey });
+      figure.onDoubleClick();
+    }
+  }
+
+}); /**
+     * @class draw2d.policy.canvas.SingleSelectionPolicy
+     *
+     *
+     * @author Andreas Herz
+     * @extends draw2d.policy.canvas.SelectionPolicy
+     */
 
 /***/ }),
 

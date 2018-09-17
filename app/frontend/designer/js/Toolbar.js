@@ -19,7 +19,6 @@ export default class Toolbar {
     this.view = view
     this.app = app
 
-
     // register this class as event listener for the canvas
     // CommandStack. This is required to update the state of
     // the Undo/Redo Buttons.
@@ -30,6 +29,7 @@ export default class Toolbar {
     // of the Delete Button
     //
     view.on("select", this.onSelectionChanged.bind(this))
+    view.on("unselect", this.onSelectionChanged.bind(this))
 
     this.fileName = null
 
@@ -161,7 +161,7 @@ export default class Toolbar {
     })
 
     Mousetrap.bindGlobal(["R", "r"], () => {
-      $('.policyRectangleToolPolicy1').click()
+      $('.policyRectangleToolPolicy').click()
       return false
     })
     Mousetrap.bindGlobal(["C", "c"], () => {
@@ -181,9 +181,9 @@ export default class Toolbar {
       return false
     })
 
-    this.unionButton = $('<img data-toggle="tooltip" class="icon" title="Polygon Union <span class=\'highlight\'> [ U ]</span>" src="./images/toolbar_geo_union.svg"/>')
+    this.unionButton = $('<img id="toolUnion" data-toggle="tooltip" class="disabled icon" title="Polygon Union <span class=\'highlight\'> [ U ]</span>" src="./images/toolbar_geo_union.svg"/>')
     buttonGroup.append(this.unionButton)
-    this.unionButton.on("click", () => {
+    $("#toolbar").delegate("#toolUnion:not(.disabled)", "click", () => {
       let selection = this.view.getSelection().getAll()
       let p = new GeoUnionToolPolicy()
       p.executed=()=>{ this.selectButton.click()}
@@ -195,9 +195,9 @@ export default class Toolbar {
       return false
     })
 
-    this.differenceButton = $('<img data-toggle="tooltip" class="icon" title="Polygon Difference <span class=\'highlight\'> [ D ]</span>" src="./images/toolbar_geo_subtract.svg"/>')
+    this.differenceButton = $('<img id="toolDifference" data-toggle="tooltip" class="disabled icon" title="Polygon Difference <span class=\'highlight\'> [ D ]</span>" src="./images/toolbar_geo_subtract.svg"/>')
     buttonGroup.append(this.differenceButton)
-    this.differenceButton.on("click", () => {
+    $("#toolbar").delegate("#toolDifference:not(.disabled)", "click", () => {
       this.view.installEditPolicy(new GeoDifferenceToolPolicy())
     })
     Mousetrap.bindGlobal(["D", "d"], () => {
@@ -205,9 +205,9 @@ export default class Toolbar {
       return false
     })
 
-    this.intersectionButton = $('<img data-toggle="tooltip" class="icon" title="Polygon Intersection <span class=\'highlight\'> [ I ]</span>" src="./images/toolbar_geo_intersect.svg"/>')
+    this.intersectionButton = $('<img id="toolIntersection" data-toggle="tooltip" class="disabled icon" title="Polygon Intersection <span class=\'highlight\'> [ I ]</span>" src="./images/toolbar_geo_intersect.svg"/>')
     buttonGroup.append(this.intersectionButton)
-    this.intersectionButton.on("click", () => {
+    $("#toolbar").delegate("#toolIntersection:not(.disabled)", "click", () => {
       this.view.installEditPolicy(new GeoIntersectionToolPolicy())
     })
     Mousetrap.bindGlobal(["I", "i"], () => {
@@ -262,11 +262,26 @@ export default class Toolbar {
    * @param {draw2d.Figure} figure
    */
   onSelectionChanged(emitter, event) {
+    console.log(event)
     if (event.figure === null) {
       $("#editDelete").addClass("disabled")
     }
     else {
       $("#editDelete").removeClass("disabled")
+    }
+
+    // available in BoundBox selection event
+    if(event.selection){
+      if(event.selection.getSize()>=2) {
+        $("#toolUnion").removeClass("disabled")
+        $("#toolDifference").removeClass("disabled")
+        $("#toolIntersection").removeClass("disabled")
+      }
+      else{
+        $("#toolUnion").addClass("disabled")
+        $("#toolDifference").addClass("disabled")
+        $("#toolIntersection").addClass("disabled")
+      }
     }
   }
 
