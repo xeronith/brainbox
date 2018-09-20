@@ -1,3 +1,6 @@
+import MarkdownDialog from '../dialog/MarkdownDialog'
+import conf from '../Configuration'
+
 export default draw2d.SetFigure.extend({
 
   NAME: "CircuitFigure",
@@ -16,7 +19,7 @@ export default draw2d.SetFigure.extend({
     })
 
     this.on("mouseenter", () => {
-      this.tooltipTimer = window.setTimeout( () =>{
+      this.tooltipTimer = window.setTimeout(() => {
         this.tooltipTimer = -1
         this.showTooltip()
       }, 500)
@@ -28,6 +31,13 @@ export default draw2d.SetFigure.extend({
 
     this.on("move", () => {
       this.positionTooltip()
+    })
+
+    this.on("dblclick", (emitter, event) => {
+      let pathToMD = conf.shapes.url + this.NAME + ".md"
+      $.get(pathToMD, function (content) {
+        new MarkdownDialog().show(content)
+      })
     })
   },
 
@@ -56,7 +66,7 @@ export default draw2d.SetFigure.extend({
   },
 
   showTooltip: function () {
-    this.tooltip = $('<div class="draw2d_tooltip">'+this.NAME+'</div>')
+    this.tooltip = $('<div class="draw2d_tooltip">' + this.NAME + '</div>')
       .appendTo('body')
       .hide()
       .fadeIn(1000)
@@ -149,7 +159,7 @@ export default draw2d.SetFigure.extend({
   },
 
 
-  getRequiredHardware: function(){
+  getRequiredHardware: function () {
     return {
       raspi: false,
       arduino: false

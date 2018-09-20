@@ -2985,6 +2985,17 @@ $.fn.extend({
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+
+var _MarkdownDialog = __webpack_require__(/*! ../dialog/MarkdownDialog */ "./app/frontend/circuit/js/dialog/MarkdownDialog.js");
+
+var _MarkdownDialog2 = _interopRequireDefault(_MarkdownDialog);
+
+var _Configuration = __webpack_require__(/*! ../Configuration */ "./app/frontend/circuit/js/Configuration.js");
+
+var _Configuration2 = _interopRequireDefault(_Configuration);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 exports.default = draw2d.SetFigure.extend({
 
   NAME: "CircuitFigure",
@@ -3017,6 +3028,13 @@ exports.default = draw2d.SetFigure.extend({
 
     this.on("move", function () {
       _this.positionTooltip();
+    });
+
+    this.on("dblclick", function (emitter, event) {
+      var pathToMD = _Configuration2.default.shapes.url + _this.NAME + ".md";
+      $.get(pathToMD, function (content) {
+        new _MarkdownDialog2.default().show(content);
+      });
     });
   },
 
@@ -3204,7 +3222,7 @@ exports.default = draw2d.SetFigure.extend({
     }, this));
   }
 });
-module.exports = exports["default"];
+module.exports = exports['default'];
 
 /***/ }),
 
