@@ -138,7 +138,6 @@ class Application {
     switch (tutorial) {
       case "pairWebUSB":
         $("#leftTabStrip .editor").click()
-          console.log("dddddd")
         this._load("tutorial_pairWebUSB.brain").then(()=>{
           checkElement("#paletteElementsScroll").then( ()=>{
             let anno = new Anno([

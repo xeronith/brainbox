@@ -373,6 +373,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = {
   fileSuffix: ".shape",
+  serverless: false,
   backend: {
     file: {
       list: "/backend/shape/list",
@@ -795,6 +796,10 @@ var _FigureTest = __webpack_require__(/*! ./dialog/FigureTest */ "../../app/fron
 
 var _FigureTest2 = _interopRequireDefault(_FigureTest);
 
+var _Configuration = __webpack_require__(/*! ./Configuration */ "../../app/frontend/designer/js/Configuration.js");
+
+var _Configuration2 = _interopRequireDefault(_Configuration);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -822,31 +827,34 @@ var Toolbar = function () {
     view.on("unselect", this.onSelectionChanged.bind(this));
 
     this.fileName = null;
+    var buttonGroup = null;
 
-    var buttonGroup = $("<div id='fileOperationGroup' class='group'></div>");
-    this.html.append(buttonGroup);
+    if (_Configuration2.default.serverless === false) {
+      buttonGroup = $("<div id='fileOperationGroup' class='group'></div>");
+      this.html.append(buttonGroup);
 
-    this.openButton = $('<img  id="fileOpen" data-toggle="tooltip" title="Load File <span class=\'highlight\'> [ Ctrl+O ]</span>" class="icon" src="./images/toolbar_download.svg"></img>');
-    buttonGroup.append(this.openButton);
-    this.openButton.on("click", function () {
-      _this.openButton.tooltip("hide");
-      app.fileOpen();
-    });
-    Mousetrap.bindGlobal("ctrl+o", function () {
-      _this.openButton.click();
-      return false;
-    });
+      this.openButton = $('<img  id="fileOpen" data-toggle="tooltip" title="Load File <span class=\'highlight\'> [ Ctrl+O ]</span>" class="icon" src="./images/toolbar_download.svg"></img>');
+      buttonGroup.append(this.openButton);
+      this.openButton.on("click", function () {
+        _this.openButton.tooltip("hide");
+        app.fileOpen();
+      });
+      Mousetrap.bindGlobal("ctrl+o", function () {
+        _this.openButton.click();
+        return false;
+      });
 
-    this.saveButton = $('<img id="fileSave" data-toggle="tooltip" title="Save File <span class=\'highlight\'> [ Ctrl+S ]</span>" class="icon" src="./images/toolbar_upload.svg"/>');
-    buttonGroup.append(this.saveButton);
-    this.saveButton.on("click", function () {
-      _this.saveButton.tooltip("hide");
-      app.fileSave();
-    });
-    Mousetrap.bindGlobal("ctrl+s", function (event) {
-      _this.saveButton.click();
-      return false;
-    });
+      this.saveButton = $('<img id="fileSave" data-toggle="tooltip" title="Save File <span class=\'highlight\'> [ Ctrl+S ]</span>" class="icon" src="./images/toolbar_upload.svg"/>');
+      buttonGroup.append(this.saveButton);
+      this.saveButton.on("click", function () {
+        _this.saveButton.tooltip("hide");
+        app.fileSave();
+      });
+      Mousetrap.bindGlobal("ctrl+s", function (event) {
+        _this.saveButton.click();
+        return false;
+      });
+    }
 
     // Inject the UNDO Button and the callbacks
     //
@@ -1051,7 +1059,6 @@ var Toolbar = function () {
   _createClass(Toolbar, [{
     key: "onSelectionChanged",
     value: function onSelectionChanged(emitter, event) {
-      console.log(event);
       if (event.figure === null) {
         $("#editDelete").addClass("disabled");
       } else {
@@ -5463,6 +5470,7 @@ if (!jQuery.browser) {
 }
 
 $(window).load(function () {
+
   // export all required classes for deserialize JSON with "eval"
   // "eval" code didn't sees imported class or code
   //
@@ -5476,8 +5484,7 @@ $(window).load(function () {
   // (fake event from the socket.io mock )
   //
   socket.on("serverless", function () {
-    console.log("running in serverless mode");
-    $("#fileOperationGroup").remove();
+    _Configuration2.default.serverless = true;
     _Configuration2.default.backend.file.get = function (file) {
       return "./shapes/" + file;
     };

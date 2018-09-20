@@ -52,6 +52,7 @@ if (!jQuery.browser) {
 import Application from "./Application"
 
 $(window).load(function () {
+
   // export all required classes for deserialize JSON with "eval"
   // "eval" code didn't sees imported class or code
   //
@@ -66,8 +67,7 @@ $(window).load(function () {
   // (fake event from the socket.io mock )
   //
   socket.on("serverless", () => {
-    console.log("running in serverless mode")
-    $("#fileOperationGroup").remove();
+    conf.serverless =true
     conf.backend.file.get = file => `./shapes/${file}`
   });
 

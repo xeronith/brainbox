@@ -315,7 +315,6 @@ var Application = function () {
       switch (tutorial) {
         case "pairWebUSB":
           $("#leftTabStrip .editor").click();
-          console.log("dddddd");
           this._load("tutorial_pairWebUSB.brain").then(function () {
             checkElement("#paletteElementsScroll").then(function () {
               var anno = new Anno([{
@@ -3258,7 +3257,6 @@ exports.default = draw2d.Connection.extend({
     // since version 3.5.6
     //
     this.on("dragEnter", function (emitter, event) {
-      console.log("dragEnter");
       _this.attr({
         outlineStroke: 2,
         outlineColor: "#30ff30"

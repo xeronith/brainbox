@@ -1,5 +1,6 @@
 export default {
   fileSuffix: ".shape",
+  serverless: false,
   backend: {
     file: {
       list: "/backend/shape/list",

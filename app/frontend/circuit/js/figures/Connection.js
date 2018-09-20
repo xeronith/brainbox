@@ -11,7 +11,6 @@ export default draw2d.Connection.extend({
     // since version 3.5.6
     //
     this.on("dragEnter", (emitter, event)=>{
-      console.log("dragEnter")
       this.attr({
         outlineStroke:2,
         outlineColor:"#30ff30"

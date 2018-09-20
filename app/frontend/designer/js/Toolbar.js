@@ -11,6 +11,7 @@ import GeoDifferenceToolPolicy from "./policy/GeoDifferenceToolPolicy"
 import FigureCodeEdit from "./dialog/FigureCodeEdit"
 import FigureMarkdownEdit from "./dialog/FigureMarkdownEdit"
 import FigureTest from "./dialog/FigureTest"
+import conf from "./Configuration"
 
 export default class Toolbar {
 
@@ -32,31 +33,34 @@ export default class Toolbar {
     view.on("unselect", this.onSelectionChanged.bind(this))
 
     this.fileName = null
+    let buttonGroup = null
 
-    let buttonGroup = $("<div id='fileOperationGroup' class='group'></div>")
-    this.html.append(buttonGroup)
+    if (conf.serverless === false) {
+      buttonGroup = $("<div id='fileOperationGroup' class='group'></div>")
+      this.html.append(buttonGroup)
 
-    this.openButton = $('<img  id="fileOpen" data-toggle="tooltip" title="Load File <span class=\'highlight\'> [ Ctrl+O ]</span>" class="icon" src="./images/toolbar_download.svg"></img>')
-    buttonGroup.append(this.openButton)
-    this.openButton.on("click", () => {
-      this.openButton.tooltip("hide")
-      app.fileOpen()
-    })
-    Mousetrap.bindGlobal("ctrl+o", () => {
-      this.openButton.click()
-      return false
-    })
+      this.openButton = $('<img  id="fileOpen" data-toggle="tooltip" title="Load File <span class=\'highlight\'> [ Ctrl+O ]</span>" class="icon" src="./images/toolbar_download.svg"></img>')
+      buttonGroup.append(this.openButton)
+      this.openButton.on("click", () => {
+        this.openButton.tooltip("hide")
+        app.fileOpen()
+      })
+      Mousetrap.bindGlobal("ctrl+o", () => {
+        this.openButton.click()
+        return false
+      })
 
-    this.saveButton = $('<img id="fileSave" data-toggle="tooltip" title="Save File <span class=\'highlight\'> [ Ctrl+S ]</span>" class="icon" src="./images/toolbar_upload.svg"/>')
-    buttonGroup.append(this.saveButton)
-    this.saveButton.on("click", () => {
-      this.saveButton.tooltip("hide")
-      app.fileSave()
-    })
-    Mousetrap.bindGlobal("ctrl+s", (event) => {
-      this.saveButton.click()
-      return false
-    })
+      this.saveButton = $('<img id="fileSave" data-toggle="tooltip" title="Save File <span class=\'highlight\'> [ Ctrl+S ]</span>" class="icon" src="./images/toolbar_upload.svg"/>')
+      buttonGroup.append(this.saveButton)
+      this.saveButton.on("click", () => {
+        this.saveButton.tooltip("hide")
+        app.fileSave()
+      })
+      Mousetrap.bindGlobal("ctrl+s", (event) => {
+        this.saveButton.click()
+        return false
+      })
+    }
 
 
     // Inject the UNDO Button and the callbacks
@@ -65,7 +69,7 @@ export default class Toolbar {
     this.html.append(buttonGroup)
     this.undoButton = $('<img id="editUndo" data-toggle="tooltip" title="Undo <span class=\'highlight\'> [ Ctrl+Z ]</span>" class="icon disabled"  src="./images/toolbar_undo.svg"/>')
     buttonGroup.append(this.undoButton)
-    $("#toolbar").delegate("#editUndo:not(.disabled)", "click",  () => {
+    $("#toolbar").delegate("#editUndo:not(.disabled)", "click", () => {
       this.view.getCommandStack().undo()
     })
     Mousetrap.bindGlobal("ctrl+z", () => {
@@ -90,7 +94,7 @@ export default class Toolbar {
     //
     this.deleteButton = $('<img  id="editDelete" data-toggle="tooltip" title="Delete <span class=\'highlight\'> [ Del ]</span>" class="icon disabled" src="./images/toolbar_delete.svg"/>')
     buttonGroup.append(this.deleteButton)
-    $("#toolbar").delegate("#editDelete:not(.disabled)", "click",function () {
+    $("#toolbar").delegate("#editDelete:not(.disabled)", "click", function () {
       view.getCommandStack().startTransaction(draw2d.Configuration.i18n.command.deleteShape)
       view.getSelection().each(function (index, figure) {
         let cmd = figure.createCommand(new draw2d.command.CommandType(draw2d.command.CommandType.DELETE))
@@ -135,28 +139,38 @@ export default class Toolbar {
     buttonGroup.append(this.shapeButton)
 
     $(".policyRectangleToolPolicy").on("click", () => {
-      let p =new RectangleToolPolicy()
-      p.executed=()=>{ this.selectButton.click()}
+      let p = new RectangleToolPolicy()
+      p.executed = () => {
+        this.selectButton.click()
+      }
       this.view.installEditPolicy(p)
     })
     $(".policyCircleToolPolicy").on("click", () => {
-      let p =new CircleToolPolicy()
-      p.executed=()=>{ this.selectButton.click()}
+      let p = new CircleToolPolicy()
+      p.executed = () => {
+        this.selectButton.click()
+      }
       this.view.installEditPolicy(p)
     })
     $(".policyLineToolPolicy").on("click", () => {
-      let p =new LineToolPolicy()
-      p.executed=()=>{ this.selectButton.click()}
+      let p = new LineToolPolicy()
+      p.executed = () => {
+        this.selectButton.click()
+      }
       this.view.installEditPolicy(p)
     })
     $(".policyTextToolPolicy").on("click", () => {
-      let p =new TextToolPolicy()
-      p.executed=()=>{ this.selectButton.click()}
+      let p = new TextToolPolicy()
+      p.executed = () => {
+        this.selectButton.click()
+      }
       this.view.installEditPolicy(p)
     })
     $(".policyPortToolPolicy").on("click", () => {
-      let p =new PortToolPolicy()
-      p.executed=()=>{ this.selectButton.click()}
+      let p = new PortToolPolicy()
+      p.executed = () => {
+        this.selectButton.click()
+      }
       this.view.installEditPolicy(p)
     })
 
@@ -186,7 +200,9 @@ export default class Toolbar {
     $("#toolbar").delegate("#toolUnion:not(.disabled)", "click", () => {
       let selection = this.view.getSelection().getAll()
       let p = new GeoUnionToolPolicy()
-      p.executed=()=>{ this.selectButton.click()}
+      p.executed = () => {
+        this.selectButton.click()
+      }
       this.view.installEditPolicy(p)
       p.execute(this.view, selection)
     })
@@ -262,7 +278,6 @@ export default class Toolbar {
    * @param {draw2d.Figure} figure
    */
   onSelectionChanged(emitter, event) {
-    console.log(event)
     if (event.figure === null) {
       $("#editDelete").addClass("disabled")
     }
@@ -271,13 +286,13 @@ export default class Toolbar {
     }
 
     // available in BoundBox selection event
-    if(event.selection){
-      if(event.selection.getSize()>=2) {
+    if (event.selection) {
+      if (event.selection.getSize() >= 2) {
         $("#toolUnion").removeClass("disabled")
         $("#toolDifference").removeClass("disabled")
         $("#toolIntersection").removeClass("disabled")
       }
-      else{
+      else {
         $("#toolUnion").addClass("disabled")
         $("#toolDifference").addClass("disabled")
         $("#toolIntersection").addClass("disabled")
