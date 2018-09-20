@@ -24,9 +24,8 @@ export default class FileOpen {
    */
   show(view) {
     $('#githubFileSelectDialog').modal('show')
-    this.fetchPathContent(storage.currentDir, view)
+    this.fetchPathContent("", view)
   }
-
 
   fetchPathContent(newPath, view) {
     storage.getFiles(newPath).then((files) => {

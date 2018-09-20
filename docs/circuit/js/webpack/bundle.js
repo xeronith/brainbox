@@ -2622,7 +2622,7 @@ var FileOpen = function () {
     key: "show",
     value: function show(view) {
       $('#githubFileSelectDialog').modal('show');
-      this.fetchPathContent(_BackendStorage2.default.currentDir, view);
+      this.fetchPathContent("", view);
     }
   }, {
     key: "fetchPathContent",
