@@ -48,7 +48,7 @@ import conf from './Configuration'
 $(window).load(function () {
   socket = io(
   {
-    path: '/circuit/socket.io'
+    path: '/socket.io'
   })
 
   // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages

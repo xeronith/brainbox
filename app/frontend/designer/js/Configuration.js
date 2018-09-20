@@ -3,7 +3,7 @@ export default {
   backend: {
     file: {
       list: "/backend/shape/list",
-      get: "/backend/shape/get",
+      get:  file=>`../backend/shape/get?filePath=${file}`,
       save:"/backend/shape/save"
     }
   }

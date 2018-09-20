@@ -3030,7 +3030,7 @@ exports.default = draw2d.SetFigure.extend({
       _this.positionTooltip();
     });
 
-    this.on("dblclick", function (emitter, event) {
+    this.on("dblclick", function () {
       var pathToMD = _Configuration2.default.shapes.url + _this.NAME + ".md";
       $.get(pathToMD, function (content) {
         new _MarkdownDialog2.default().show(content);
@@ -4433,7 +4433,7 @@ if (!jQuery.browser) {
 
 $(window).load(function () {
   socket = io({
-    path: '/circuit/socket.io'
+    path: '/socket.io'
   });
 
   // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages

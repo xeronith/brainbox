@@ -33,7 +33,7 @@ export default draw2d.SetFigure.extend({
       this.positionTooltip()
     })
 
-    this.on("dblclick", (emitter, event) => {
+    this.on("dblclick", () => {
       let pathToMD = conf.shapes.url + this.NAME + ".md"
       $.get(pathToMD, function (content) {
         new MarkdownDialog().show(content)

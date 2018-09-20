@@ -2,6 +2,7 @@
 import "../less/index.less"
 import "font-awesome/css/font-awesome.css"
 import global from "./global"
+import conf from "./Configuration"
 
 //require('webpack-jquery-ui/css');  //ommit, if you don't want to load basic css theme
 
@@ -56,6 +57,23 @@ $(window).load(function () {
   //
   for(var k in global) window[k]=global[k];
 
-  console.log("window loaded. Init application")
-  app = shape_designer.app = new Application()
+  socket = io(
+    {
+      path: '/socket.io'
+    })
+
+  // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
+  // (fake event from the socket.io mock )
+  //
+  socket.on("serverless", () => {
+    console.log("running in serverless mode")
+    $("#fileOperationGroup").remove();
+    conf.backend.file.get = file => `./shapes/${file}`
+  });
+
+  socket.on("connect", () => {
+    app = shape_designer.app = new Application()
+  });
+
+
 })

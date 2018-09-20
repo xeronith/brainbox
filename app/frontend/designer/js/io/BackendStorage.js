@@ -33,6 +33,11 @@ export default class BackendStorage{
           path
         }
       }).then( (response)=>{
+        // happens in "serverless" mode on the gh-pages/docs installation
+        //
+        if (typeof response === "string")
+          response = JSON.parse(response)
+
         let files = response.files
         // sort the result
         // Directories are always on top
@@ -76,22 +81,22 @@ export default class BackendStorage{
    * @returns {*}
    */
   loadFile(fileName){
-    console.log(fileName)
     return $.ajax({
-      url: conf.backend.file.get,
+      url: conf.backend.file.get(fileName),
       xhrFields: {
         withCredentials: true
-      },
-      data: {
-        filePath: fileName
       }
     })
       .fail(function(error) {
         console.log(arguments)
       })
       .then((response)=>{
-      console.log()
-      if(response.draw2d)
+        // happens in "serverless" mode on the gh-pages/docs installation
+        //
+        if (typeof response === "string")
+          response = JSON.parse(response)
+
+        if(response.draw2d)
         return response.draw2d
       return response
     })

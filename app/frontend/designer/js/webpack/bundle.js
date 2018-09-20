@@ -376,7 +376,9 @@ exports.default = {
   backend: {
     file: {
       list: "/backend/shape/list",
-      get: "/backend/shape/get",
+      get: function get(file) {
+        return "../backend/shape/get?filePath=" + file;
+      },
       save: "/backend/shape/save"
     }
   }
@@ -821,10 +823,10 @@ var Toolbar = function () {
 
     this.fileName = null;
 
-    var buttonGroup = $("<div class='group'></div>");
+    var buttonGroup = $("<div id='fileOperationGroup' class='group'></div>");
     this.html.append(buttonGroup);
 
-    this.openButton = $('<img  data-toggle="tooltip" title="Load File <span class=\'highlight\'> [ Ctrl+O ]</span>" class="icon" src="./images/toolbar_download.svg"></img>');
+    this.openButton = $('<img  id="fileOpen" data-toggle="tooltip" title="Load File <span class=\'highlight\'> [ Ctrl+O ]</span>" class="icon" src="./images/toolbar_download.svg"></img>');
     buttonGroup.append(this.openButton);
     this.openButton.on("click", function () {
       _this.openButton.tooltip("hide");
@@ -835,7 +837,7 @@ var Toolbar = function () {
       return false;
     });
 
-    this.saveButton = $('<img data-toggle="tooltip" title="Save File <span class=\'highlight\'> [ Ctrl+S ]</span>" class="icon" src="./images/toolbar_upload.svg"/>');
+    this.saveButton = $('<img id="fileSave" data-toggle="tooltip" title="Save File <span class=\'highlight\'> [ Ctrl+S ]</span>" class="icon" src="./images/toolbar_upload.svg"/>');
     buttonGroup.append(this.saveButton);
     this.saveButton.on("click", function () {
       _this.saveButton.tooltip("hide");
@@ -5413,6 +5415,10 @@ var _global = __webpack_require__(/*! ./global */ "./app/frontend/designer/js/gl
 
 var _global2 = _interopRequireDefault(_global);
 
+var _Configuration = __webpack_require__(/*! ./Configuration */ "./app/frontend/designer/js/Configuration.js");
+
+var _Configuration2 = _interopRequireDefault(_Configuration);
+
 __webpack_require__(/*! ./figure/index */ "./app/frontend/designer/js/figure/index.js");
 
 __webpack_require__(/*! ./filter/index */ "./app/frontend/designer/js/filter/index.js");
@@ -5462,8 +5468,24 @@ $(window).load(function () {
   //
   for (var k in _global2.default) {
     window[k] = _global2.default[k];
-  }console.log("window loaded. Init application");
-  app = shape_designer.app = new _Application2.default();
+  }socket = io({
+    path: '/socket.io'
+  });
+
+  // remove the fileOpen/Save stuff if we run in a "serverless" mode. e.g. on gh-pages
+  // (fake event from the socket.io mock )
+  //
+  socket.on("serverless", function () {
+    console.log("running in serverless mode");
+    $("#fileOperationGroup").remove();
+    _Configuration2.default.backend.file.get = function (file) {
+      return "./shapes/" + file;
+    };
+  });
+
+  socket.on("connect", function () {
+    app = shape_designer.app = new _Application2.default();
+  });
 });
 
 /***/ }),
@@ -5517,6 +5539,10 @@ var BackendStorage = function () {
           path: path
         }
       }).then(function (response) {
+        // happens in "serverless" mode on the gh-pages/docs installation
+        //
+        if (typeof response === "string") response = JSON.parse(response);
+
         var files = response.files;
         // sort the result
         // Directories are always on top
@@ -5561,19 +5587,18 @@ var BackendStorage = function () {
   }, {
     key: "loadFile",
     value: function loadFile(fileName) {
-      console.log(fileName);
       return $.ajax({
-        url: _Configuration2.default.backend.file.get,
+        url: _Configuration2.default.backend.file.get(fileName),
         xhrFields: {
           withCredentials: true
-        },
-        data: {
-          filePath: fileName
         }
       }).fail(function (error) {
         console.log(arguments);
       }).then(function (response) {
-        console.log();
+        // happens in "serverless" mode on the gh-pages/docs installation
+        //
+        if (typeof response === "string") response = JSON.parse(response);
+
         if (response.draw2d) return response.draw2d;
         return response;
       });

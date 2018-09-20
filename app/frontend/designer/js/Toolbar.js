@@ -33,10 +33,10 @@ export default class Toolbar {
 
     this.fileName = null
 
-    let buttonGroup = $("<div class='group'></div>")
+    let buttonGroup = $("<div id='fileOperationGroup' class='group'></div>")
     this.html.append(buttonGroup)
 
-    this.openButton = $('<img  data-toggle="tooltip" title="Load File <span class=\'highlight\'> [ Ctrl+O ]</span>" class="icon" src="./images/toolbar_download.svg"></img>')
+    this.openButton = $('<img  id="fileOpen" data-toggle="tooltip" title="Load File <span class=\'highlight\'> [ Ctrl+O ]</span>" class="icon" src="./images/toolbar_download.svg"></img>')
     buttonGroup.append(this.openButton)
     this.openButton.on("click", () => {
       this.openButton.tooltip("hide")
@@ -47,7 +47,7 @@ export default class Toolbar {
       return false
     })
 
-    this.saveButton = $('<img data-toggle="tooltip" title="Save File <span class=\'highlight\'> [ Ctrl+S ]</span>" class="icon" src="./images/toolbar_upload.svg"/>')
+    this.saveButton = $('<img id="fileSave" data-toggle="tooltip" title="Save File <span class=\'highlight\'> [ Ctrl+S ]</span>" class="icon" src="./images/toolbar_upload.svg"/>')
     buttonGroup.append(this.saveButton)
     this.saveButton.on("click", () => {
       this.saveButton.tooltip("hide")

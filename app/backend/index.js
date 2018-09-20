@@ -11,7 +11,7 @@ const bodyParser = require('body-parser');
 const glob = require("glob");
 
 
-const io = require('./src/comm/websocket').connect(http, { path: '/circuit/socket.io'});
+const io = require('./src/comm/websocket').connect(http, { path: '/socket.io'});
 const mqtt = require('./src/comm/hive-mqtt').connect(io, "freegroup/brainbox");
 const raspi = require("./src/comm/raspi").connect(io);
 
