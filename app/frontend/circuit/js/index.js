@@ -68,6 +68,8 @@ $(window).load(function () {
     conf.backend.file.image =  ()=> `../brain/img`
   });
 
+  let global = require("./global")
+  for(let k in global) window[k]=global[k];
 
   // we must load the "shape/index.js" in the global scope.
   $.getScript(conf.shapes.url+"index.js",function(){
@@ -75,11 +77,16 @@ $(window).load(function () {
     // export all required classes for deserialize JSON with "eval"
     // "eval" code didn't sees imported class or code
     //
-    let global = require("./global")
-    for(let k in global) window[k]=global[k];
     app = require("./Application")
     require("./hardware").init(socket)
     inlineSVG.init()
+  }).fail(function(){
+    if(arguments[0].readyState==0){
+      //script failed to load
+    }else{
+      //script loaded but failed to parse
+      alert(arguments[2].toString());
+    }
   });
 
 });

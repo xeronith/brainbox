@@ -3,6 +3,7 @@ import ConnectionSelectionFeedbackPolicy from "./ConnectionSelectionFeedbackPoli
 import DecoratedInputPort from "./figures/DecoratedInputPort"
 import Connection from "./figures/Connection"
 import ProbeFigure from "./figures/ProbeFigure"
+import CircuitFigure from "./figures/CircuitFigure"
 import ConnectionRouter from "./ConnectionRouter"
 import Raft from "./figures/Raft"
 import Mousetrap from "mousetrap"
@@ -22,5 +23,6 @@ export default {
   Mousetrap,
   inlineSVG,
   LabelInplaceEditor,
-  ConnectionRouter
+  ConnectionRouter,
+  CircuitFigure
 }

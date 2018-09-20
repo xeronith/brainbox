@@ -2972,6 +2972,242 @@ $.fn.extend({
 
 /***/ }),
 
+/***/ "../../app/frontend/circuit/js/figures/CircuitFigure.js":
+/*!****************************************************************************************************!*\
+  !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/circuit/js/figures/CircuitFigure.js ***!
+  \****************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = draw2d.SetFigure.extend({
+
+  NAME: "CircuitFigure",
+
+  init: function init(attr, setter, getter) {
+    var _this = this;
+
+    this.tooltip = null;
+    this.tooltipTimer = -1;
+
+    this._super(attr, setter, getter);
+
+    this.persistPorts = false;
+    this.zoomCallback = $.proxy(this.positionTooltip, this);
+
+    this.on("dragstart", function () {
+      _this.hideTooltip(true);
+    });
+
+    this.on("mouseenter", function () {
+      _this.tooltipTimer = window.setTimeout(function () {
+        _this.tooltipTimer = -1;
+        _this.showTooltip();
+      }, 500);
+    });
+
+    this.on("mouseleave", function () {
+      _this.hideTooltip();
+    });
+
+    this.on("move", function () {
+      _this.positionTooltip();
+    });
+  },
+
+  setCanvas: function setCanvas(canvas) {
+    if (this.canvas !== null) this.canvas.off(this.zoomCallback);
+    this._super(canvas);
+    if (this.canvas !== null) this.canvas.on("zoom", this.zoomCallback);
+  },
+
+  hideTooltip: function hideTooltip(fast) {
+    if (this.tooltipTimer !== -1) {
+      window.clearTimeout(this.tooltipTimer);
+      this.tooltipTimer = -1;
+    } else if (this.tooltip !== null) {
+      if (fast) {
+        this.tooltip.remove();
+      } else {
+        this.tooltip.fadeOut(500, function () {
+          $(this).remove();
+        });
+      }
+      this.tooltip = null;
+    }
+  },
+
+  showTooltip: function showTooltip() {
+    this.tooltip = $('<div class="draw2d_tooltip">' + this.NAME + '</div>').appendTo('body').hide().fadeIn(1000);
+    this.positionTooltip();
+  },
+
+  positionTooltip: function positionTooltip() {
+    if (this.tooltip === null) {
+      return;
+    }
+
+    var width = this.tooltip.outerWidth(true);
+    var pos = this.canvas.fromCanvasToDocumentCoordinate(this.getAbsoluteX() + this.getWidth() / 2 - width / 2 + 8, this.getAbsoluteY() + this.getHeight() + 10);
+
+    this.tooltip.css({ 'top': pos.y, 'left': pos.x });
+  },
+
+  applyAlpha: function applyAlpha() {},
+
+  layerGet: function layerGet(name, attributes) {
+    if (this.svgNodes === null) return null;
+
+    var result = null;
+    this.svgNodes.some(function (shape) {
+      if (shape.data("name") === name) {
+        result = shape;
+      }
+      return result !== null;
+    });
+
+    return result;
+  },
+
+  layerAttr: function layerAttr(name, attributes) {
+    if (this.svgNodes === null) return;
+
+    this.svgNodes.forEach(function (shape) {
+      if (shape.data("name") === name) {
+        shape.attr(attributes);
+      }
+    });
+  },
+
+  layerShow: function layerShow(name, flag, duration) {
+    if (this.svgNodes === null) return;
+
+    if (duration) {
+      this.svgNodes.forEach(function (node) {
+        if (node.data("name") === name) {
+          if (flag) {
+            node.attr({ opacity: 0 }).show().animate({ opacity: 1 }, duration);
+          } else {
+            node.animate({ opacity: 0 }, duration, function () {
+              this.hide();
+            });
+          }
+        }
+      });
+    } else {
+      this.svgNodes.forEach(function (node) {
+        if (node.data("name") === name) {
+          if (flag) {
+            node.show();
+          } else {
+            node.hide();
+          }
+        }
+      });
+    }
+  },
+
+  calculate: function calculate() {},
+
+  onStart: function onStart() {},
+
+  onStop: function onStop() {},
+
+  getParameterSettings: function getParameterSettings() {
+    return [];
+  },
+
+  getRequiredHardware: function getRequiredHardware() {
+    return {
+      raspi: false,
+      arduino: false
+    };
+  },
+
+  onDrop: function onDrop(dropTarget, x, y, shiftKey, ctrlKey) {
+    // Activate a "smart insert" If the user drop this figure on connection
+    //
+    /*
+    if (dropTarget instanceof draw2d.Connection) {
+      let additionalConnection = dropTarget.getCanvas().createConnection()
+      let oldSource = dropTarget.getSource()
+      let oldTarget = dropTarget.getTarget()
+      if (oldSource instanceof draw2d.InputPort) {
+        oldSource = dropTarget.getTarget()
+        oldTarget = dropTarget.getSource()
+      }
+       let stack = this.getCanvas().getCommandStack()
+      let cmd = new draw2d.command.CommandReconnect(dropTarget)
+      cmd.setNewPorts(oldSource, this.getInputPort(0))
+      stack.execute(cmd)
+       cmd = new draw2d.command.CommandConnect(oldTarget, this.getOutputPort(0))
+      cmd.setConnection(additionalConnection)
+      stack.execute(cmd)
+    }
+    */
+  },
+
+  /**
+   * @method
+   * Return an objects with all important attributes for XML or JSON serialization
+   *
+   * @returns {Object}
+   */
+  getPersistentAttributes: function getPersistentAttributes() {
+    var memento = this._super();
+
+    // add all decorations to the memento
+    //
+    memento.labels = [];
+    this.children.each(function (i, e) {
+      var labelJSON = e.figure.getPersistentAttributes();
+      labelJSON.locator = e.locator.NAME;
+      memento.labels.push(labelJSON);
+    });
+
+    return memento;
+  },
+
+  /**
+   * @method
+   * Read all attributes from the serialized properties and transfer them into the shape.
+   *
+   * @param {Object} memento
+   * @returns
+   */
+  setPersistentAttributes: function setPersistentAttributes(memento) {
+    this._super(memento);
+
+    // remove all decorations created in the constructor of this element
+    //
+    this.resetChildren();
+
+    // and add all children of the JSON document.
+    //
+    $.each(memento.labels, $.proxy(function (i, json) {
+      // create the figure stored in the JSON
+      var figure = eval("new " + json.type + "()");
+
+      // apply all attributes
+      figure.attr(json);
+
+      // instantiate the locator
+      var locator = eval("new " + json.locator + "()");
+
+      // add the new figure as child to this figure
+      this.add(figure, locator);
+    }, this));
+  }
+});
+module.exports = exports["default"];
+
+/***/ }),
+
 /***/ "../../app/frontend/circuit/js/figures/Connection.js":
 /*!*************************************************************************************************!*\
   !*** /Users/d023280/Documents/workspace/brainbox/app/frontend/circuit/js/figures/Connection.js ***!
@@ -3841,6 +4077,10 @@ var _ProbeFigure = __webpack_require__(/*! ./figures/ProbeFigure */ "../../app/f
 
 var _ProbeFigure2 = _interopRequireDefault(_ProbeFigure);
 
+var _CircuitFigure = __webpack_require__(/*! ./figures/CircuitFigure */ "../../app/frontend/circuit/js/figures/CircuitFigure.js");
+
+var _CircuitFigure2 = _interopRequireDefault(_CircuitFigure);
+
 var _ConnectionRouter = __webpack_require__(/*! ./ConnectionRouter */ "../../app/frontend/circuit/js/ConnectionRouter.js");
 
 var _ConnectionRouter2 = _interopRequireDefault(_ConnectionRouter);
@@ -3881,7 +4121,8 @@ exports.default = {
   Mousetrap: _mousetrap2.default,
   inlineSVG: _inlineSVG2.default,
   LabelInplaceEditor: _LabelInplaceEditor2.default,
-  ConnectionRouter: _ConnectionRouter2.default
+  ConnectionRouter: _ConnectionRouter2.default,
+  CircuitFigure: _CircuitFigure2.default
 };
 module.exports = exports["default"];
 
@@ -4200,18 +4441,25 @@ $(window).load(function () {
     };
   });
 
-  // we must load the "shape/index.js" in the global scope.
+  var global = __webpack_require__(/*! ./global */ "../../app/frontend/circuit/js/global.js");
+  for (var k in global) {
+    window[k] = global[k];
+  } // we must load the "shape/index.js" in the global scope.
   $.getScript(_Configuration2.default.shapes.url + "index.js", function () {
 
     // export all required classes for deserialize JSON with "eval"
     // "eval" code didn't sees imported class or code
     //
-    var global = __webpack_require__(/*! ./global */ "../../app/frontend/circuit/js/global.js");
-    for (var k in global) {
-      window[k] = global[k];
-    }app = __webpack_require__(/*! ./Application */ "../../app/frontend/circuit/js/Application.js");
+    app = __webpack_require__(/*! ./Application */ "../../app/frontend/circuit/js/Application.js");
     __webpack_require__(/*! ./hardware */ "../../app/frontend/circuit/js/hardware.js").init(socket);
     inlineSVG.init();
+  }).fail(function () {
+    if (arguments[0].readyState == 0) {
+      //script failed to load
+    } else {
+      //script loaded but failed to parse
+      alert(arguments[2].toString());
+    }
   });
 });
 

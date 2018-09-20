@@ -7,7 +7,7 @@ that can display digits from 0-9.
 The most common configuration has an array of eight LEDs arranged 
 in a special
 pattern to display these digits. They are laid out as a squared-off 
-figure  8 . Every LED is assigned a name from `a` to `h` and is 
+figure  8 . Every LED is assigned a name from `a` to `h` and is 
 identified by its name. Seven LEDs `a` to `g` are used to display 
 the numerals while eighth LED `h` is used to display the dot/decimal.
   

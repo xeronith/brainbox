@@ -4,12 +4,14 @@
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_gate_AND = draw2d.SetFigure.extend({
+var draw2d_circuit_gate_AND = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_gate_AND",
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+
      this._super( $.extend({stroke:0, bgColor:null, width:30,height:40},attr), setter, getter);
      var port;
      // input01
@@ -30,7 +32,6 @@ var draw2d_circuit_gate_AND = draw2d.SetFigure.extend({
      port.setBackgroundColor("#1C9BAB");
      port.setName("out");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
    },
 
    createShapeElement : function()
@@ -62,143 +63,7 @@ var draw2d_circuit_gate_AND = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**

@@ -4,15 +4,13 @@
 // created with http://www.draw2d.org
 //
 //
-var Arduino = draw2d.SetFigure.extend({
+var Arduino = CircuitFigure.extend({
 
    NAME: "Arduino",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
-     this.tooltip = null;
-     this.tooltipTimer = -1;
 
      this._super( $.extend({stroke:0, bgColor:null, width:104.51462500000162,height:240.2584999999999},attr), setter, getter);
      var port;
@@ -88,83 +86,7 @@ var Arduino = draw2d.SetFigure.extend({
      port.setBackgroundColor("#1C9BAB");
      port.setName("port_d13");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
-     this.zoomCallback = $.proxy(this.positionTooltip,this);
-
-     this.on("dragstart", function() {
-      _this.hideTooltip(true)
-    })
-
-    this.on("mouseenter", function() {
-      _this.tooltipTimer = window.setTimeout(function() {
-        _this.tooltipTimer = -1
-        _this.showTooltip()
-      }, 500)
-    })
-
-    this.on("mouseleave", function(){
-      _this.hideTooltip()
-    })
-
-    this.on("move", function(){
-      _this.positionTooltip()
-    })
-
    },
-
-    setCanvas: function(canvas)
-    {
-        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
-        this._super(canvas);
-        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
-    },
-
-    hideTooltip: function (fast) {
-      if (this.tooltipTimer !== -1) {
-        window.clearTimeout(this.tooltipTimer)
-        this.tooltipTimer = -1
-      }
-      else if(this.tooltip!==null){
-        if(fast) {
-          this.tooltip.remove()
-        }
-        else{
-          this.tooltip.fadeOut(500, function () {
-            $(this).remove()
-          })
-        }
-        this.tooltip = null
-      }
-    },
-
-    showTooltip:function()
-    {
-        this.tooltip= $('<div class="draw2d_tooltip">Arduino</div>')
-            .appendTo('body')
-            .hide()
-            .fadeIn(1000);
-        this.positionTooltip();
-    },
-
-
-    positionTooltip: function()
-    {
-        if( this.tooltip===null){
-            return;
-        }
-
-        var width =  this.tooltip.outerWidth(true);
-        var pos = this.canvas.fromCanvasToDocumentCoordinate(
-                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
-                this.getAbsoluteY()+this.getHeight() + 10);
-
-        // remove the scrolling part from the tooltip because the tooltip is placed
-        // inside the scrolling container
-        pos.x +=this.canvas.getScrollLeft();
-        pos.y +=this.canvas.getScrollTop();
-
-        this.tooltip.css({'top': pos.y, 'left': pos.x});
-    },
 
    createShapeElement : function()
    {
@@ -460,166 +382,7 @@ var Arduino = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    getRequiredHardware: function(){
-        return {
-           raspi: false,
-           arduino: false
-        }
-    },
-
-    onDrop:function(dropTarget, x, y, shiftKey, ctrlKey)
-    {
-    	// Activate a "smart insert" If the user drop this figure on connection
-    	//
-    	if(dropTarget instanceof draw2d.Connection){
-    		var additionalConnection = dropTarget.getCanvas().createConnection();
-        var oldSource = dropTarget.getSource();
-        var oldTarget = dropTarget.getTarget();
-        if(oldSource instanceof draw2d.InputPort){
-          oldSource = dropTarget.getTarget();
-          oldTarget = dropTarget.getSource();
-        }
-
-        var stack = this.getCanvas().getCommandStack();
-        var cmd = new draw2d.command.CommandReconnect(dropTarget);
-        cmd.setNewPorts(oldSource, this.getInputPort(0));
-        stack.execute(cmd);
-
-        cmd = new draw2d.command.CommandConnect(oldTarget,this.getOutputPort(0));
-        cmd.setConnection(additionalConnection);
-        stack.execute(cmd);
-    	}
-    },
-
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -741,15 +504,13 @@ Arduino = Arduino.extend({
 // created with http://www.draw2d.org
 //
 //
-var ArduinoLed = draw2d.SetFigure.extend({
+var ArduinoLed = CircuitFigure.extend({
 
    NAME: "ArduinoLed",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
-     this.tooltip = null;
-     this.tooltipTimer = -1;
 
      this._super( $.extend({stroke:0, bgColor:null, width:30,height:32},attr), setter, getter);
      var port;
@@ -759,83 +520,7 @@ var ArduinoLed = draw2d.SetFigure.extend({
      port.setBackgroundColor("#1C9BAB");
      port.setName("Port");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
-     this.zoomCallback = $.proxy(this.positionTooltip,this);
-
-     this.on("dragstart", function() {
-      _this.hideTooltip(true)
-    })
-
-    this.on("mouseenter", function() {
-      _this.tooltipTimer = window.setTimeout(function() {
-        _this.tooltipTimer = -1
-        _this.showTooltip()
-      }, 500)
-    })
-
-    this.on("mouseleave", function(){
-      _this.hideTooltip()
-    })
-
-    this.on("move", function(){
-      _this.positionTooltip()
-    })
-
    },
-
-    setCanvas: function(canvas)
-    {
-        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
-        this._super(canvas);
-        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
-    },
-
-    hideTooltip: function (fast) {
-      if (this.tooltipTimer !== -1) {
-        window.clearTimeout(this.tooltipTimer)
-        this.tooltipTimer = -1
-      }
-      else if(this.tooltip!==null){
-        if(fast) {
-          this.tooltip.remove()
-        }
-        else{
-          this.tooltip.fadeOut(500, function () {
-            $(this).remove()
-          })
-        }
-        this.tooltip = null
-      }
-    },
-
-    showTooltip:function()
-    {
-        this.tooltip= $('<div class="draw2d_tooltip">Arduino Led</div>')
-            .appendTo('body')
-            .hide()
-            .fadeIn(1000);
-        this.positionTooltip();
-    },
-
-
-    positionTooltip: function()
-    {
-        if( this.tooltip===null){
-            return;
-        }
-
-        var width =  this.tooltip.outerWidth(true);
-        var pos = this.canvas.fromCanvasToDocumentCoordinate(
-                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
-                this.getAbsoluteY()+this.getHeight() + 10);
-
-        // remove the scrolling part from the tooltip because the tooltip is placed
-        // inside the scrolling container
-        pos.x +=this.canvas.getScrollLeft();
-        pos.y +=this.canvas.getScrollTop();
-
-        this.tooltip.css({'top': pos.y, 'left': pos.x});
-    },
 
    createShapeElement : function()
    {
@@ -881,159 +566,7 @@ var ArduinoLed = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    onDrop:function(dropTarget, x, y, shiftKey, ctrlKey)
-    {
-    	// Activate a "smart insert" If the user drop this figure on connection
-    	//
-    	if(dropTarget instanceof draw2d.Connection){
-    		var additionalConnection = dropTarget.getCanvas().createConnection();
-        var oldSource = dropTarget.getSource();
-        var oldTarget = dropTarget.getTarget();
-        if(oldSource instanceof draw2d.InputPort){
-          oldSource = dropTarget.getTarget();
-          oldTarget = dropTarget.getSource();
-        }
-
-        var stack = this.getCanvas().getCommandStack();
-        var cmd = new draw2d.command.CommandReconnect(dropTarget);
-        cmd.setNewPorts(oldSource, this.getInputPort(0));
-        stack.execute(cmd);
-
-        cmd = new draw2d.command.CommandConnect(oldTarget,this.getOutputPort(0));
-        cmd.setConnection(additionalConnection);
-        stack.execute(cmd);
-    	}
-    },
-
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -1092,15 +625,13 @@ ArduinoLed = ArduinoLed.extend({
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_alu_FullAdder = draw2d.SetFigure.extend({
+var draw2d_circuit_alu_FullAdder = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_alu_FullAdder",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
-     this.tooltip = null;
-     this.tooltipTimer = -1;
 
      this._super( $.extend({stroke:0, bgColor:null, width:70,height:77.53125},attr), setter, getter);
      var port;
@@ -1134,83 +665,7 @@ var draw2d_circuit_alu_FullAdder = draw2d.SetFigure.extend({
      port.setBackgroundColor("#37B1DE");
      port.setName("input_c");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
-     this.zoomCallback = $.proxy(this.positionTooltip,this);
-
-     this.on("dragstart", function() {
-      _this.hideTooltip(true)
-    })
-
-    this.on("mouseenter", function() {
-      _this.tooltipTimer = window.setTimeout(function() {
-        _this.tooltipTimer = -1
-        _this.showTooltip()
-      }, 500)
-    })
-
-    this.on("mouseleave", function(){
-      _this.hideTooltip()
-    })
-
-    this.on("move", function(){
-      _this.positionTooltip()
-    })
-
    },
-
-    setCanvas: function(canvas)
-    {
-        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
-        this._super(canvas);
-        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
-    },
-
-    hideTooltip: function (fast) {
-      if (this.tooltipTimer !== -1) {
-        window.clearTimeout(this.tooltipTimer)
-        this.tooltipTimer = -1
-      }
-      else if(this.tooltip!==null){
-        if(fast) {
-          this.tooltip.remove()
-        }
-        else{
-          this.tooltip.fadeOut(500, function () {
-            $(this).remove()
-          })
-        }
-        this.tooltip = null
-      }
-    },
-
-    showTooltip:function()
-    {
-        this.tooltip= $('<div class="draw2d_tooltip">FullAdder</div>')
-            .appendTo('body')
-            .hide()
-            .fadeIn(1000);
-        this.positionTooltip();
-    },
-
-
-    positionTooltip: function()
-    {
-        if( this.tooltip===null){
-            return;
-        }
-
-        var width =  this.tooltip.outerWidth(true);
-        var pos = this.canvas.fromCanvasToDocumentCoordinate(
-                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
-                this.getAbsoluteY()+this.getHeight() + 10);
-
-        // remove the scrolling part from the tooltip because the tooltip is placed
-        // inside the scrolling container
-        pos.x +=this.canvas.getScrollLeft();
-        pos.y +=this.canvas.getScrollTop();
-
-        this.tooltip.css({'top': pos.y, 'left': pos.x});
-    },
 
    createShapeElement : function()
    {
@@ -1276,143 +731,7 @@ var draw2d_circuit_alu_FullAdder = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -1475,12 +794,14 @@ draw2d_circuit_alu_FullAdder = draw2d_circuit_alu_FullAdder.extend({
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_alu_FullAdder4Bit = draw2d.SetFigure.extend({
+var draw2d_circuit_alu_FullAdder4Bit = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_alu_FullAdder4Bit",
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+
      this._super( $.extend({stroke:0, bgColor:null, width:80,height:200},attr), setter, getter);
      var port;
      // output_as
@@ -1567,7 +888,6 @@ var draw2d_circuit_alu_FullAdder4Bit = draw2d.SetFigure.extend({
      port.setBackgroundColor("#37B1DE");
      port.setName("output_ds");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
    },
 
    createShapeElement : function()
@@ -1684,143 +1004,7 @@ var draw2d_circuit_alu_FullAdder4Bit = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -1925,15 +1109,13 @@ draw2d_circuit_alu_FullAdder4Bit = draw2d_circuit_alu_FullAdder4Bit.extend({
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_alu_HalfAdder = draw2d.SetFigure.extend({
+var draw2d_circuit_alu_HalfAdder = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_alu_HalfAdder",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
-     this.tooltip = null;
-     this.tooltipTimer = -1;
 
      this._super( $.extend({stroke:0, bgColor:null, width:70,height:65},attr), setter, getter);
      var port;
@@ -1961,83 +1143,7 @@ var draw2d_circuit_alu_HalfAdder = draw2d.SetFigure.extend({
      port.setBackgroundColor("#37B1DE");
      port.setName("input_b");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
-     this.zoomCallback = $.proxy(this.positionTooltip,this);
-
-     this.on("dragstart", function() {
-      _this.hideTooltip(true)
-    })
-
-    this.on("mouseenter", function() {
-      _this.tooltipTimer = window.setTimeout(function() {
-        _this.tooltipTimer = -1
-        _this.showTooltip()
-      }, 500)
-    })
-
-    this.on("mouseleave", function(){
-      _this.hideTooltip()
-    })
-
-    this.on("move", function(){
-      _this.positionTooltip()
-    })
-
    },
-
-    setCanvas: function(canvas)
-    {
-        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
-        this._super(canvas);
-        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
-    },
-
-    hideTooltip: function (fast) {
-      if (this.tooltipTimer !== -1) {
-        window.clearTimeout(this.tooltipTimer)
-        this.tooltipTimer = -1
-      }
-      else if(this.tooltip!==null){
-        if(fast) {
-          this.tooltip.remove()
-        }
-        else{
-          this.tooltip.fadeOut(500, function () {
-            $(this).remove()
-          })
-        }
-        this.tooltip = null
-      }
-    },
-
-    showTooltip:function()
-    {
-        this.tooltip= $('<div class="draw2d_tooltip">Half Adder</div>')
-            .appendTo('body')
-            .hide()
-            .fadeIn(1000);
-        this.positionTooltip();
-    },
-
-
-    positionTooltip: function()
-    {
-        if( this.tooltip===null){
-            return;
-        }
-
-        var width =  this.tooltip.outerWidth(true);
-        var pos = this.canvas.fromCanvasToDocumentCoordinate(
-                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
-                this.getAbsoluteY()+this.getHeight() + 10);
-
-        // remove the scrolling part from the tooltip because the tooltip is placed
-        // inside the scrolling container
-        pos.x +=this.canvas.getScrollLeft();
-        pos.y +=this.canvas.getScrollTop();
-
-        this.tooltip.css({'top': pos.y, 'left': pos.x});
-    },
 
    createShapeElement : function()
    {
@@ -2093,143 +1199,7 @@ var draw2d_circuit_alu_HalfAdder = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -2285,23 +1255,24 @@ draw2d_circuit_alu_HalfAdder = draw2d_circuit_alu_HalfAdder.extend({
 });
 
 
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_counter_BCDCounter = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_counter_BCDCounter = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_counter_BCDCounter",
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+
      this._super( $.extend({stroke:0, bgColor:null, width:80,height:108},attr), setter, getter);
      var port;
      // input_t
-     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-1.20833587646473, 18.055555555555557));
+     port = this.addPort(new DecoratedInputPort(), new draw2d.layout.locator.XYRelPortLocator(-1.2083358764652985, 18.055555555555557));
      port.setConnectionDirection(3);
      port.setBackgroundColor("#1C9BAB");
      port.setName("input_t");
@@ -2330,7 +1301,6 @@ var draw2d_circuit_counter_BCDCounter = draw2d.SetFigure.extend({
      port.setBackgroundColor("#1C9BAB");
      port.setName("out_d");
      port.setMaxFanOut(25);
-     this.persistPorts=false;
    },
 
    createShapeElement : function()
@@ -2344,191 +1314,55 @@ var draw2d_circuit_counter_BCDCounter = draw2d.SetFigure.extend({
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L80,0 L80,108 L0,108");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M0,3Q0,0 3, 0L77,0Q80,0 80, 3L80,105Q80,108 77, 108L3,108Q0,108 0, 105L0,3');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'BCD -');
+       shape.attr({"x":8.033331298827761,"y":40.8125,"text-anchor":"start","text":"BCD -","font-family":"\"Arial\"","font-size":14,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'Counter');
+       shape.attr({"x":7.033331298827761,"y":55.412500000000364,"text-anchor":"start","text":"Counter","font-family":"\"Arial\"","font-size":14,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M0 11L18 19.74285714285361L0 28Z');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'A');
+       shape.attr({"x":63.01770629882776,"y":16,"text-anchor":"start","text":"A","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'B');
+       shape.attr({"x":63.01770629882776,"y":41.5,"text-anchor":"start","text":"B","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'C');
+       shape.attr({"x":63.01770629882776,"y":65.5,"text-anchor":"start","text":"C","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'D');
+       shape.attr({"x":63.01770629882776,"y":90.5,"text-anchor":"start","text":"D","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L80,0 L80,108 L0,108");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M0,3Q0,0 3, 0L77,0Q80,0 80, 3L80,105Q80,108 77, 108L3,108Q0,108 0, 105L0,3');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'BCD -');
-        shape.attr({"x":8.033331298828216,"y":41,"text-anchor":"start","text":"BCD -","font-family":"\"Arial\"","font-size":14,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'Counter');
-        shape.attr({"x":7.033331298828216,"y":55.600000000000364,"text-anchor":"start","text":"Counter","font-family":"\"Arial\"","font-size":14,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M0 11L18 19.74285714285361L0 28Z');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'A');
-        shape.attr({"x":63.017706298828216,"y":16,"text-anchor":"start","text":"A","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'B');
-        shape.attr({"x":63.017706298828216,"y":41.5,"text-anchor":"start","text":"B","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'C');
-        shape.attr({"x":63.017706298828216,"y":65.5,"text-anchor":"start","text":"C","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'D');
-        shape.attr({"x":63.017706298828216,"y":90.5,"text-anchor":"start","text":"D","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-
-        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+       return this.canvas.paper.setFinish();
+   }
 });
 
 /**
@@ -2592,7 +1426,6 @@ draw2d_circuit_counter_BCDCounter = draw2d_circuit_counter_BCDCounter.extend({
     {
     }
 });
-draw2d_circuit_counter_BCDCounter.github="./shapes/org/draw2d/circuit/counter/BCDCounter.shape";
 
 
 // Generated Code for the Draw2D touch HTML5 lib.
@@ -2601,15 +1434,13 @@ draw2d_circuit_counter_BCDCounter.github="./shapes/org/draw2d/circuit/counter/BC
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_decoder_BCDto7Seg = draw2d.SetFigure.extend({
+var draw2d_circuit_decoder_BCDto7Seg = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_decoder_BCDto7Seg",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
-     this.tooltip = null;
-     this.tooltipTimer = -1;
 
      this._super( $.extend({stroke:0, bgColor:null, width:87,height:185},attr), setter, getter);
      var port;
@@ -2679,83 +1510,7 @@ var draw2d_circuit_decoder_BCDto7Seg = draw2d.SetFigure.extend({
      port.setBackgroundColor("#37B1DE");
      port.setName("out_g");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
-     this.zoomCallback = $.proxy(this.positionTooltip,this);
-
-     this.on("dragstart", function() {
-      _this.hideTooltip(true)
-    })
-
-    this.on("mouseenter", function() {
-      _this.tooltipTimer = window.setTimeout(function() {
-        _this.tooltipTimer = -1
-        _this.showTooltip()
-      }, 500)
-    })
-
-    this.on("mouseleave", function(){
-      _this.hideTooltip()
-    })
-
-    this.on("move", function(){
-      _this.positionTooltip()
-    })
-
    },
-
-    setCanvas: function(canvas)
-    {
-        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
-        this._super(canvas);
-        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
-    },
-
-    hideTooltip: function (fast) {
-      if (this.tooltipTimer !== -1) {
-        window.clearTimeout(this.tooltipTimer)
-        this.tooltipTimer = -1
-      }
-      else if(this.tooltip!==null){
-        if(fast) {
-          this.tooltip.remove()
-        }
-        else{
-          this.tooltip.fadeOut(500, function () {
-            $(this).remove()
-          })
-        }
-        this.tooltip = null
-      }
-    },
-
-    showTooltip:function()
-    {
-        this.tooltip= $('<div class="draw2d_tooltip">BC Dto7 Seg</div>')
-            .appendTo('body')
-            .hide()
-            .fadeIn(1000);
-        this.positionTooltip();
-    },
-
-
-    positionTooltip: function()
-    {
-        if( this.tooltip===null){
-            return;
-        }
-
-        var width =  this.tooltip.outerWidth(true);
-        var pos = this.canvas.fromCanvasToDocumentCoordinate(
-                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
-                this.getAbsoluteY()+this.getHeight() + 10);
-
-        // remove the scrolling part from the tooltip because the tooltip is placed
-        // inside the scrolling container
-        pos.x +=this.canvas.getScrollLeft();
-        pos.y +=this.canvas.getScrollTop();
-
-        this.tooltip.css({'top': pos.y, 'left': pos.x});
-    },
 
    createShapeElement : function()
    {
@@ -2851,143 +1606,7 @@ var draw2d_circuit_decoder_BCDto7Seg = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -3047,19 +1666,20 @@ draw2d_circuit_decoder_BCDto7Seg = draw2d_circuit_decoder_BCDto7Seg.extend({
 });
 
 
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_display_7Segment = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_display_7Segment = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_display_7Segment",
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+
      this._super( $.extend({stroke:0, bgColor:null, width:90,height:175},attr), setter, getter);
      var port;
      // port_a
@@ -3104,7 +1724,6 @@ var draw2d_circuit_display_7Segment = draw2d.SetFigure.extend({
      port.setBackgroundColor("#37B1DE");
      port.setName("port_g");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
    },
 
    createShapeElement : function()
@@ -3118,191 +1737,55 @@ var draw2d_circuit_display_7Segment = draw2d.SetFigure.extend({
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L90,0 L90,175 L0,175");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // circle
+       shape = this.canvas.paper.path('M0,2Q0,0 2, 0L88,0Q90,0 90, 2L90,173Q90,175 88, 175L2,175Q0,175 0, 173L0,2');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","circle");
+       
+       // seg_a
+       shape = this.canvas.paper.path('M22.5,7.8279999999999745Q22.5,4.8279999999999745 25.5, 4.8279999999999745L79.5,4.8279999999999745Q82.5,4.8279999999999745 82.5, 7.8279999999999745L82.5,11.827999999999975Q82.5,14.827999999999975 79.5, 14.827999999999975L25.5,14.827999999999975Q22.5,14.827999999999975 22.5, 11.827999999999975L22.5,7.8279999999999745');
+       shape.attr({"stroke":"#D6D6D6","stroke-width":1,"fill":"#C21B7A","dasharray":null,"opacity":1});
+       shape.data("name","seg_a");
+       
+       // seg_b
+       shape = this.canvas.paper.path('M73.764920771077,22.227039779341887Q73.9887319206191,19.235400000000027 76.98645340387436, 19.35230127813636L81.50227851674474,19.528403604681195Q84.5,19.645304882817527 84.274657968082, 22.636829739583895L80.2366101112989,76.24387514323365Q80.0112680793809,79.23540000000003 77.0112680793809, 79.23540000000003L72.5,79.23540000000003Q69.5,79.23540000000003 69.7238111495421, 76.24376022065817L73.764920771077,22.227039779341887');
+       shape.attr({"stroke":"#D6D6D6","stroke-width":1,"fill":"#C21B7A","dasharray":null,"opacity":1});
+       shape.data("name","seg_b");
+       
+       // seg_c
+       shape = this.canvas.paper.path('M67.04142077107649,98.81963977934183Q67.26523192061859,95.82799999999997 70.26295340387382, 95.94490127813683L74.77877851674425,96.12100360468244Q77.77649999999949,96.2379048828193 77.55115796808148, 99.22942973958567L73.51311011129839,152.8364751432336Q73.28776807938038,155.82799999999997 70.28776807938038, 155.82799999999997L65.77649999999949,155.82799999999997Q62.77649999999949,155.82799999999997 63.00031114954158, 152.83636022065812L67.04142077107649,98.81963977934183');
+       shape.attr({"stroke":"#D6D6D6","stroke-width":1,"fill":"#C21B7A","dasharray":null,"opacity":1});
+       shape.data("name","seg_c");
+       
+       // seg_d
+       shape = this.canvas.paper.path('M10,161.82799999999997Q10,158.82799999999997 13, 158.82799999999997L67,158.82799999999997Q70,158.82799999999997 70, 161.82799999999997L70,165.82799999999997Q70,168.82799999999997 67, 168.82799999999997L13,168.82799999999997Q10,168.82799999999997 10, 165.82799999999997L10,161.82799999999997');
+       shape.attr({"stroke":"#D6D6D6","stroke-width":1,"fill":"#C21B7A","dasharray":null,"opacity":1});
+       shape.data("name","seg_d");
+       
+       // seg_e
+       shape = this.canvas.paper.path('M13.264920771077009,97.81963977934183Q13.488731920619102,94.82799999999997 16.486453403874357, 94.9449012781363L21.002278516744745,95.12100360468115Q24,95.23790488281747 23.774657968082003, 98.22942973958385L19.736610111298894,151.8364751432336Q19.511268079380898,154.82799999999997 16.511268079380898, 154.82799999999997L12,154.82799999999997Q9,154.82799999999997 9.223811149542094, 151.83636022065812L13.264920771077009,97.81963977934183');
+       shape.attr({"stroke":"#D6D6D6","stroke-width":1,"fill":"#C21B7A","dasharray":null,"opacity":1});
+       shape.data("name","seg_e");
+       
+       // seg_f
+       shape = this.canvas.paper.path('M18.26492077107701,22.227039779341887Q18.488731920619102,19.235400000000027 21.486453403874393, 19.352301278135453L26.00227851674471,19.528403604678918Q29,19.645304882814344 28.774657968082014, 22.63682973958072L24.736610111298884,76.24387514323365Q24.511268079380898,79.23540000000003 21.511268079380898, 79.23540000000003L17,79.23540000000003Q14,79.23540000000003 14.223811149542094, 76.24376022065817L18.26492077107701,22.227039779341887');
+       shape.attr({"stroke":"#D6D6D6","stroke-width":1,"fill":"#C21B7A","dasharray":null,"opacity":1});
+       shape.data("name","seg_f");
+       
+       // seg_g
+       shape = this.canvas.paper.path('M17,85.82799999999997Q17,82.82799999999997 20, 82.82799999999997L74,82.82799999999997Q77,82.82799999999997 77, 85.82799999999997L77,89.82799999999997Q77,92.82799999999997 74, 92.82799999999997L20,92.82799999999997Q17,92.82799999999997 17, 89.82799999999997L17,85.82799999999997');
+       shape.attr({"stroke":"#D6D6D6","stroke-width":1,"fill":"#C21B7A","dasharray":null,"opacity":1});
+       shape.data("name","seg_g");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L90,0 L90,175 L0,175");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // circle
-        shape = this.canvas.paper.path('M0,2Q0,0 2, 0L88,0Q90,0 90, 2L90,173Q90,175 88, 175L2,175Q0,175 0, 173L0,2');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","circle");
-        
-        // seg_a
-        shape = this.canvas.paper.path('M22.5,7.8279999999999745Q22.5,4.8279999999999745 25.5, 4.8279999999999745L79.5,4.8279999999999745Q82.5,4.8279999999999745 82.5, 7.8279999999999745L82.5,11.827999999999975Q82.5,14.827999999999975 79.5, 14.827999999999975L25.5,14.827999999999975Q22.5,14.827999999999975 22.5, 11.827999999999975L22.5,7.8279999999999745');
-        shape.attr({"stroke":"#D6D6D6","stroke-width":1,"fill":"#C21B7A","dasharray":null,"opacity":1});
-        shape.data("name","seg_a");
-        
-        // seg_b
-        shape = this.canvas.paper.path('M73.764920771077,22.227039779341887Q73.9887319206191,19.235400000000027 76.98645340387436, 19.35230127813636L81.50227851674474,19.528403604681195Q84.5,19.645304882817527 84.274657968082, 22.636829739583895L80.2366101112989,76.24387514323365Q80.0112680793809,79.23540000000003 77.0112680793809, 79.23540000000003L72.5,79.23540000000003Q69.5,79.23540000000003 69.7238111495421, 76.24376022065817L73.764920771077,22.227039779341887');
-        shape.attr({"stroke":"#D6D6D6","stroke-width":1,"fill":"#C21B7A","dasharray":null,"opacity":1});
-        shape.data("name","seg_b");
-        
-        // seg_c
-        shape = this.canvas.paper.path('M67.04142077107649,98.81963977934183Q67.26523192061859,95.82799999999997 70.26295340387382, 95.94490127813683L74.77877851674425,96.12100360468244Q77.77649999999949,96.2379048828193 77.55115796808148, 99.22942973958567L73.51311011129839,152.8364751432336Q73.28776807938038,155.82799999999997 70.28776807938038, 155.82799999999997L65.77649999999949,155.82799999999997Q62.77649999999949,155.82799999999997 63.00031114954158, 152.83636022065812L67.04142077107649,98.81963977934183');
-        shape.attr({"stroke":"#D6D6D6","stroke-width":1,"fill":"#C21B7A","dasharray":null,"opacity":1});
-        shape.data("name","seg_c");
-        
-        // seg_d
-        shape = this.canvas.paper.path('M10,161.82799999999997Q10,158.82799999999997 13, 158.82799999999997L67,158.82799999999997Q70,158.82799999999997 70, 161.82799999999997L70,165.82799999999997Q70,168.82799999999997 67, 168.82799999999997L13,168.82799999999997Q10,168.82799999999997 10, 165.82799999999997L10,161.82799999999997');
-        shape.attr({"stroke":"#D6D6D6","stroke-width":1,"fill":"#C21B7A","dasharray":null,"opacity":1});
-        shape.data("name","seg_d");
-        
-        // seg_e
-        shape = this.canvas.paper.path('M13.264920771077009,97.81963977934183Q13.488731920619102,94.82799999999997 16.486453403874357, 94.9449012781363L21.002278516744745,95.12100360468115Q24,95.23790488281747 23.774657968082003, 98.22942973958385L19.736610111298894,151.8364751432336Q19.511268079380898,154.82799999999997 16.511268079380898, 154.82799999999997L12,154.82799999999997Q9,154.82799999999997 9.223811149542094, 151.83636022065812L13.264920771077009,97.81963977934183');
-        shape.attr({"stroke":"#D6D6D6","stroke-width":1,"fill":"#C21B7A","dasharray":null,"opacity":1});
-        shape.data("name","seg_e");
-        
-        // seg_f
-        shape = this.canvas.paper.path('M18.26492077107701,22.227039779341887Q18.488731920619102,19.235400000000027 21.486453403874393, 19.352301278135453L26.00227851674471,19.528403604678918Q29,19.645304882814344 28.774657968082014, 22.63682973958072L24.736610111298884,76.24387514323365Q24.511268079380898,79.23540000000003 21.511268079380898, 79.23540000000003L17,79.23540000000003Q14,79.23540000000003 14.223811149542094, 76.24376022065817L18.26492077107701,22.227039779341887');
-        shape.attr({"stroke":"#D6D6D6","stroke-width":1,"fill":"#C21B7A","dasharray":null,"opacity":1});
-        shape.data("name","seg_f");
-        
-        // seg_g
-        shape = this.canvas.paper.path('M17,85.82799999999997Q17,82.82799999999997 20, 82.82799999999997L74,82.82799999999997Q77,82.82799999999997 77, 85.82799999999997L77,89.82799999999997Q77,92.82799999999997 74, 92.82799999999997L20,92.82799999999997Q17,92.82799999999997 17, 89.82799999999997L17,85.82799999999997');
-        shape.attr({"stroke":"#D6D6D6","stroke-width":1,"fill":"#C21B7A","dasharray":null,"opacity":1});
-        shape.data("name","seg_g");
-        
-
-        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+       return this.canvas.paper.setFinish();
+   }
 });
 
 /**
@@ -3342,7 +1825,6 @@ draw2d_circuit_display_7Segment = draw2d_circuit_display_7Segment.extend({
     }
 
 });
-draw2d_circuit_display_7Segment.github="./shapes/org/draw2d/circuit/display/7Segment.shape";
 
 
 // Generated Code for the Draw2D touch HTML5 lib.
@@ -3351,15 +1833,13 @@ draw2d_circuit_display_7Segment.github="./shapes/org/draw2d/circuit/display/7Seg
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_display_Led = draw2d.SetFigure.extend({
+var draw2d_circuit_display_Led = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_display_Led",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
-     this.tooltip = null;
-     this.tooltipTimer = -1;
 
      this._super( $.extend({stroke:0, bgColor:null, width:30,height:32},attr), setter, getter);
      var port;
@@ -3369,83 +1849,7 @@ var draw2d_circuit_display_Led = draw2d.SetFigure.extend({
      port.setBackgroundColor("#1C9BAB");
      port.setName("Port");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
-     this.zoomCallback = $.proxy(this.positionTooltip,this);
-
-     this.on("dragstart", function() {
-      _this.hideTooltip(true)
-    })
-
-    this.on("mouseenter", function() {
-      _this.tooltipTimer = window.setTimeout(function() {
-        _this.tooltipTimer = -1
-        _this.showTooltip()
-      }, 500)
-    })
-
-    this.on("mouseleave", function(){
-      _this.hideTooltip()
-    })
-
-    this.on("move", function(){
-      _this.positionTooltip()
-    })
-
    },
-
-    setCanvas: function(canvas)
-    {
-        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
-        this._super(canvas);
-        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
-    },
-
-    hideTooltip: function (fast) {
-      if (this.tooltipTimer !== -1) {
-        window.clearTimeout(this.tooltipTimer)
-        this.tooltipTimer = -1
-      }
-      else if(this.tooltip!==null){
-        if(fast) {
-          this.tooltip.remove()
-        }
-        else{
-          this.tooltip.fadeOut(500, function () {
-            $(this).remove()
-          })
-        }
-        this.tooltip = null
-      }
-    },
-
-    showTooltip:function()
-    {
-        this.tooltip= $('<div class="draw2d_tooltip">Led</div>')
-            .appendTo('body')
-            .hide()
-            .fadeIn(1000);
-        this.positionTooltip();
-    },
-
-
-    positionTooltip: function()
-    {
-        if( this.tooltip===null){
-            return;
-        }
-
-        var width =  this.tooltip.outerWidth(true);
-        var pos = this.canvas.fromCanvasToDocumentCoordinate(
-                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
-                this.getAbsoluteY()+this.getHeight() + 10);
-
-        // remove the scrolling part from the tooltip because the tooltip is placed
-        // inside the scrolling container
-        pos.x +=this.canvas.getScrollLeft();
-        pos.y +=this.canvas.getScrollTop();
-
-        this.tooltip.css({'top': pos.y, 'left': pos.x});
-    },
 
    createShapeElement : function()
    {
@@ -3491,143 +1895,7 @@ var draw2d_circuit_display_Led = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -3665,15 +1933,13 @@ draw2d_circuit_display_Led = draw2d_circuit_display_Led.extend({
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_flipflop_DFlipFlop = draw2d.SetFigure.extend({
+var draw2d_circuit_flipflop_DFlipFlop = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_flipflop_DFlipFlop",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
-     this.tooltip = null;
-     this.tooltipTimer = -1;
 
      this._super( $.extend({stroke:0, bgColor:null, width:41.5,height:53.052974999999606},attr), setter, getter);
      var port;
@@ -3701,83 +1967,7 @@ var draw2d_circuit_flipflop_DFlipFlop = draw2d.SetFigure.extend({
      port.setBackgroundColor("#1C9BAB");
      port.setName("input_t");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
-     this.zoomCallback = $.proxy(this.positionTooltip,this);
-
-     this.on("dragstart", function() {
-      _this.hideTooltip(true)
-    })
-
-    this.on("mouseenter", function() {
-      _this.tooltipTimer = window.setTimeout(function() {
-        _this.tooltipTimer = -1
-        _this.showTooltip()
-      }, 500)
-    })
-
-    this.on("mouseleave", function(){
-      _this.hideTooltip()
-    })
-
-    this.on("move", function(){
-      _this.positionTooltip()
-    })
-
    },
-
-    setCanvas: function(canvas)
-    {
-        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
-        this._super(canvas);
-        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
-    },
-
-    hideTooltip: function (fast) {
-      if (this.tooltipTimer !== -1) {
-        window.clearTimeout(this.tooltipTimer)
-        this.tooltipTimer = -1
-      }
-      else if(this.tooltip!==null){
-        if(fast) {
-          this.tooltip.remove()
-        }
-        else{
-          this.tooltip.fadeOut(500, function () {
-            $(this).remove()
-          })
-        }
-        this.tooltip = null
-      }
-    },
-
-    showTooltip:function()
-    {
-        this.tooltip= $('<div class="draw2d_tooltip">D Flip Flop</div>')
-            .appendTo('body')
-            .hide()
-            .fadeIn(1000);
-        this.positionTooltip();
-    },
-
-
-    positionTooltip: function()
-    {
-        if( this.tooltip===null){
-            return;
-        }
-
-        var width =  this.tooltip.outerWidth(true);
-        var pos = this.canvas.fromCanvasToDocumentCoordinate(
-                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
-                this.getAbsoluteY()+this.getHeight() + 10);
-
-        // remove the scrolling part from the tooltip because the tooltip is placed
-        // inside the scrolling container
-        pos.x +=this.canvas.getScrollLeft();
-        pos.y +=this.canvas.getScrollTop();
-
-        this.tooltip.css({'top': pos.y, 'left': pos.x});
-    },
 
    createShapeElement : function()
    {
@@ -3833,143 +2023,7 @@ var draw2d_circuit_flipflop_DFlipFlop = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -4010,19 +2064,20 @@ draw2d_circuit_flipflop_DFlipFlop = draw2d_circuit_flipflop_DFlipFlop.extend({
 });
 
 
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_flipflop_JKFlipFlop = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_flipflop_JKFlipFlop = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_flipflop_JKFlipFlop",
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+
      this._super( $.extend({stroke:0, bgColor:null, width:40,height:63.12239999999838},attr), setter, getter);
      var port;
      // output_q
@@ -4055,7 +2110,6 @@ var draw2d_circuit_flipflop_JKFlipFlop = draw2d.SetFigure.extend({
      port.setBackgroundColor("#1C9BAB");
      port.setName("input_k");
      port.setMaxFanOut(1);
-     this.persistPorts=false;
    },
 
    createShapeElement : function()
@@ -4069,191 +2123,55 @@ var draw2d_circuit_flipflop_JKFlipFlop = draw2d.SetFigure.extend({
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L40,0 L40,63.12239999999838 L0,63.12239999999838");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M0,1.122399999998379Q0,0.12239999999837892 1, 0.12239999999837892L39,0.12239999999837892Q40,0.12239999999837892 40, 1.122399999998379L40,62.12239999999838Q40,63.12239999999838 39, 63.12239999999838L1,63.12239999999838Q0,63.12239999999838 0, 62.12239999999838L0,1.122399999998379');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'Q');
+       shape.attr({"x":26.28125,"y":51.43056749999823,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M0 25.693454999998266L12.041999999999916 30.59945499999685L0 35.95145499999808Z');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"none","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'Q');
+       shape.attr({"x":26.28125,"y":10.736967499998173,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'J');
+       shape.attr({"x":8.0078125,"y":10.6796875,"text-anchor":"start","text":"J","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'K');
+       shape.attr({"x":7.978880000001482,"y":51.43056749999823,"text-anchor":"start","text":"K","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M26.5 45.5L33.5,45.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M26.5 45.5L33.5,45.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L40,0 L40,63.12239999999838 L0,63.12239999999838");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M0,1.122399999998379Q0,0.12239999999837892 1, 0.12239999999837892L39,0.12239999999837892Q40,0.12239999999837892 40, 1.122399999998379L40,62.12239999999838Q40,63.12239999999838 39, 63.12239999999838L1,63.12239999999838Q0,63.12239999999838 0, 62.12239999999838L0,1.122399999998379');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'Q');
-        shape.attr({"x":26.28125,"y":51.75087999999823,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M0 25.693454999998266L12.041999999999916 30.59945499999685L0 35.95145499999808Z');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"none","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'Q');
-        shape.attr({"x":26.28125,"y":11.057279999998173,"text-anchor":"start","text":"Q","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'J');
-        shape.attr({"x":8.0078125,"y":11,"text-anchor":"start","text":"J","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'K');
-        shape.attr({"x":7.978880000001482,"y":51.75087999999823,"text-anchor":"start","text":"K","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M26.5 45.5L33.5,45.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M26.5 45.5L33.5,45.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-
-        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+       return this.canvas.paper.setFinish();
+   }
 });
 
 /**
@@ -4310,7 +2228,6 @@ draw2d_circuit_flipflop_JKFlipFlop = draw2d_circuit_flipflop_JKFlipFlop.extend({
         this.last_t = t;
     }
 });
-draw2d_circuit_flipflop_JKFlipFlop.github="./shapes/org/draw2d/circuit/flipflop/JKFlipFlop.shape";
 
 
 // Generated Code for the Draw2D touch HTML5 lib.
@@ -4319,15 +2236,13 @@ draw2d_circuit_flipflop_JKFlipFlop.github="./shapes/org/draw2d/circuit/flipflop/
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_flipflop_SRFlipFlop = draw2d.SetFigure.extend({
+var draw2d_circuit_flipflop_SRFlipFlop = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_flipflop_SRFlipFlop",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
-     this.tooltip = null;
-     this.tooltipTimer = -1;
 
      this._super( $.extend({stroke:0, bgColor:null, width:40,height:63.12239999999838},attr), setter, getter);
      var port;
@@ -4355,83 +2270,7 @@ var draw2d_circuit_flipflop_SRFlipFlop = draw2d.SetFigure.extend({
      port.setBackgroundColor("#1C9BAB");
      port.setName("input_r");
      port.setMaxFanOut(1);
-     this.persistPorts=false;
-     this.zoomCallback = $.proxy(this.positionTooltip,this);
-
-     this.on("dragstart", function() {
-      _this.hideTooltip(true)
-    })
-
-    this.on("mouseenter", function() {
-      _this.tooltipTimer = window.setTimeout(function() {
-        _this.tooltipTimer = -1
-        _this.showTooltip()
-      }, 500)
-    })
-
-    this.on("mouseleave", function(){
-      _this.hideTooltip()
-    })
-
-    this.on("move", function(){
-      _this.positionTooltip()
-    })
-
    },
-
-    setCanvas: function(canvas)
-    {
-        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
-        this._super(canvas);
-        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
-    },
-
-    hideTooltip: function (fast) {
-      if (this.tooltipTimer !== -1) {
-        window.clearTimeout(this.tooltipTimer)
-        this.tooltipTimer = -1
-      }
-      else if(this.tooltip!==null){
-        if(fast) {
-          this.tooltip.remove()
-        }
-        else{
-          this.tooltip.fadeOut(500, function () {
-            $(this).remove()
-          })
-        }
-        this.tooltip = null
-      }
-    },
-
-    showTooltip:function()
-    {
-        this.tooltip= $('<div class="draw2d_tooltip">SR Flip Flop</div>')
-            .appendTo('body')
-            .hide()
-            .fadeIn(1000);
-        this.positionTooltip();
-    },
-
-
-    positionTooltip: function()
-    {
-        if( this.tooltip===null){
-            return;
-        }
-
-        var width =  this.tooltip.outerWidth(true);
-        var pos = this.canvas.fromCanvasToDocumentCoordinate(
-                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
-                this.getAbsoluteY()+this.getHeight() + 10);
-
-        // remove the scrolling part from the tooltip because the tooltip is placed
-        // inside the scrolling container
-        pos.x +=this.canvas.getScrollLeft();
-        pos.y +=this.canvas.getScrollTop();
-
-        this.tooltip.css({'top': pos.y, 'left': pos.x});
-    },
 
    createShapeElement : function()
    {
@@ -4487,143 +2326,7 @@ var draw2d_circuit_flipflop_SRFlipFlop = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -4680,15 +2383,13 @@ draw2d_circuit_flipflop_SRFlipFlop = draw2d_circuit_flipflop_SRFlipFlop.extend({
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_flipflop_TFlipFlop = draw2d.SetFigure.extend({
+var draw2d_circuit_flipflop_TFlipFlop = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_flipflop_TFlipFlop",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
-     this.tooltip = null;
-     this.tooltipTimer = -1;
 
      this._super( $.extend({stroke:0, bgColor:null, width:40,height:52.552974999999606},attr), setter, getter);
      var port;
@@ -4710,83 +2411,7 @@ var draw2d_circuit_flipflop_TFlipFlop = draw2d.SetFigure.extend({
      port.setBackgroundColor("#1C9BAB");
      port.setName("input_t");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
-     this.zoomCallback = $.proxy(this.positionTooltip,this);
-
-     this.on("dragstart", function() {
-      _this.hideTooltip(true)
-    })
-
-    this.on("mouseenter", function() {
-      _this.tooltipTimer = window.setTimeout(function() {
-        _this.tooltipTimer = -1
-        _this.showTooltip()
-      }, 500)
-    })
-
-    this.on("mouseleave", function(){
-      _this.hideTooltip()
-    })
-
-    this.on("move", function(){
-      _this.positionTooltip()
-    })
-
    },
-
-    setCanvas: function(canvas)
-    {
-        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
-        this._super(canvas);
-        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
-    },
-
-    hideTooltip: function (fast) {
-      if (this.tooltipTimer !== -1) {
-        window.clearTimeout(this.tooltipTimer)
-        this.tooltipTimer = -1
-      }
-      else if(this.tooltip!==null){
-        if(fast) {
-          this.tooltip.remove()
-        }
-        else{
-          this.tooltip.fadeOut(500, function () {
-            $(this).remove()
-          })
-        }
-        this.tooltip = null
-      }
-    },
-
-    showTooltip:function()
-    {
-        this.tooltip= $('<div class="draw2d_tooltip">T Flip Flop</div>')
-            .appendTo('body')
-            .hide()
-            .fadeIn(1000);
-        this.positionTooltip();
-    },
-
-
-    positionTooltip: function()
-    {
-        if( this.tooltip===null){
-            return;
-        }
-
-        var width =  this.tooltip.outerWidth(true);
-        var pos = this.canvas.fromCanvasToDocumentCoordinate(
-                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
-                this.getAbsoluteY()+this.getHeight() + 10);
-
-        // remove the scrolling part from the tooltip because the tooltip is placed
-        // inside the scrolling container
-        pos.x +=this.canvas.getScrollLeft();
-        pos.y +=this.canvas.getScrollTop();
-
-        this.tooltip.css({'top': pos.y, 'left': pos.x});
-    },
 
    createShapeElement : function()
    {
@@ -4837,143 +2462,7 @@ var draw2d_circuit_flipflop_TFlipFlop = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -5020,12 +2509,14 @@ draw2d_circuit_flipflop_TFlipFlop = draw2d_circuit_flipflop_TFlipFlop.extend({
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_gate_AND = draw2d.SetFigure.extend({
+var draw2d_circuit_gate_AND = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_gate_AND",
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+
      this._super( $.extend({stroke:0, bgColor:null, width:30,height:40},attr), setter, getter);
      var port;
      // input01
@@ -5046,7 +2537,6 @@ var draw2d_circuit_gate_AND = draw2d.SetFigure.extend({
      port.setBackgroundColor("#1C9BAB");
      port.setName("out");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
    },
 
    createShapeElement : function()
@@ -5078,143 +2568,7 @@ var draw2d_circuit_gate_AND = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -5252,15 +2606,13 @@ draw2d_circuit_gate_AND = draw2d_circuit_gate_AND.extend({
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_gate_NAND = draw2d.SetFigure.extend({
+var draw2d_circuit_gate_NAND = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_gate_NAND",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
-     this.tooltip = null;
-     this.tooltipTimer = -1;
 
      this._super( $.extend({stroke:0, bgColor:null, width:35,height:40},attr), setter, getter);
      var port;
@@ -5282,83 +2634,7 @@ var draw2d_circuit_gate_NAND = draw2d.SetFigure.extend({
      port.setBackgroundColor("#1C9BAB");
      port.setName("output");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
-     this.zoomCallback = $.proxy(this.positionTooltip,this);
-
-     this.on("dragstart", function() {
-      _this.hideTooltip(true)
-    })
-
-    this.on("mouseenter", function() {
-      _this.tooltipTimer = window.setTimeout(function() {
-        _this.tooltipTimer = -1
-        _this.showTooltip()
-      }, 500)
-    })
-
-    this.on("mouseleave", function(){
-      _this.hideTooltip()
-    })
-
-    this.on("move", function(){
-      _this.positionTooltip()
-    })
-
    },
-
-    setCanvas: function(canvas)
-    {
-        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
-        this._super(canvas);
-        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
-    },
-
-    hideTooltip: function (fast) {
-      if (this.tooltipTimer !== -1) {
-        window.clearTimeout(this.tooltipTimer)
-        this.tooltipTimer = -1
-      }
-      else if(this.tooltip!==null){
-        if(fast) {
-          this.tooltip.remove()
-        }
-        else{
-          this.tooltip.fadeOut(500, function () {
-            $(this).remove()
-          })
-        }
-        this.tooltip = null
-      }
-    },
-
-    showTooltip:function()
-    {
-        this.tooltip= $('<div class="draw2d_tooltip">NAND</div>')
-            .appendTo('body')
-            .hide()
-            .fadeIn(1000);
-        this.positionTooltip();
-    },
-
-
-    positionTooltip: function()
-    {
-        if( this.tooltip===null){
-            return;
-        }
-
-        var width =  this.tooltip.outerWidth(true);
-        var pos = this.canvas.fromCanvasToDocumentCoordinate(
-                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
-                this.getAbsoluteY()+this.getHeight() + 10);
-
-        // remove the scrolling part from the tooltip because the tooltip is placed
-        // inside the scrolling container
-        pos.x +=this.canvas.getScrollLeft();
-        pos.y +=this.canvas.getScrollTop();
-
-        this.tooltip.css({'top': pos.y, 'left': pos.x});
-    },
 
    createShapeElement : function()
    {
@@ -5394,159 +2670,7 @@ var draw2d_circuit_gate_NAND = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    onDrop:function(dropTarget, x, y, shiftKey, ctrlKey)
-    {
-    	// Activate a "smart insert" If the user drop this figure on connection
-    	//
-    	if(dropTarget instanceof draw2d.Connection){
-    		var additionalConnection = dropTarget.getCanvas().createConnection();
-        var oldSource = dropTarget.getSource();
-        var oldTarget = dropTarget.getTarget();
-        if(oldSource instanceof draw2d.InputPort){
-          oldSource = dropTarget.getTarget();
-          oldTarget = dropTarget.getSource();
-        }
-
-        var stack = this.getCanvas().getCommandStack();
-        var cmd = new draw2d.command.CommandReconnect(dropTarget);
-        cmd.setNewPorts(oldSource, this.getInputPort(0));
-        stack.execute(cmd);
-
-        cmd = new draw2d.command.CommandConnect(oldTarget,this.getOutputPort(0));
-        cmd.setConnection(additionalConnection);
-        stack.execute(cmd);
-    	}
-    },
-
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -5578,19 +2702,20 @@ draw2d_circuit_gate_NAND = draw2d_circuit_gate_NAND.extend({
 });
 
 
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_gate_NOR = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_gate_NOR = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_gate_NOR",
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+
      this._super( $.extend({stroke:0, bgColor:null, width:34.5,height:40},attr), setter, getter);
      var port;
      // input01
@@ -5611,7 +2736,6 @@ var draw2d_circuit_gate_NOR = draw2d.SetFigure.extend({
      port.setBackgroundColor("#1C9BAB");
      port.setName("output");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
    },
 
    createShapeElement : function()
@@ -5625,166 +2749,30 @@ var draw2d_circuit_gate_NOR = draw2d.SetFigure.extend({
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L34.5,0 L34.5,40 L0,40");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M0,3Q0,0 3, 0L27,0Q30,0 30, 3L30,37Q30,40 27, 40L3,40Q0,40 0, 37L0,3');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'>1');
+       shape.attr({"x":4,"y":20.171875,"text-anchor":"start","text":">1","font-family":"\"Arial\"","font-size":20,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Circle
+       shape = this.canvas.paper.ellipse();
+       shape.attr({"rx":4,"ry":4,"cx":30.5,"cy":20,"stroke":"#1B1B1B","stroke-width":1,"fill":"#FCFFFF","dasharray":null,"opacity":1});
+       shape.data("name","Circle");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L34.5,0 L34.5,40 L0,40");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M0,3Q0,0 3, 0L27,0Q30,0 30, 3L30,37Q30,40 27, 40L3,40Q0,40 0, 37L0,3');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'>1');
-        shape.attr({"x":4,"y":21,"text-anchor":"start","text":">1","font-family":"\"Arial\"","font-size":20,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Circle
-        shape = this.canvas.paper.ellipse();
-        shape.attr({"rx":4,"ry":4,"cx":30.5,"cy":20,"stroke":"#1B1B1B","stroke-width":1,"fill":"#FCFFFF","dasharray":null,"opacity":1});
-        shape.data("name","Circle");
-        
-
-        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+       return this.canvas.paper.setFinish();
+   }
 });
 
 /**
@@ -5814,7 +2802,6 @@ draw2d_circuit_gate_NOR = draw2d_circuit_gate_NOR.extend({
         o1.setValue(!(i1.getValue() || i2.getValue()));
     }
 });
-draw2d_circuit_gate_NOR.github="./shapes/org/draw2d/circuit/gate/NOR.shape";
 
 
 // Generated Code for the Draw2D touch HTML5 lib.
@@ -5823,15 +2810,13 @@ draw2d_circuit_gate_NOR.github="./shapes/org/draw2d/circuit/gate/NOR.shape";
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_gate_NOT = draw2d.SetFigure.extend({
+var draw2d_circuit_gate_NOT = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_gate_NOT",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
-     this.tooltip = null;
-     this.tooltipTimer = -1;
 
      this._super( $.extend({stroke:0, bgColor:null, width:36,height:40},attr), setter, getter);
      var port;
@@ -5847,83 +2832,7 @@ var draw2d_circuit_gate_NOT = draw2d.SetFigure.extend({
      port.setBackgroundColor("#1C9BAB");
      port.setName("output");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
-     this.zoomCallback = $.proxy(this.positionTooltip,this);
-
-     this.on("dragstart", function() {
-      _this.hideTooltip(true)
-    })
-
-    this.on("mouseenter", function() {
-      _this.tooltipTimer = window.setTimeout(function() {
-        _this.tooltipTimer = -1
-        _this.showTooltip()
-      }, 500)
-    })
-
-    this.on("mouseleave", function(){
-      _this.hideTooltip()
-    })
-
-    this.on("move", function(){
-      _this.positionTooltip()
-    })
-
    },
-
-    setCanvas: function(canvas)
-    {
-        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
-        this._super(canvas);
-        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
-    },
-
-    hideTooltip: function (fast) {
-      if (this.tooltipTimer !== -1) {
-        window.clearTimeout(this.tooltipTimer)
-        this.tooltipTimer = -1
-      }
-      else if(this.tooltip!==null){
-        if(fast) {
-          this.tooltip.remove()
-        }
-        else{
-          this.tooltip.fadeOut(500, function () {
-            $(this).remove()
-          })
-        }
-        this.tooltip = null
-      }
-    },
-
-    showTooltip:function()
-    {
-        this.tooltip= $('<div class="draw2d_tooltip">NOT</div>')
-            .appendTo('body')
-            .hide()
-            .fadeIn(1000);
-        this.positionTooltip();
-    },
-
-
-    positionTooltip: function()
-    {
-        if( this.tooltip===null){
-            return;
-        }
-
-        var width =  this.tooltip.outerWidth(true);
-        var pos = this.canvas.fromCanvasToDocumentCoordinate(
-                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
-                this.getAbsoluteY()+this.getHeight() + 10);
-
-        // remove the scrolling part from the tooltip because the tooltip is placed
-        // inside the scrolling container
-        pos.x +=this.canvas.getScrollLeft();
-        pos.y +=this.canvas.getScrollTop();
-
-        this.tooltip.css({'top': pos.y, 'left': pos.x});
-    },
 
    createShapeElement : function()
    {
@@ -5959,167 +2868,7 @@ var draw2d_circuit_gate_NOT = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-
-    onDrop:function(dropTarget, x, y, shiftKey, ctrlKey)
-    {
-    	// Activate a "smart insert" If the user drop this figure on connection
-    	//
-    	if(dropTarget instanceof draw2d.Connection){
-    		var additionalConnection = dropTarget.getCanvas().createConnection();
-        var oldSource = dropTarget.getSource();
-        var oldTarget = dropTarget.getTarget();
-
-        var stack = this.getCanvas().getCommandStack();
-        stack.startTransaction();
-        var cmd = new draw2d.command.CommandReconnect(dropTarget);
-        cmd.setNewPorts(oldSource, this.getInputPort(0));
-        stack.execute(cmd);
-
-        cmd = new draw2d.command.CommandConnect(oldTarget,this.getOutputPort(0));
-        cmd.setConnection(additionalConnection);
-        stack.execute(cmd);
-        stack.commitTransaction();
-    	}
-    },
-
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -6157,15 +2906,13 @@ draw2d_circuit_gate_NOT = draw2d_circuit_gate_NOT.extend({
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_gate_OR = draw2d.SetFigure.extend({
+var draw2d_circuit_gate_OR = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_gate_OR",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
-     this.tooltip = null;
-     this.tooltipTimer = -1;
 
      this._super( $.extend({stroke:0, bgColor:null, width:30.78125,height:40},attr), setter, getter);
      var port;
@@ -6187,83 +2934,7 @@ var draw2d_circuit_gate_OR = draw2d.SetFigure.extend({
      port.setBackgroundColor("#1C9BAB");
      port.setName("output");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
-     this.zoomCallback = $.proxy(this.positionTooltip,this);
-
-     this.on("dragstart", function() {
-      _this.hideTooltip(true)
-    })
-
-    this.on("mouseenter", function() {
-      _this.tooltipTimer = window.setTimeout(function() {
-        _this.tooltipTimer = -1
-        _this.showTooltip()
-      }, 500)
-    })
-
-    this.on("mouseleave", function(){
-      _this.hideTooltip()
-    })
-
-    this.on("move", function(){
-      _this.positionTooltip()
-    })
-
    },
-
-    setCanvas: function(canvas)
-    {
-        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
-        this._super(canvas);
-        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
-    },
-
-    hideTooltip: function (fast) {
-      if (this.tooltipTimer !== -1) {
-        window.clearTimeout(this.tooltipTimer)
-        this.tooltipTimer = -1
-      }
-      else if(this.tooltip!==null){
-        if(fast) {
-          this.tooltip.remove()
-        }
-        else{
-          this.tooltip.fadeOut(500, function () {
-            $(this).remove()
-          })
-        }
-        this.tooltip = null
-      }
-    },
-
-    showTooltip:function()
-    {
-        this.tooltip= $('<div class="draw2d_tooltip">OR</div>')
-            .appendTo('body')
-            .hide()
-            .fadeIn(1000);
-        this.positionTooltip();
-    },
-
-
-    positionTooltip: function()
-    {
-        if( this.tooltip===null){
-            return;
-        }
-
-        var width =  this.tooltip.outerWidth(true);
-        var pos = this.canvas.fromCanvasToDocumentCoordinate(
-                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
-                this.getAbsoluteY()+this.getHeight() + 10);
-
-        // remove the scrolling part from the tooltip because the tooltip is placed
-        // inside the scrolling container
-        pos.x +=this.canvas.getScrollLeft();
-        pos.y +=this.canvas.getScrollTop();
-
-        this.tooltip.css({'top': pos.y, 'left': pos.x});
-    },
 
    createShapeElement : function()
    {
@@ -6294,167 +2965,7 @@ var draw2d_circuit_gate_OR = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-
-    onDrop:function(dropTarget, x, y, shiftKey, ctrlKey)
-    {
-    	// Activate a "smart insert" If the user drop this figure on connection
-    	//
-    	if(dropTarget instanceof draw2d.Connection){
-    		var additionalConnection = dropTarget.getCanvas().createConnection();
-        var oldSource = dropTarget.getSource();
-        var oldTarget = dropTarget.getTarget();
-
-        var stack = this.getCanvas().getCommandStack();
-        stack.startTransaction();
-        var cmd = new draw2d.command.CommandReconnect(dropTarget);
-        cmd.setNewPorts(oldSource, this.getInputPort(0));
-        stack.execute(cmd);
-
-        cmd = new draw2d.command.CommandConnect(oldTarget,this.getOutputPort(0));
-        cmd.setConnection(additionalConnection);
-        stack.execute(cmd);
-        stack.commitTransaction();
-    	}
-    },
-
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -6492,15 +3003,13 @@ draw2d_circuit_gate_OR = draw2d_circuit_gate_OR.extend({
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_hardware_RaspiGPIO = draw2d.SetFigure.extend({
+var draw2d_circuit_hardware_RaspiGPIO = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_hardware_RaspiGPIO",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
-     this.tooltip = null;
-     this.tooltipTimer = -1;
 
      this._super( $.extend({stroke:0, bgColor:null, width:105,height:259.5},attr), setter, getter);
      var port;
@@ -6600,83 +3109,7 @@ var draw2d_circuit_hardware_RaspiGPIO = draw2d.SetFigure.extend({
      port.setBackgroundColor("#37B1DE");
      port.setName("gpo_16");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
-     this.zoomCallback = $.proxy(this.positionTooltip,this);
-
-     this.on("dragstart", function() {
-      _this.hideTooltip(true)
-    })
-
-    this.on("mouseenter", function() {
-      _this.tooltipTimer = window.setTimeout(function() {
-        _this.tooltipTimer = -1
-        _this.showTooltip()
-      }, 500)
-    })
-
-    this.on("mouseleave", function(){
-      _this.hideTooltip()
-    })
-
-    this.on("move", function(){
-      _this.positionTooltip()
-    })
-
    },
-
-    setCanvas: function(canvas)
-    {
-        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
-        this._super(canvas);
-        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
-    },
-
-    hideTooltip: function (fast) {
-      if (this.tooltipTimer !== -1) {
-        window.clearTimeout(this.tooltipTimer)
-        this.tooltipTimer = -1
-      }
-      else if(this.tooltip!==null){
-        if(fast) {
-          this.tooltip.remove()
-        }
-        else{
-          this.tooltip.fadeOut(500, function () {
-            $(this).remove()
-          })
-        }
-        this.tooltip = null
-      }
-    },
-
-    showTooltip:function()
-    {
-        this.tooltip= $('<div class="draw2d_tooltip">RaspiGPIO</div>')
-            .appendTo('body')
-            .hide()
-            .fadeIn(1000);
-        this.positionTooltip();
-    },
-
-
-    positionTooltip: function()
-    {
-        if( this.tooltip===null){
-            return;
-        }
-
-        var width =  this.tooltip.outerWidth(true);
-        var pos = this.canvas.fromCanvasToDocumentCoordinate(
-                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
-                this.getAbsoluteY()+this.getHeight() + 10);
-
-        // remove the scrolling part from the tooltip because the tooltip is placed
-        // inside the scrolling container
-        pos.x +=this.canvas.getScrollLeft();
-        pos.y +=this.canvas.getScrollTop();
-
-        this.tooltip.css({'top': pos.y, 'left': pos.x});
-    },
 
    createShapeElement : function()
    {
@@ -6877,159 +3310,7 @@ var draw2d_circuit_hardware_RaspiGPIO = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    onDrop:function(dropTarget, x, y, shiftKey, ctrlKey)
-    {
-    	// Activate a "smart insert" If the user drop this figure on connection
-    	//
-    	if(dropTarget instanceof draw2d.Connection){
-    		var additionalConnection = dropTarget.getCanvas().createConnection();
-        var oldSource = dropTarget.getSource();
-        var oldTarget = dropTarget.getTarget();
-        if(oldSource instanceof draw2d.InputPort){
-          oldSource = dropTarget.getTarget();
-          oldTarget = dropTarget.getSource();
-        }
-
-        var stack = this.getCanvas().getCommandStack();
-        var cmd = new draw2d.command.CommandReconnect(dropTarget);
-        cmd.setNewPorts(oldSource, this.getInputPort(0));
-        stack.execute(cmd);
-
-        cmd = new draw2d.command.CommandConnect(oldTarget,this.getOutputPort(0));
-        cmd.setConnection(additionalConnection);
-        stack.execute(cmd);
-    	}
-    },
-
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -7090,15 +3371,13 @@ draw2d_circuit_hardware_RaspiGPIO = draw2d_circuit_hardware_RaspiGPIO.extend({
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_hardware_RaspiINPUT = draw2d.SetFigure.extend({
+var draw2d_circuit_hardware_RaspiINPUT = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_hardware_RaspiINPUT",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
-     this.tooltip = null;
-     this.tooltipTimer = -1;
 
      this._super( $.extend({stroke:0, bgColor:null, width:106.25999999999931,height:259.5},attr), setter, getter);
      var port;
@@ -7150,83 +3429,7 @@ var draw2d_circuit_hardware_RaspiINPUT = draw2d.SetFigure.extend({
      port.setBackgroundColor("#37B1DE");
      port.setName("gpo_16");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
-     this.zoomCallback = $.proxy(this.positionTooltip,this);
-
-     this.on("dragstart", function() {
-      _this.hideTooltip(true)
-    })
-
-    this.on("mouseenter", function() {
-      _this.tooltipTimer = window.setTimeout(function() {
-        _this.tooltipTimer = -1
-        _this.showTooltip()
-      }, 500)
-    })
-
-    this.on("mouseleave", function(){
-      _this.hideTooltip()
-    })
-
-    this.on("move", function(){
-      _this.positionTooltip()
-    })
-
    },
-
-    setCanvas: function(canvas)
-    {
-        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
-        this._super(canvas);
-        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
-    },
-
-    hideTooltip: function (fast) {
-      if (this.tooltipTimer !== -1) {
-        window.clearTimeout(this.tooltipTimer)
-        this.tooltipTimer = -1
-      }
-      else if(this.tooltip!==null){
-        if(fast) {
-          this.tooltip.remove()
-        }
-        else{
-          this.tooltip.fadeOut(500, function () {
-            $(this).remove()
-          })
-        }
-        this.tooltip = null
-      }
-    },
-
-    showTooltip:function()
-    {
-        this.tooltip= $('<div class="draw2d_tooltip">RaspiINPUT</div>')
-            .appendTo('body')
-            .hide()
-            .fadeIn(1000);
-        this.positionTooltip();
-    },
-
-
-    positionTooltip: function()
-    {
-        if( this.tooltip===null){
-            return;
-        }
-
-        var width =  this.tooltip.outerWidth(true);
-        var pos = this.canvas.fromCanvasToDocumentCoordinate(
-                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
-                this.getAbsoluteY()+this.getHeight() + 10);
-
-        // remove the scrolling part from the tooltip because the tooltip is placed
-        // inside the scrolling container
-        pos.x +=this.canvas.getScrollLeft();
-        pos.y +=this.canvas.getScrollTop();
-
-        this.tooltip.css({'top': pos.y, 'left': pos.x});
-    },
 
    createShapeElement : function()
    {
@@ -7387,166 +3590,7 @@ var draw2d_circuit_hardware_RaspiINPUT = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    getRequiredHardware: function(){
-        return {
-           raspi: false,
-           arduino: false
-        }
-    },
-
-    onDrop:function(dropTarget, x, y, shiftKey, ctrlKey)
-    {
-    	// Activate a "smart insert" If the user drop this figure on connection
-    	//
-    	if(dropTarget instanceof draw2d.Connection){
-    		var additionalConnection = dropTarget.getCanvas().createConnection();
-        var oldSource = dropTarget.getSource();
-        var oldTarget = dropTarget.getTarget();
-        if(oldSource instanceof draw2d.InputPort){
-          oldSource = dropTarget.getTarget();
-          oldTarget = dropTarget.getSource();
-        }
-
-        var stack = this.getCanvas().getCommandStack();
-        var cmd = new draw2d.command.CommandReconnect(dropTarget);
-        cmd.setNewPorts(oldSource, this.getInputPort(0));
-        stack.execute(cmd);
-
-        cmd = new draw2d.command.CommandConnect(oldTarget,this.getOutputPort(0));
-        cmd.setConnection(additionalConnection);
-        stack.execute(cmd);
-    	}
-    },
-
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -7610,15 +3654,13 @@ draw2d_circuit_hardware_RaspiINPUT = draw2d_circuit_hardware_RaspiINPUT.extend({
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_hardware_RaspiOUTPUT = draw2d.SetFigure.extend({
+var draw2d_circuit_hardware_RaspiOUTPUT = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_hardware_RaspiOUTPUT",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
-     this.tooltip = null;
-     this.tooltipTimer = -1;
 
      this._super( $.extend({stroke:0, bgColor:null, width:106.61262500000157,height:259.5},attr), setter, getter);
      var port;
@@ -7670,83 +3712,7 @@ var draw2d_circuit_hardware_RaspiOUTPUT = draw2d.SetFigure.extend({
      port.setBackgroundColor("#37B1DE");
      port.setName("gpi_8");
      port.setMaxFanOut(1);
-     this.persistPorts=false;
-     this.zoomCallback = $.proxy(this.positionTooltip,this);
-
-     this.on("dragstart", function() {
-      _this.hideTooltip(true)
-    })
-
-    this.on("mouseenter", function() {
-      _this.tooltipTimer = window.setTimeout(function() {
-        _this.tooltipTimer = -1
-        _this.showTooltip()
-      }, 500)
-    })
-
-    this.on("mouseleave", function(){
-      _this.hideTooltip()
-    })
-
-    this.on("move", function(){
-      _this.positionTooltip()
-    })
-
    },
-
-    setCanvas: function(canvas)
-    {
-        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
-        this._super(canvas);
-        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
-    },
-
-    hideTooltip: function (fast) {
-      if (this.tooltipTimer !== -1) {
-        window.clearTimeout(this.tooltipTimer)
-        this.tooltipTimer = -1
-      }
-      else if(this.tooltip!==null){
-        if(fast) {
-          this.tooltip.remove()
-        }
-        else{
-          this.tooltip.fadeOut(500, function () {
-            $(this).remove()
-          })
-        }
-        this.tooltip = null
-      }
-    },
-
-    showTooltip:function()
-    {
-        this.tooltip= $('<div class="draw2d_tooltip">RaspiOUTPUT</div>')
-            .appendTo('body')
-            .hide()
-            .fadeIn(1000);
-        this.positionTooltip();
-    },
-
-
-    positionTooltip: function()
-    {
-        if( this.tooltip===null){
-            return;
-        }
-
-        var width =  this.tooltip.outerWidth(true);
-        var pos = this.canvas.fromCanvasToDocumentCoordinate(
-                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
-                this.getAbsoluteY()+this.getHeight() + 10);
-
-        // remove the scrolling part from the tooltip because the tooltip is placed
-        // inside the scrolling container
-        pos.x +=this.canvas.getScrollLeft();
-        pos.y +=this.canvas.getScrollTop();
-
-        this.tooltip.css({'top': pos.y, 'left': pos.x});
-    },
 
    createShapeElement : function()
    {
@@ -7907,166 +3873,7 @@ var draw2d_circuit_hardware_RaspiOUTPUT = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    getRequiredHardware: function(){
-        return {
-           raspi: false,
-           arduino: false
-        }
-    },
-
-    onDrop:function(dropTarget, x, y, shiftKey, ctrlKey)
-    {
-    	// Activate a "smart insert" If the user drop this figure on connection
-    	//
-    	if(dropTarget instanceof draw2d.Connection){
-    		var additionalConnection = dropTarget.getCanvas().createConnection();
-        var oldSource = dropTarget.getSource();
-        var oldTarget = dropTarget.getTarget();
-        if(oldSource instanceof draw2d.InputPort){
-          oldSource = dropTarget.getTarget();
-          oldTarget = dropTarget.getSource();
-        }
-
-        var stack = this.getCanvas().getCommandStack();
-        var cmd = new draw2d.command.CommandReconnect(dropTarget);
-        cmd.setNewPorts(oldSource, this.getInputPort(0));
-        stack.execute(cmd);
-
-        cmd = new draw2d.command.CommandConnect(oldTarget,this.getOutputPort(0));
-        cmd.setConnection(additionalConnection);
-        stack.execute(cmd);
-    	}
-    },
-
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -8135,15 +3942,13 @@ draw2d_circuit_hardware_RaspiOUTPUT = draw2d_circuit_hardware_RaspiOUTPUT.extend
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_pulse_10hz = draw2d.SetFigure.extend({
+var draw2d_circuit_pulse_10hz = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_pulse_10hz",
 
    init:function(attr, setter, getter)
    {
      var _this = this;
-     this.tooltip = null;
-     this.tooltipTimer = -1;
 
      this._super( $.extend({stroke:0, bgColor:null, width:33.671875,height:49.5},attr), setter, getter);
      var port;
@@ -8153,83 +3958,7 @@ var draw2d_circuit_pulse_10hz = draw2d.SetFigure.extend({
      port.setBackgroundColor("#1C9BAB");
      port.setName("Port");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
-     this.zoomCallback = $.proxy(this.positionTooltip,this);
-
-     this.on("dragstart", function() {
-      _this.hideTooltip(true)
-    })
-
-    this.on("mouseenter", function() {
-      _this.tooltipTimer = window.setTimeout(function() {
-        _this.tooltipTimer = -1
-        _this.showTooltip()
-      }, 500)
-    })
-
-    this.on("mouseleave", function(){
-      _this.hideTooltip()
-    })
-
-    this.on("move", function(){
-      _this.positionTooltip()
-    })
-
    },
-
-    setCanvas: function(canvas)
-    {
-        if(this.canvas !==null) this.canvas.off(this.zoomCallback);
-        this._super(canvas);
-        if(this.canvas !==null) this.canvas.on("zoom",this.zoomCallback);
-    },
-
-    hideTooltip: function (fast) {
-      if (this.tooltipTimer !== -1) {
-        window.clearTimeout(this.tooltipTimer)
-        this.tooltipTimer = -1
-      }
-      else if(this.tooltip!==null){
-        if(fast) {
-          this.tooltip.remove()
-        }
-        else{
-          this.tooltip.fadeOut(500, function () {
-            $(this).remove()
-          })
-        }
-        this.tooltip = null
-      }
-    },
-
-    showTooltip:function()
-    {
-        this.tooltip= $('<div class="draw2d_tooltip">10hz</div>')
-            .appendTo('body')
-            .hide()
-            .fadeIn(1000);
-        this.positionTooltip();
-    },
-
-
-    positionTooltip: function()
-    {
-        if( this.tooltip===null){
-            return;
-        }
-
-        var width =  this.tooltip.outerWidth(true);
-        var pos = this.canvas.fromCanvasToDocumentCoordinate(
-                this.getAbsoluteX()+this.getWidth()/2-width/2+8,
-                this.getAbsoluteY()+this.getHeight() + 10);
-
-        // remove the scrolling part from the tooltip because the tooltip is placed
-        // inside the scrolling container
-        pos.x +=this.canvas.getScrollLeft();
-        pos.y +=this.canvas.getScrollTop();
-
-        this.tooltip.css({'top': pos.y, 'left': pos.x});
-    },
 
    createShapeElement : function()
    {
@@ -8270,159 +3999,7 @@ var draw2d_circuit_pulse_10hz = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    onDrop:function(dropTarget, x, y, shiftKey, ctrlKey)
-    {
-    	// Activate a "smart insert" If the user drop this figure on connection
-    	//
-    	if(dropTarget instanceof draw2d.Connection){
-    		var additionalConnection = dropTarget.getCanvas().createConnection();
-        var oldSource = dropTarget.getSource();
-        var oldTarget = dropTarget.getTarget();
-        if(oldSource instanceof draw2d.InputPort){
-          oldSource = dropTarget.getTarget();
-          oldTarget = dropTarget.getSource();
-        }
-
-        var stack = this.getCanvas().getCommandStack();
-        var cmd = new draw2d.command.CommandReconnect(dropTarget);
-        cmd.setNewPorts(oldSource, this.getInputPort(0));
-        stack.execute(cmd);
-
-        cmd = new draw2d.command.CommandConnect(oldTarget,this.getOutputPort(0));
-        cmd.setConnection(additionalConnection);
-        stack.execute(cmd);
-    	}
-    },
-
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -8471,34 +4048,34 @@ draw2d_circuit_pulse_10hz = draw2d_circuit_pulse_10hz.extend({
 });
 
 
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_pulse_50hz = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_pulse_50hz = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_pulse_50hz",
 
    init:function(attr, setter, getter)
    {
-     this._super( $.extend({stroke:0, bgColor:null, width:32,height:48.60950000000048},attr), setter, getter);
+     var _this = this;
+
+     this._super( $.extend({stroke:0, bgColor:null, width:31.6640625,height:48.60950000000048},attr), setter, getter);
      var port;
      // circle
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(102.0751953125, 69.8754358715884));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(103.15815445349125, 69.8754358715884));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#1C9BAB");
      port.setName("circle");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
    },
 
    createShapeElement : function()
    {
       var shape = this._super();
-      this.originalWidth = 32;
+      this.originalWidth = 31.6640625;
       this.originalHeight= 48.60950000000048;
       return shape;
    },
@@ -8506,171 +4083,35 @@ var draw2d_circuit_pulse_50hz = draw2d.SetFigure.extend({
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L31.6640625,0 L31.6640625,48.60950000000048 L0,48.60950000000048");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // Rectangle
+       shape = this.canvas.paper.path('M1.6640625 18.60950000000048L31.6640625 18.60950000000048L31.6640625 48.60950000000048L1.6640625 48.60950000000048Z');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","Rectangle");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'50Hz');
+       shape.attr({"x":4,"y":10.578125,"text-anchor":"start","text":"50Hz","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M3.5 41.5L10.5,41.5L10.5,30.5L22.5,30.5L22.5,40.5L28.5,40.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M3.5 41.5L10.5,41.5L10.5,30.5L22.5,30.5L22.5,40.5L28.5,40.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L32,0 L32,48.60950000000048 L0,48.60950000000048");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Rectangle
-        shape = this.canvas.paper.path('M1.6640625 18.60950000000048L31.6640625 18.60950000000048L31.6640625 48.60950000000048L1.6640625 48.60950000000048Z');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","Rectangle");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'50Hz');
-        shape.attr({"x":4,"y":11,"text-anchor":"start","text":"50Hz","font-family":"\"Arial\"","font-size":10,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M3.5 41.5L10.5,41.5L10.5,30.5L22.5,30.5L22.5,40.5L28.5,40.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M3.5 41.5L10.5,41.5L10.5,30.5L22.5,30.5L22.5,40.5L28.5,40.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":1,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-
-        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+       return this.canvas.paper.setFinish();
+   }
 });
 
 /**
@@ -8712,7 +4153,6 @@ draw2d_circuit_pulse_50hz = draw2d_circuit_pulse_50hz.extend({
     }
 
 });
-draw2d_circuit_pulse_50hz.github="./shapes/org/draw2d/circuit/pulse/50hz.shape";
 
 
 // Generated Code for the Draw2D touch HTML5 lib.
@@ -8721,12 +4161,14 @@ draw2d_circuit_pulse_50hz.github="./shapes/org/draw2d/circuit/pulse/50hz.shape";
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_pulse_Delay = draw2d.SetFigure.extend({
+var draw2d_circuit_pulse_Delay = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_pulse_Delay",
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+
      this._super( $.extend({stroke:0, bgColor:null, width:84,height:69},attr), setter, getter);
      var port;
      // Port
@@ -8741,7 +4183,6 @@ var draw2d_circuit_pulse_Delay = draw2d.SetFigure.extend({
      port.setBackgroundColor("#37B1DE");
      port.setName("Port");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
    },
 
    createShapeElement : function()
@@ -8853,143 +4294,7 @@ var draw2d_circuit_pulse_Delay = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -9061,221 +4366,85 @@ draw2d_circuit_pulse_Delay = draw2d_circuit_pulse_Delay.extend({
 });
 
 
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_switch_HighLow = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_switch_HighLow = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_switch_HighLow",
 
    init:function(attr, setter, getter)
    {
-     this._super( $.extend({stroke:0, bgColor:null, width:42,height:43.5},attr), setter, getter);
+     var _this = this;
+
+     this._super( $.extend({stroke:0, bgColor:null, width:42,height:42.90625},attr), setter, getter);
      var port;
      // Port
-     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(98.80952380952381, 51.72413793103448));
+     port = this.createPort("output", new draw2d.layout.locator.XYRelPortLocator(98.80952380952381, 52.43991260014567));
      port.setConnectionDirection(1);
      port.setBackgroundColor("#37B1DE");
      port.setName("Port");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
    },
 
    createShapeElement : function()
    {
       var shape = this._super();
       this.originalWidth = 42;
-      this.originalHeight= 43.5;
+      this.originalHeight= 42.90625;
       return shape;
    },
 
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L42,0 L42,42.90625 L0,42.90625");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'1');
+       shape.attr({"x":4.5,"y":10.5,"text-anchor":"start","text":"1","font-family":"\"Arial\"","font-size":11,"stroke":"none","fill":"#C21B7A","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Label
+       shape = this.canvas.paper.text(0,0,'0');
+       shape.attr({"x":4,"y":32.203125,"text-anchor":"start","text":"0","font-family":"\"Arial\"","font-size":12,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
+       shape.data("name","Label");
+       
+       // Circle
+       shape = this.canvas.paper.ellipse();
+       shape.attr({"rx":3,"ry":3.5,"cx":39,"cy":22.5,"stroke":"none","stroke-width":0,"fill":"#000000","dasharray":null,"opacity":1});
+       shape.data("name","Circle");
+       
+       // high_shadow
+       shape = this.canvas.paper.path('M39.5 22.5L13.5,11.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","high_shadow");
+       
+       // high
+       shape = this.canvas.paper.path('M39.5 22.5L13.5,11.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","high");
+       
+       // low_shadow
+       shape = this.canvas.paper.path('M38.5 22.5L13.5,32.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","low_shadow");
+       
+       // low
+       shape = this.canvas.paper.path('M38.5 22.5L13.5,32.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","low");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L42,0 L42,43.5 L0,43.5");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'1');
-        shape.attr({"x":4.5,"y":11,"text-anchor":"start","text":"1","font-family":"\"Arial\"","font-size":11,"stroke":"none","fill":"#C21B7A","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Label
-        shape = this.canvas.paper.text(0,0,'0');
-        shape.attr({"x":4,"y":32.5,"text-anchor":"start","text":"0","font-family":"\"Arial\"","font-size":12,"stroke":"none","fill":"#080808","stroke-scale":true,"font-weight":"normal","stroke-width":0,"opacity":1});
-        shape.data("name","Label");
-        
-        // Circle
-        shape = this.canvas.paper.ellipse();
-        shape.attr({"rx":3,"ry":3.5,"cx":39,"cy":22.5,"stroke":"none","stroke-width":0,"fill":"#000000","dasharray":null,"opacity":1});
-        shape.data("name","Circle");
-        
-        // high_shadow
-        shape = this.canvas.paper.path('M39.5 22.5L13.5,11.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":2,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","high_shadow");
-        
-        // high
-        shape = this.canvas.paper.path('M39.5 22.5L13.5,11.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":2,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","high");
-        
-        // low_shadow
-        shape = this.canvas.paper.path('M38.5 22.5L13.5,32.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":2,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","low_shadow");
-        
-        // low
-        shape = this.canvas.paper.path('M38.5 22.5L13.5,32.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":2,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","low");
-        
-
-        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+       return this.canvas.paper.setFinish();
+   }
 });
 
 /**
@@ -9316,7 +4485,6 @@ draw2d_circuit_switch_HighLow = draw2d_circuit_switch_HighLow.extend({
     }
 
 });
-draw2d_circuit_switch_HighLow.github="./shapes/org/draw2d/circuit/switch/HighLow.shape";
 
 
 // Generated Code for the Draw2D touch HTML5 lib.
@@ -9325,12 +4493,14 @@ draw2d_circuit_switch_HighLow.github="./shapes/org/draw2d/circuit/switch/HighLow
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_switch_HighLowArray = draw2d.SetFigure.extend({
+var draw2d_circuit_switch_HighLowArray = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_switch_HighLowArray",
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+
      this._super( $.extend({stroke:0, bgColor:null, width:20,height:160},attr), setter, getter);
      var port;
      // port01
@@ -9381,7 +4551,6 @@ var draw2d_circuit_switch_HighLowArray = draw2d.SetFigure.extend({
      port.setBackgroundColor("#37B1DE");
      port.setName("port08");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
    },
 
    createShapeElement : function()
@@ -9443,143 +4612,7 @@ var draw2d_circuit_switch_HighLowArray = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -9618,19 +4651,20 @@ draw2d_circuit_switch_HighLowArray = draw2d_circuit_switch_HighLowArray.extend({
 });
 
 
-// Generated Code for the Draw2D touch HTML5 lib
-//                                                        
-// http://www.draw2d.org                                  
-//                                                        
-// Go to the Designer http://www.draw2d.org               
-// to design your own shape or download user generated    
-//                                                        
-var draw2d_circuit_switch_PushButton = draw2d.SetFigure.extend({            
+// Generated Code for the Draw2D touch HTML5 lib.
+// File will be generated if you save the *.shape file.
+//
+// created with http://www.draw2d.org
+//
+//
+var draw2d_circuit_switch_PushButton = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_switch_PushButton",
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+
      this._super( $.extend({stroke:0, bgColor:null, width:45.35582499999964,height:27.483999999999924},attr), setter, getter);
      var port;
      // Port
@@ -9639,7 +4673,6 @@ var draw2d_circuit_switch_PushButton = draw2d.SetFigure.extend({
      port.setBackgroundColor("#37B1DE");
      port.setName("Port");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
    },
 
    createShapeElement : function()
@@ -9653,181 +4686,45 @@ var draw2d_circuit_switch_PushButton = draw2d.SetFigure.extend({
    createSet: function()
    {
        this.canvas.paper.setStart();
+       var shape = null;
+       // BoundingBox
+       shape = this.canvas.paper.path("M0,0 L45.35582499999964,0 L45.35582499999964,27.483999999999924 L0,27.483999999999924");
+       shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
+       shape.data("name","BoundingBox");
+       
+       // Label
+       shape = this.canvas.paper.ellipse();
+       shape.attr({"rx":4.5,"ry":4,"cx":4.5,"cy":22.983999999999924,"stroke":"none","stroke-width":0,"fill":"#C21B7A","dasharray":null,"opacity":1});
+       shape.data("name","Label");
+       
+       // Circle
+       shape = this.canvas.paper.ellipse();
+       shape.attr({"rx":4.5,"ry":4,"cx":27.5,"cy":23.483999999999924,"stroke":"none","stroke-width":0,"fill":"#000000","dasharray":null,"opacity":1});
+       shape.data("name","Circle");
+       
+       // low
+       shape = this.canvas.paper.path('M26.125825000000077,8.735999999999876Q24.125825000000077,8.735999999999876 24.125825000000077, 6.735999999999876L24.125825000000077,2Q24.125825000000077,0 22.125825000000077, 0L11.125825000000077,0Q9.125825000000077,0 9.125825000000077, 2L9.125825000000077,6.735999999999876Q9.125825000000077,8.735999999999876 7.125825000000077, 8.735999999999876L2.2994250000001557,8.735999999999876Q0.2994250000001557,8.735999999999876 0.2994250000001557, 10.735999999999876L0.2994250000001557,11.735999999999876Q0.2994250000001557,13.735999999999876 2.2994250000001557, 13.735999999999876L30.299425000000156,13.735999999999876Q32.299425000000156,13.735999999999876 32.299425000000156, 11.735999999999876L32.299425000000156,10.735999999999876Q32.299425000000156,8.735999999999876 30.299425000000156, 8.735999999999876L26.125825000000077,8.735999999999876');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","low");
+       
+       // high
+       shape = this.canvas.paper.path('M22.31382500000018,16.235999999999876Q20.50182500000028,16.235999999999876 21.26817190867477, 14.388647187036133L23.359478091325588,9.347352812963743Q24.125825000000077,7.5 22.125825000000077, 7.5L11.125825000000077,7.5Q9.125825000000077,7.5 9.62777239007231, 9.435987814424376L10.888877609927716,14.3000121855755Q11.39082499999995,16.235999999999876 9.39082499999995, 16.235999999999876L2.2994250000001557,16.235999999999876Q0.2994250000001557,16.235999999999876 0.2994250000001557, 18.235999999999876L0.2994250000001557,19.235999999999876Q0.2994250000001557,21.235999999999876 2.2994250000001557, 21.235999999999876L30.299425000000156,21.235999999999876Q32.299425000000156,21.235999999999876 32.299425000000156, 19.235999999999876L32.299425000000156,18.235999999999876Q32.299425000000156,16.235999999999876 30.299425000000156, 16.235999999999876L26.125825000000077,16.235999999999876Q24.125825000000077,16.235999999999876 22.31382500000018, 16.235999999999876L22.31382500000018,16.235999999999876');
+       shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
+       shape.data("name","high");
+       
+       // Line_shadow
+       shape = this.canvas.paper.path('M30.5 23.5L37.5,23.5L45.5,23.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line_shadow");
+       
+       // Line
+       shape = this.canvas.paper.path('M30.5 23.5L37.5,23.5L45.5,23.5');
+       shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":2,"stroke-dasharray":null,"opacity":1});
+       shape.data("name","Line");
+       
 
-        // BoundingBox
-        shape = this.canvas.paper.path("M0,0 L45.35582499999964,0 L45.35582499999964,27.483999999999924 L0,27.483999999999924");
-        shape.attr({"stroke":"none","stroke-width":0,"fill":"none"});
-        shape.data("name","BoundingBox");
-        
-        // Label
-        shape = this.canvas.paper.ellipse();
-        shape.attr({"rx":4.5,"ry":4,"cx":4.5,"cy":22.983999999999924,"stroke":"none","stroke-width":0,"fill":"#C21B7A","dasharray":null,"opacity":1});
-        shape.data("name","Label");
-        
-        // Circle
-        shape = this.canvas.paper.ellipse();
-        shape.attr({"rx":4.5,"ry":4,"cx":27.5,"cy":23.483999999999924,"stroke":"none","stroke-width":0,"fill":"#000000","dasharray":null,"opacity":1});
-        shape.data("name","Circle");
-        
-        // low
-        shape = this.canvas.paper.path('M26.125825000000077,8.735999999999876Q24.125825000000077,8.735999999999876 24.125825000000077, 6.735999999999876L24.125825000000077,2Q24.125825000000077,0 22.125825000000077, 0L11.125825000000077,0Q9.125825000000077,0 9.125825000000077, 2L9.125825000000077,6.735999999999876Q9.125825000000077,8.735999999999876 7.125825000000077, 8.735999999999876L2.2994250000001557,8.735999999999876Q0.2994250000001557,8.735999999999876 0.2994250000001557, 10.735999999999876L0.2994250000001557,11.735999999999876Q0.2994250000001557,13.735999999999876 2.2994250000001557, 13.735999999999876L30.299425000000156,13.735999999999876Q32.299425000000156,13.735999999999876 32.299425000000156, 11.735999999999876L32.299425000000156,10.735999999999876Q32.299425000000156,8.735999999999876 30.299425000000156, 8.735999999999876L26.125825000000077,8.735999999999876');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","low");
-        
-        // high
-        shape = this.canvas.paper.path('M22.31382500000018,16.235999999999876Q20.50182500000028,16.235999999999876 21.26817190867477, 14.388647187036133L23.359478091325588,9.347352812963743Q24.125825000000077,7.5 22.125825000000077, 7.5L11.125825000000077,7.5Q9.125825000000077,7.5 9.62777239007231, 9.435987814424376L10.888877609927716,14.3000121855755Q11.39082499999995,16.235999999999876 9.39082499999995, 16.235999999999876L2.2994250000001557,16.235999999999876Q0.2994250000001557,16.235999999999876 0.2994250000001557, 18.235999999999876L0.2994250000001557,19.235999999999876Q0.2994250000001557,21.235999999999876 2.2994250000001557, 21.235999999999876L30.299425000000156,21.235999999999876Q32.299425000000156,21.235999999999876 32.299425000000156, 19.235999999999876L32.299425000000156,18.235999999999876Q32.299425000000156,16.235999999999876 30.299425000000156, 16.235999999999876L26.125825000000077,16.235999999999876Q24.125825000000077,16.235999999999876 22.31382500000018, 16.235999999999876L22.31382500000018,16.235999999999876');
-        shape.attr({"stroke":"#303030","stroke-width":1,"fill":"#FFFFFF","dasharray":null,"opacity":1});
-        shape.data("name","high");
-        
-        // Line_shadow
-        shape = this.canvas.paper.path('M30.5 23.5L37.5,23.5L45.5,23.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"none","stroke-width":2,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line_shadow");
-        
-        // Line
-        shape = this.canvas.paper.path('M30.5 23.5L37.5,23.5L45.5,23.5');
-        shape.attr({"stroke-linecap":"round","stroke-linejoin":"round","stroke":"#000000","stroke-width":2,"stroke-dasharray":null,"opacity":1});
-        shape.data("name","Line");
-        
-
-        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+       return this.canvas.paper.setFinish();
+   }
 });
 
 /**
@@ -9875,7 +4772,6 @@ draw2d_circuit_switch_PushButton = draw2d_circuit_switch_PushButton.extend({
     }
 
 });
-draw2d_circuit_switch_PushButton.github="./shapes/org/draw2d/circuit/switch/PushButton.shape";
 
 
 // Generated Code for the Draw2D touch HTML5 lib.
@@ -9884,12 +4780,14 @@ draw2d_circuit_switch_PushButton.github="./shapes/org/draw2d/circuit/switch/Push
 // created with http://www.draw2d.org
 //
 //
-var draw2d_circuit_timer_Delay = draw2d.SetFigure.extend({
+var draw2d_circuit_timer_Delay = CircuitFigure.extend({
 
    NAME: "draw2d_circuit_timer_Delay",
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+
      this._super( $.extend({stroke:0, bgColor:null, width:84,height:69},attr), setter, getter);
      var port;
      // output_0
@@ -9904,7 +4802,6 @@ var draw2d_circuit_timer_Delay = draw2d.SetFigure.extend({
      port.setBackgroundColor("#37B1DE");
      port.setName("input_0");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
    },
 
    createShapeElement : function()
@@ -10016,143 +4913,7 @@ var draw2d_circuit_timer_Delay = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
@@ -10229,12 +4990,14 @@ draw2d_circuit_timer_Delay = draw2d_circuit_timer_Delay.extend({
 // created with http://www.draw2d.org
 //
 //
-var HiveMQ = draw2d.SetFigure.extend({
+var HiveMQ = CircuitFigure.extend({
 
    NAME: "HiveMQ",
 
    init:function(attr, setter, getter)
    {
+     var _this = this;
+
      this._super( $.extend({stroke:0, bgColor:null, width:97,height:37},attr), setter, getter);
      var port;
      // Port
@@ -10243,7 +5006,6 @@ var HiveMQ = draw2d.SetFigure.extend({
      port.setBackgroundColor("#1C9BAB");
      port.setName("Port");
      port.setMaxFanOut(20);
-     this.persistPorts=false;
    },
 
    createShapeElement : function()
@@ -10275,143 +5037,7 @@ var HiveMQ = draw2d.SetFigure.extend({
        
 
        return this.canvas.paper.setFinish();
-   },
-
-   applyAlpha: function()
-   {
-   },
-
-   layerGet: function(name, attributes)
-   {
-      if(this.svgNodes===null) return null;
-
-      var result=null;
-      this.svgNodes.some(function(shape){
-         if(shape.data("name")===name){
-            result=shape;
-         }
-         return result!==null;
-      });
-
-      return result;
-   },
-
-   layerAttr: function(name, attributes)
-   {
-     if(this.svgNodes===null) return;
-
-     this.svgNodes.forEach(function(shape){
-             if(shape.data("name")===name){
-                  shape.attr(attributes);
-             }
-     });
-   },
-
-   layerShow: function(name, flag, duration)
-   {
-      if(this.svgNodes===null) return;
-
-      if(duration){
-        this.svgNodes.forEach(function(node){
-            if(node.data("name")===name){
-                if(flag){
-                    node.attr({ opacity : 0 }).show().animate({ opacity : 1 }, duration);
-                }
-                else{
-                    node.animate({ opacity : 0 }, duration, function () { this.hide() });
-                }
-            }
-        });
-      }
-      else{
-          this.svgNodes.forEach(function(node){
-              if(node.data("name")===name){
-                   if(flag){node.show();}
-                   else{node.hide();}
-               }
-           });
-      }
-   },
-
-    calculate: function()
-    {
-    },
-
-    onStart: function()
-    {
-    },
-
-    onStop:function()
-    {
-    },
-
-    getParameterSettings: function()
-    {
-        return [];
-    },
-
-    /**
-     * @method
-     */
-    addPort: function(port, locator)
-    {
-        this._super(port, locator);
-        return port;
-    },
-
-    /**
-     * @method
-     * Return an objects with all important attributes for XML or JSON serialization
-     *
-     * @returns {Object}
-     */
-    getPersistentAttributes : function()
-    {
-        var memento = this._super();
-
-        // add all decorations to the memento
-        //
-        memento.labels = [];
-        this.children.each(function(i,e){
-            var labelJSON = e.figure.getPersistentAttributes();
-            labelJSON.locator=e.locator.NAME;
-            memento.labels.push(labelJSON);
-        });
-
-        return memento;
-    },
-
-    /**
-     * @method
-     * Read all attributes from the serialized properties and transfer them into the shape.
-     *
-     * @param {Object} memento
-     * @returns
-     */
-    setPersistentAttributes : function(memento)
-    {
-        this._super(memento);
-
-        // remove all decorations created in the constructor of this element
-        //
-        this.resetChildren();
-
-        // and add all children of the JSON document.
-        //
-        $.each(memento.labels, $.proxy(function(i,json){
-            // create the figure stored in the JSON
-            var figure =  eval("new "+json.type+"()");
-
-            // apply all attributes
-            figure.attr(json);
-
-            // instantiate the locator
-            var locator =  eval("new "+json.locator+"()");
-
-            // add the new figure as child to this figure
-            this.add(figure, locator);
-        },this));
-    }
+   }
 });
 
 /**
