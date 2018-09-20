@@ -147,3 +147,27 @@
     animation: ripple 1s ease-out;
   }
 }
+
+.pulse {
+  display: block;
+  border-radius: 50%;
+  box-shadow: 0 0 0 rgba(44,44,44, 0.2);
+  animation: pulse 2s infinite;
+  animation-iteration-count: 5;
+
+}
+.pulse:hover {
+  animation: none;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(44,44,44,  0.2);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(44,44,44,  0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(44,44,44,  0);
+  }
+}
